@@ -1,0 +1,14 @@
+ping localhost
+
+ping www.google.com
+ping www.facebook.com
+ping www.youtube.com
+ping www.amazon.com
+ping www.wikipedia.org
+ping www.twitter.com
+ping www.instagram.com
+ping www.linkedin.com
+ping www.netflix.com
+ping www.reddit.com
+
+nslookup
