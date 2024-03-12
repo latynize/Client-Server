@@ -21,21 +21,24 @@ def checkAddress (address):
         print(f"Domain-Name: {address}, IP-Adresse: {resolve_hostname_to_ip(address)}")
     
 if __name__ == "__main__":
-    
-    checkAddress('localhost')
-    
-    checkAddress('google.com')
-    checkAddress('fc.de')
-    checkAddress('facebook.com')
-    checkAddress('eclipse.org')
-    checkAddress('sam.hwr-berlin.de')
-    checkAddress('hwr-berlin.de')
-    checkAddress('github.com')
-    checkAddress('agilemanifesto.org')
-    checkAddress('tagesschau.de')
-    checkAddress('schalke04.de')
 
+#localhost
+    checkAddress('localhost') 
     checkAddress('127.0.0.1')
+     
+#Host-Name
+    checkAddress('google.com') 
+    checkAddress('fc.de') 
+    checkAddress('facebook.com') 
+    checkAddress('eclipse.org') 
+    checkAddress('sam.hwr-berlin.de') 
+    checkAddress('hwr-berlin.de') 
+    checkAddress('github.com') 
+    checkAddress('agilemanifesto.org') 
+    checkAddress('tagesschau.de') 
+    checkAddress('schalke04.de') 
+
+#IP-Adressen
     checkAddress('142.251.37.14')
     checkAddress('18.245.31.63')
     checkAddress('185.60.217.35')
