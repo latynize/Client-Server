@@ -31,7 +31,7 @@ def trace_route(address):
         print(f"Fehler bei der Routenverfolgung: {e}")
 
 if __name__ == "__main__":
-    address = input("Bitte geben Sie eine IP-Adresse oder einen Domain-Namen ein: ")
+    address = input("Gebe IP-Adresse oder Domain ein: ")
 
     if address.replace('.', '').isdigit():  # Prüfung, ob IP
         print(f"Domain-Name: {resolve_ip_to_hostname(address)}")
