@@ -1,5 +1,3 @@
-import socket
-import os
 import ntplib
 from time import ctime
 
@@ -7,13 +5,13 @@ def getNTP(server):
     ntp_client = ntplib.NTPClient()
     response = ntp_client.request(server, version=3)
     print(server, ': \n', ctime(response.tx_time))
-    print('stratum: ', response.stratum)
-    print('version: ', response.version)
-    print('mode: ', response.mode)
-    print('poll: ', response.poll)
-    print('precision: ', response.precision)
-    print('delay: ', response.delay)
-    print('dispersion: ', response.root_dispersion, '\n')
+    print('stratum: ', response.stratum) #Stratum ist die Schicht des NTP-Servers nach der Atomuhr
+    print('version: ', response.version) #Version des NTP-Protokolls
+    print('mode: ', response.mode) #Mode des NTP-Servers, in unserem Fall 4 (Broadcast)
+    print('poll: ', response.poll) #Polling-Intervall des NTP-Servers
+    print('precision: ', response.precision) #Genauigkeit des NTP-Servers
+    print('delay: ', response.delay) #Verzögerung des NTP-Servers
+    print('dispersion: ', response.root_dispersion*1000, '(ms)\n') #Abweichung des NTP-Servers
 
 getNTP('time.apple.com')
 getNTP('time.windows.com')
