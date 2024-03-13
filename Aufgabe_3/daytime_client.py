@@ -1,6 +1,6 @@
 import socket
 
-def query_daytime_service(server='time.nist.gov'):
+def query_daytime_service(server):
     try:
         # Erstelle Socket für Verbindung
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -16,4 +16,5 @@ def query_daytime_service(server='time.nist.gov'):
         print(f"An error occurred: {e}")
 
 # Funktion zur DayTime-Service Abfrage
-query_daytime_service()
+query_daytime_service('time.nist.gov')
+query_daytime_service('time.windows.com')
