@@ -1,22 +1,19 @@
 import socket
-import os
 
-# Set the path for the Unix socket
-socket_path = '/tmp/my_socket'
+def query_daytime_service(server='time.nist.gov'):
+    try:
+        # Erstelle einen Socket für die Verbindung
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            # Baue die Verbindung zum Server auf Port 13 auf
+            s.connect((server, 13))
+            
+            # Lese die Antwort vom Server
+            data = s.recv(1024)
+            
+            # Gib die empfangenen Daten aus (DayTime-Service-Antwort)
+            print(f"Received: {data.decode().strip()}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-# Create the Unix socket client
-client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-
-# Connect to the server
-client.connect(socket_path)
-
-# Send a message to the server
-message = 'Hello from the client!'
-client.sendall(message.encode())
-
-# Receive a response from the server
-response = client.recv(1024)
-print(f'Received response: {response.decode()}')
-
-# Close the connection
-client.close()
+# Verwende die Funktion, um den DayTime-Service abzufragen
+query_daytime_service()
