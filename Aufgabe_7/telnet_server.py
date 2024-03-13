@@ -25,7 +25,7 @@ def start_server(host, port):
             handle_client(client_socket)
 
 if __name__ == "__main__":
-    HOST = '194.94.23.245'  # Erlaubt Verbindungen von überall
+    HOST = 'localhost'  # Erlaubt Verbindungen von überall
     PORT = 65432      # Nicht-privilegierter Port für den Server
     
     start_server(HOST, PORT)
