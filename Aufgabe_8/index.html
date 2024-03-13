@@ -39,5 +39,33 @@
         <p>Vielen Dank für Ihren Besuch!</p>
         <img src="example.jpg" alt="Beispielbild">
     </div>
+    <h1>POST-Anfrage senden</h1>
+    <form id="postForm">
+        <label for="data">Daten:</label>
+        <input type="text" id="data" name="data">
+        <button type="submit">Absenden</button>
+    </form>
+
+    <script>
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seiten-Neuladen)
+
+            var formData = new FormData(this); // Formulardaten abrufen
+            fetch('/post', { // POST-Anfrage senden an die URL /post
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Antwort vom Server:', data);
+                alert('Antwort vom Server: ' + data);
+            })
+            .catch(error => {
+                console.error('Fehler:', error);
+                alert('Fehler: ' + error.message);
+            });
+        });
+    </script>
+
 </body>
 </html>
