@@ -38,14 +38,14 @@
         <p>Dies ist eine einfache Startseite für unseren Webserver.</p>
         <p>Vielen Dank für Ihren Besuch!</p>
         <img src="example.jpg" alt="Beispielbild">
-    </div>
+    
     <h1>POST-Anfrage senden</h1>
     <form id="postForm">
         <label for="data">Daten:</label>
         <input type="text" id="data" name="data">
         <button type="submit">Absenden</button>
     </form>
-
+    </div>
     <script>
         document.getElementById('postForm').addEventListener('submit', function(event) {
             event.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seiten-Neuladen)
