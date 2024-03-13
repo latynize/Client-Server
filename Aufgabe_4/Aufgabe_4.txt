@@ -14,7 +14,8 @@ poll:
 Das Polling-Intervall ist die Zeit in Sekunden zwischen aufeinanderfolgenden Anfragen an den NTP-Server.
 
 precision: 
-Die Genauigkeit des NTP-Servers. Dies ist ein Maß dafür, wie genau die Uhr des Servers ist.
+Die Genauigkeit des NTP-Servers. Dies ist ein Maß dafür, wie genau die Uhr des Servers ist. 
+Die Angabe ist in einer 2er Potenz angegeben.
 
 delay: 
 Die Verzögerung ist die Zeit in Sekunden, die es dauert, bis ein Paket vom Client zum Server und zurück gelangt.
