@@ -1,7 +1,14 @@
+Wie kann die Route von IP-Datenpaketen ermittelt werden?
+-> mit Hilfe von traceroute (siehe Aufgabe1.txt)
+
 Hop: der Weg eines eines Datenpakets den es von einem Router/Zwischenstation
      zur nächsten benötigt
 
-Trip: bezieht sich auf die gesamte Reise eines Datenpakets von Urpsung zu Ziel und zurück,
+Trip: bezieht sich auf die gesamte Reise eines Datenpakets von Urpsung zu Ziel,
       es umfasst alle hops die das Paket gemacht hat
 
 Hop-Count: die Anzahl aller Hops im Trip
+
+Quellen:
+https://www.computerweekly.com/de/definition/Hop
+https://www.cloudflare.com/de-de/learning/cdn/glossary/round-trip-time-rtt/
