@@ -1,17 +1,19 @@
 import socket
-import os
-import ntplib
-from time import ctime
 
-server = 'time.windows.com'
-ntp_client = ntplib.NTPClient()
-response = ntp_client.request(server, version=3)
-print(ctime(response.tx_time))
+def query_daytime_service(server='time.nist.gov'):
+    try:
+        # Erstelle einen Socket für die Verbindung
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            # Baue die Verbindung zum Server auf Port 13 auf
+            s.connect((server, 13))
+            
+            # Lese die Antwort vom Server
+            data = s.recv(1024)
+            
+            # Gib die empfangenen Daten aus (DayTime-Service-Antwort)
+            print(f"Received: {data.decode().strip()}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-server = 'time.apple.com'
-ntp_client = ntplib.NTPClient()
-response = ntp_client.request(server, version=3)
-print(ctime(response.tx_time))
-
-#List of Daytime Servers
-#https://gist.github.com/mutin-sa/eea1c396b1e610a2da1e5550d94b0453
+# Verwende die Funktion, um den DayTime-Service abzufragen
+query_daytime_service()
