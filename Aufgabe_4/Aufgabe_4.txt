@@ -1,0 +1,29 @@
+stratum: 
+Das Stratum ist eine Zahl, die die "Schicht" oder das Level des NTP-Servers in Bezug auf eine Referenzuhr 
+(in der Regel eine Atomuhr) angibt. Ein Stratum-1-Server ist direkt mit der Referenzuhr verbunden, 
+ein Stratum-2-Server ist mit einem Stratum-1-Server verbunden, und so weiter.
+
+version: 
+Dies ist die Version des NTP-Protokolls, das vom Server verwendet wird.
+
+mode: 
+Der Modus gibt an, wie der NTP-Server arbeitet. In Ihrem Fall ist der Modus 4, was bedeutet, 
+dass der Server im Broadcast-Modus arbeitet.
+
+poll: 
+Das Polling-Intervall ist die Zeit in Sekunden zwischen aufeinanderfolgenden Anfragen an den NTP-Server.
+
+precision: 
+Die Genauigkeit des NTP-Servers. Dies ist ein Maß dafür, wie genau die Uhr des Servers ist.
+
+delay: 
+Die Verzögerung ist die Zeit in Sekunden, die es dauert, bis ein Paket vom Client zum Server und zurück gelangt.
+
+dispersion: 
+Die Wurzel-Dispersion ist ein Maß für die maximale Fehlerwahrscheinlichkeit der Uhr des Servers. 
+Es wird in Millisekunden angegeben.
+
+Quellen:
+stratum: https://www.elektronik-kompendium.de/sites/net/0908041.html
+https://www.omnisecu.com/ccna-security/ntp-network-time-protocol-modes-of-operation.php
+https://www.rfc-editor.org/rfc/pdfrfc/rfc1305.txt.pdf
