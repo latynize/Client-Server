@@ -6,7 +6,14 @@ from time import ctime
 def getNTP(server):
     ntp_client = ntplib.NTPClient()
     response = ntp_client.request(server, version=3)
-    print(server, ': ', ctime(response.tx_time))
+    print(server, ': \n', ctime(response.tx_time))
+    print('stratum: ', response.stratum)
+    print('version: ', response.version)
+    print('mode: ', response.mode)
+    print('poll: ', response.poll)
+    print('precision: ', response.precision)
+    print('delay: ', response.delay)
+    print('dispersion: ', response.root_dispersion, '\n')
 
 getNTP('time.apple.com')
 getNTP('time.windows.com')
