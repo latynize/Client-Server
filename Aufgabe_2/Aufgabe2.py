@@ -24,6 +24,7 @@ if __name__ == "__main__":
     address = [
         'localhost',
         '127.0.0.1',
+    #Domain
         'google.com',
         'fc.de',
         'facebook.com',
@@ -34,6 +35,7 @@ if __name__ == "__main__":
         'agilemanifesto.org',
         'tagesschau.de',
         'schalke04.de',
+    #IP-Adressen
         '172.217.16.78',
         '18.64.119.54',
         '157.240.253.35',
