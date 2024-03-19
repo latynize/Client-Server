@@ -14,9 +14,9 @@ def resolve_ip_to_hostname(ip):
     
 def checkAddress (address):
     if address.replace('.', '').isdigit():  # Prüfung, ob IP
-        print(f"IP-Adresse: {address}, Domain-Name: {resolve_ip_to_hostname(address)}")
+        print(f"IP-Adresse: {address}, Domain-Name: {resolve_ip_to_hostname(address)}", "\n")
     else:
-        print(f"Domain-Name: {address}, IP-Adresse: {resolve_hostname_to_ip(address)}")
+        print(f"Domain-Name: {address}, IP-Adresse: {resolve_hostname_to_ip(address)}", "\n")
     
 if __name__ == "__main__":
     address = [
@@ -43,6 +43,6 @@ if __name__ == "__main__":
         '34.110.152.241',
         '104.22.25.183'
     ]
-    x = len(address)
+
     for x in address:
-        print(checkAddress(x), "\n")
+        checkAddress(x)

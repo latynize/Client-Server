@@ -70,8 +70,6 @@ if __name__ == "__main__":
         '34.110.152.241',
         '104.22.25.183'
     ]
-
-    x = len(address)
     
     for x in address:
-        print(checkAddress(x))
+        checkAddress(x)
