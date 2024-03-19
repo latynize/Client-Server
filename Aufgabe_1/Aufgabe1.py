@@ -21,28 +21,30 @@ def ping(address):
         print(output)
     except subprocess.CalledProcessError as e:
         print(f"Fehler beim Ping: {e}")
+    return
 
 def trace_route(address):
-    command = ['traceroute', address] if platform.system() != "Windows" else ['tracert', address]
+    command = ['traceroute','-m','4', address,] if platform.system() != "Windows" else ['tracert', address]
     try:
         output = subprocess.check_output(command, universal_newlines=True)
         print(output)
     except subprocess.CalledProcessError as e:
         print(f"Fehler bei der Routenverfolgung: {e}")
-        
+    return
+
 def printDomain(address):
     print(address+':')
     print("\nPing:")
     ping(address)
     print("\nRoute:")
-    trace_route(address, "\n")
+    trace_route(address)
         
 def checkAddress (address):
     if address.replace('.', '').isdigit():  # Prüfung, ob IP
-        print(f"IP-Adresse: {address}, Domain-Name: {resolve_ip_to_hostname(address)}")
+        print(f"IP-Adresse: {address}, Domain-Name: {resolve_ip_to_hostname(address)}", "\n")
         printDomain(address)
     else:
-        print(f"Domain-Name: {address}, IP-Adresse: {resolve_hostname_to_ip(address)}")
+        print(f"Domain-Name: {address}, IP-Adresse: {resolve_hostname_to_ip(address)}", "\n")
         printDomain(address)
 
 if __name__ == "__main__":
@@ -65,10 +67,10 @@ if __name__ == "__main__":
         '198.41.30.198',
         '194.94.23.253',
         '194.94.22.19',
-        '140.82.121.3',
         '185.199.108.153',
         '34.110.152.241',
-        '104.22.25.183'
+        '104.22.25.183',
+        '140.82.121.3'
     ]
     
     for x in address:
