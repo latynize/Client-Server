@@ -35,8 +35,7 @@ def printDomain(address):
     print("\nPing:")
     ping(address)
     print("\nRoute:")
-    trace_route(address)
-    print("\n")
+    trace_route(address, "\n")
         
 def checkAddress (address):
     if address.replace('.', '').isdigit():  # Prüfung, ob IP

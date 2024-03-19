@@ -1,6 +1,4 @@
-import subprocess
 import socket
-import platform
 
 def resolve_hostname_to_ip(hostname):
     try:
@@ -47,5 +45,4 @@ if __name__ == "__main__":
     ]
     x = len(address)
     for x in address:
-        print(checkAddress(x))
-        print("\n")
+        print(checkAddress(x), "\n")
