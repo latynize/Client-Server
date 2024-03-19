@@ -21,32 +21,31 @@ def checkAddress (address):
         print(f"Domain-Name: {address}, IP-Adresse: {resolve_hostname_to_ip(address)}")
     
 if __name__ == "__main__":
-
-#localhost
-    checkAddress('localhost') 
-    checkAddress('127.0.0.1')
-     
-#Host-Name
-    checkAddress('google.com') 
-    checkAddress('fc.de') 
-    checkAddress('facebook.com') 
-    checkAddress('eclipse.org') 
-    checkAddress('sam.hwr-berlin.de') 
-    checkAddress('hwr-berlin.de') 
-    checkAddress('github.com') 
-    checkAddress('agilemanifesto.org') 
-    checkAddress('tagesschau.de') 
-    checkAddress('schalke04.de') 
-
-#IP-Adressen
-    checkAddress('142.251.37.14')
-    checkAddress('18.245.31.63')
-    checkAddress('185.60.217.35')
-    checkAddress('198.41.30.198')
-    checkAddress('194.94.23.253')
-    checkAddress('194.94.22.19')
-    checkAddress('140.82.121.3')
-    checkAddress('185.199.108.153')
-    checkAddress('34.110.152.241')
-    checkAddress('104.22.25.183')
-  
+    address = [
+        'localhost',
+        '127.0.0.1',
+        'google.com',
+        'fc.de',
+        'facebook.com',
+        'eclipse.org',
+        'sam.hwr-berlin.de',
+        'hwr-berlin.de',
+        'github.com',
+        'agilemanifesto.org',
+        'tagesschau.de',
+        'schalke04.de',
+        '142.251.37.14',
+        '18.245.31.63',
+        '185.60.217.35',
+        '198.41.30.198',
+        '194.94.23.253',
+        '194.94.22.19',
+        '140.82.121.3',
+        '185.199.108.153',
+        '34.110.152.241',
+        '104.22.25.183'
+    ]
+    x = len(address)
+    for x in address:
+        print(checkAddress(x))
+        print("\n")
