@@ -1,2 +1,5 @@
 1. cmd in Powershell Terminal eingeben
 2. start.bat in cmd eingeben
+
+mac:
+uvicorn main:app --reload
