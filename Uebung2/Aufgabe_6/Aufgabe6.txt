@@ -1,0 +1,66 @@
+Machen Sie sich mit den Standardbefehlen von Telnet (alle
+Betriebssysteme) vertraut und dokumentieren Sie diese.
+
+telnet - startet Telnet
+close/c - vorhandene Telnet Verbindung abbrechen
+display - anzeigen der aktuellen Telnet-Client Einstellungen 
+environ - definiert Variablen für die jeweilige Betriebssystemumgebung
+help/? - zeigt liste der Standardbefehle
+open/o - stellt Verbindung zu einem Host-Computer oder Remote-Server her
+quit/q - Telnet beenden
+send - sendet ausgewählte Telnet-Strings an den Host
+set - Festlegung Terminaltyp für Verbindung oder Veränderung von Verbindungsparametern
+set ? - Zeigt Befehle die mit set verwendet werden können
+status - feststellen, ob der Telnet-Client verbunden ist
+unset - Lädt standardmäßig festgelegte Verbindugsparamter 
+
+Quelle: https://www.heise.de/tipps-tricks/Die-wichtigsten-Telnet-Befehle-4572200.html
+
+
+Recherchieren Sie nach mindestes 3 freien Telnet-basierten Servern
+und versuchen Sie sich auf diese zu verbinden.
+
+o freechess.org
+-> Schachspiel
+
+o telehack.com 
+zrun
+zrun [name of the game]
+-> sehr viele verfügbare Spiele (alle Textadeventures)
+
+o telehack.com
+eliza
+-> AI Psychotherapeut
+
+o bofh.jeffballard.us 666
+-> Findet Ausreden bzw. Entschuldigungen
+
+Quelle: https://www.digitalcitizen.life/5-fun-geeky-things-you-can-do-telnet-client/
+
+
+Für welche Anwendungsbereiche (Serverarten, Aufgaben, …) wurde
+bzw. wird Telnet eingesetzt?
+
+-mit Telnet können sich textbasierte Kommandos auf entfernten Rechnern ausführen lassen
+-> so lassen sich zum Beispiel Ressourcen auf einem Server für andere zugänglich zu machen
+-mit Telnet war auch der Zugriff auf Datenbanken möglich, bei vielen Datenbanknen war nur ein Zugriff mit textbasierten sessions möglich 
+-auch ist es mit Telnet möglich die grundsätzliche Verfügbarkeit und Funktionen der Dienste testen
+
+Quelle: https://www.ip-insider.de/was-ist-telnet-a-691219/
+
+
+Welche Vor- und Nachteile sehen Sie in der Verwendung des Telnet-
+Protokolls.
+
+Vorteile:
+-vielseitig einsetzbar
+-plattformübergreifend
+-uneingeschränkter Zugriff auf Zielressourcen
+
+Nachteile:
+-Datenaustausch ist unverschlüsselt
+-großer Spielraum für Hacker durch Vollzugriff
+-nur noch wenige Server verfügbar
+
+Quelle: https://www.ionos.de/digitalguide/server/tools/telnet-das-systemuebergreifende-remote-protokoll/ 
+

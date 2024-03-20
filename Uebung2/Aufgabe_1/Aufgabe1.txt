@@ -1,0 +1,47 @@
+nslookup localhost
+nslookup google.com
+nslookup fc.de
+nslookup facebook.com
+nslookup eclipse.org
+nslookup sam.hwr-berlin.de
+nslookup hwr-berlin.de
+nslookup github.com
+nslookup agilemanifesto.org
+nslookup tagesschau.de
+nslookup schalke04.de
+
+nslookup 127.0.0.1
+nslookup 142.251.37.14
+nslookup 18.245.31.63
+nslookup 185.60.217.35
+nslookup 198.41.30.198
+nslookup 194.94.23.253
+nslookup 194.94.22.19
+nslookup 140.82.121.3
+nslookup 185.199.108.153
+nslookup 34.110.152.241
+nslookup 104.22.25.183
+
+traceroute localhost
+traceroute google.com
+traceroute fc.de
+traceroute facebook.com
+traceroute eclipse.org
+traceroute sam.hwr-berlin.de
+traceroute hwr-berlin.de
+traceroute github.com
+traceroute agilemanifesto.org
+traceroute tagesschau.de
+traceroute schalke04.de
+
+traceroute 127.0.0.1
+traceroute 142.251.37.14
+traceroute 18.245.31.63
+traceroute 185.60.217.35
+traceroute 198.41.30.198
+traceroute 194.94.23.253
+traceroute 194.94.22.19
+traceroute 140.82.121.3
+traceroute 185.199.108.153
+traceroute 34.110.152.241
+traceroute 104.22.25.183
