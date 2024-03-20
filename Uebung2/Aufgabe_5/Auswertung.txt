@@ -1,2 +1,0 @@
-Google geht --> Metadaten und HTML
-Tagesschau nicht --> Metadaten aber kein HTML
