@@ -19,10 +19,40 @@ async def read_items():
     try:
         json_string = """
 {
-  "personen": [
-    {"name": "Anna", "alter": 28, "beruf": "Ingenieurin"},
-    {"name": "Bernd", "alter": 35, "beruf": "Lehrer"},
-    {"name": "Carla", "alter": 24, "beruf": "Designerin"}
+  "personal": [
+    {
+      "ID": 1,
+      "Vorname": "Max",
+      "Name": "Mustermann",
+      "freie FTE": 0.5,
+      "Mail": "max.mustermann@example.com",
+      "Tel. Nummer": "123456789",
+      "Beschäftigungsstart": "2023-01-01",
+      "Erfahrungsgrad": "Fortgeschritten",
+      "Typ": "Vollzeit"
+    },
+    {
+      "ID": 2,
+      "Vorname": "Lisa",
+      "Name": "Müller",
+      "freie FTE": 0.8,
+      "Mail": "lisa.mueller@example.com",
+      "Tel. Nummer": "987654321",
+      "Beschäftigungsstart": "2022-05-15",
+      "Erfahrungsgrad": "Anfänger",
+      "Typ": "Teilzeit"
+    },
+    {
+      "ID": 3,
+      "Vorname": "Tom",
+      "Name": "Schmidt",
+      "freie FTE": 1.0,
+      "Mail": "tom.schmidt@example.com",
+      "Tel. Nummer": "456789123",
+      "Beschäftigungsstart": "2021-09-30",
+      "Erfahrungsgrad": "Erfahren",
+      "Typ": "Vollzeit"
+    }
   ]
 }
 """
