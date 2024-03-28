@@ -1,18 +1,18 @@
 from fastapi import FastAPI, HTTPException
-from databases import Database
+#from databases import Database
 import sqlalchemy
 import json
 
 app = FastAPI()
-database = Database('postgresql://postgres:post@localhost/postgres')
+# database = Database('postgresql://postgres:post@localhost/postgres')
 
 @app.on_event("startup")
-async def startup():
-    await database.connect()
+#async def startup():
+    #await database.connect()
 
 @app.on_event("shutdown")
-async def shutdown():
-    await database.disconnect()
+#async def shutdown():
+    #await database.disconnect()
 
 @app.get('/api/personal/')
 async def read_items():
