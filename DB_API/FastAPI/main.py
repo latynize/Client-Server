@@ -211,3 +211,14 @@ async def get_address(db: AsyncSession = Depends(get_db)):
     )
     addresses = result.scalars().all()
     return {"address": [model_to_dict(adress) for adress in addresses]} 
+
+@app.get('/api/type/')
+async def get_type(db: AsyncSession = Depends(get_db)):
+    Type = Base.classes.type
+    result = await db.execute(
+        select(
+            Type
+        )
+    )
+    types = result.scalars().all()
+    return {"types": [model_to_dict(type) for type in types]}
