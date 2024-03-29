@@ -38,6 +38,10 @@ async def get_db() -> AsyncSession:
 async def startup_event():
     await reflect_tables()  
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    await engine.dispose()
+
 @app.get('/api/personal/')
 async def get_personal(db: AsyncSession = Depends(get_db)):
     Employee = Base.classes.employee
