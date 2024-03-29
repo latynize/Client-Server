@@ -8,15 +8,14 @@ from sqlalchemy import text
 # Assuming your models are correctly reflected or declared elsewhere
 # from your_models import Employee
 
-engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres")
+engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres", echo=True)
 SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = automap_base()
 
 def model_to_dict(model_instance):
-    for base in model_instance.__class__.__bases__:
-        if hasattr(base, '__table__'):
-            return {column.name: getattr(model_instance, column.name) for column in base.__table__.columns}
+    if hasattr(model_instance.__class__, '__table__'):
+        return {column.name: getattr(model_instance, column.name) for column in model_instance.__class__.__table__.columns}
     return {}
 
 async def reflect_tables():
