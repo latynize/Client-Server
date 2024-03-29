@@ -202,4 +202,40 @@ async def get_type(db: AsyncSession = Depends(get_db)):
         select(Type)
     )
     types = result.scalars().all()
-    return {"types": [model_to_dict(type) for type in types]}
+    return {"type": [model_to_dict(type) for type in types]}
+
+@app.get('/api/education_degree/')
+async def get_education_degree(db: AsyncSession = Depends(get_db)):
+    Education_degree = Base.classes.education_degree
+    result = await db.execute(
+        select(Education_degree)
+    )
+    education_degree = result.scalars().all()
+    return {"education_degree": [model_to_dict(education_degree) for education_degree in education_degree]}
+
+@app.get('/api/job/')
+async def get_job(db: AsyncSession = Depends(get_db)):
+    Job = Base.classes.job
+    result = await db.execute(
+        select(Job)
+    )
+    jobs = result.scalars().all()
+    return {"job": [model_to_dict(job) for job in jobs]}
+
+@app.get('/api/skill/')
+async def get_skill(db: AsyncSession = Depends(get_db)):
+    Skill = Base.classes.skill
+    result = await db.execute(
+        select(Skill)
+    )
+    skills = result.scalars().all()
+    return {"skill": [model_to_dict(skill) for skill in skills]}
+
+@app.get('/api/experience_level/')
+async def get_experience_level(db: AsyncSession = Depends(get_db)):
+    Experience_level = Base.classes.experience_level
+    result = await db.execute(
+        select(Experience_level)
+    )
+    experience_levels = result.scalars().all()
+    return {"experience_level": [model_to_dict(experience_level) for experience_level in experience_levels]}
