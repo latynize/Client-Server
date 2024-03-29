@@ -1,49 +1,27 @@
 from fastapi import FastAPI, Depends
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import text
+import mapper
 
-engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres", echo=True)
-SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-Base = automap_base()
-
-def model_to_dict(model_instance, exclude_columns=None):
-    exclude_columns = exclude_columns or []
-    if hasattr(model_instance.__class__, '__table__'):
-        table = model_instance.__class__.__table__
-    return {
-        column.name: getattr(model_instance, column.name)
-        for column in table.columns
-        if column.name not in exclude_columns
-    }
-
-async def reflect_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.prepare, reflect=True, schema="cioban")
-
+mapper = mapper.Mapper()
 app = FastAPI()
 
-async def get_db() -> AsyncSession:
-    async with SessionLocal() as session:
-        await session.execute(text("SET search_path TO cioban"))
-        yield session
 
 @app.on_event("startup")
 async def startup_event():
-    await reflect_tables()  
+    await mapper.reflect_tables()
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await engine.dispose()
+    await mapper.engine.dispose()
+
 
 @app.get('/api/personal/')
-async def get_personal(db: AsyncSession = Depends(get_db)):
-    Employee = Base.classes.employee
-    Exp_Level = Base.classes.experience_level
-    Type = Base.classes.type
+async def get_personal(db: AsyncSession = Depends(mapper.get_db)):
+    Employee = mapper.Base.classes.employee
+    Exp_Level = mapper.Base.classes.experience_level
+    Type = mapper.Base.classes.type
     result = await db.execute(
         select(
             Employee,
@@ -55,10 +33,10 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
     )
 
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
-    
+
     employees = [
         {
-            **model_to_dict(employee, exclude_columns=exclude_columns),
+            **mapper.model_to_dict(employee, exclude_columns=exclude_columns),
             "exp_lvl_description": exp_lvl_description,
             "type_name": type_name
         }
@@ -66,11 +44,12 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
     ]
     return {"personal": employees}
 
+
 @app.get('/api/internal/')
-async def get_internal(db: AsyncSession = Depends(get_db)):
-    Employee = Base.classes.employee
-    Exp_Level = Base.classes.experience_level
-    Type = Base.classes.type
+async def get_internal(db: AsyncSession = Depends(mapper.get_db)):
+    Employee = mapper.Base.classes.employee
+    Exp_Level = mapper.Base.classes.experience_level
+    Type = mapper.Base.classes.type
     result = await db.execute(
         select(
             Employee,
@@ -83,10 +62,10 @@ async def get_internal(db: AsyncSession = Depends(get_db)):
     )
 
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
-    
+
     internals = [
         {
-            **model_to_dict(internal, exclude_columns=exclude_columns),
+            **mapper.model_to_dict(internal, exclude_columns=exclude_columns),
             "exp_lvl_description": exp_lvl_description,
             "type_name": type_name
         }
@@ -94,11 +73,12 @@ async def get_internal(db: AsyncSession = Depends(get_db)):
     ]
     return {"internal": internals}
 
+
 @app.get('/api/external/')
-async def get_external(db: AsyncSession = Depends(get_db)):
-    Employee = Base.classes.employee
-    Exp_Level = Base.classes.experience_level
-    Type = Base.classes.type
+async def get_external(db: AsyncSession = Depends(mapper.get_db)):
+    Employee = mapper.Base.classes.employee
+    Exp_Level = mapper.Base.classes.experience_level
+    Type = mapper.Base.classes.type
     result = await db.execute(
         select(
             Employee,
@@ -111,10 +91,10 @@ async def get_external(db: AsyncSession = Depends(get_db)):
     )
 
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
-    
+
     externals = [
         {
-            **model_to_dict(external, exclude_columns=exclude_columns),
+            **mapper.model_to_dict(external, exclude_columns=exclude_columns),
             "exp_lvl_description": exp_lvl_description,
             "type_name": type_name
         }
@@ -122,11 +102,12 @@ async def get_external(db: AsyncSession = Depends(get_db)):
     ]
     return {"external": externals}
 
+
 @app.get('/api/stat/')
-async def get_stat(db: AsyncSession = Depends(get_db)):
-    Employee = Base.classes.employee
-    Exp_Level = Base.classes.experience_level
-    Type = Base.classes.type
+async def get_stat(db: AsyncSession = Depends(mapper.get_db)):
+    Employee = mapper.Base.classes.employee
+    Exp_Level = mapper.Base.classes.experience_level
+    Type = mapper.Base.classes.type
     result = await db.execute(
         select(
             Employee,
@@ -139,10 +120,10 @@ async def get_stat(db: AsyncSession = Depends(get_db)):
     )
 
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
-    
+
     stats = [
         {
-            **model_to_dict(stat, exclude_columns=exclude_columns),
+            **mapper.model_to_dict(stat, exclude_columns=exclude_columns),
             "exp_lvl_description": exp_lvl_description,
             "type_name": type_name
         }
@@ -150,11 +131,12 @@ async def get_stat(db: AsyncSession = Depends(get_db)):
     ]
     return {"stat": stats}
 
+
 @app.get('/api/project/')
-async def get_project(db: AsyncSession = Depends(get_db)):
-    Project = Base.classes.project
-    Department = Base.classes.department
-    Employee = Base.classes.employee
+async def get_project(db: AsyncSession = Depends(mapper.get_db)):
+    Project = mapper.Base.classes.project
+    Department = mapper.Base.classes.department
+    Employee = mapper.Base.classes.employee
     result = await db.execute(
         select(
             Project,
@@ -166,10 +148,10 @@ async def get_project(db: AsyncSession = Depends(get_db)):
     )
 
     exclude_columns = ['department_id', 'proj_manager']
-    
+
     projects = [
         {
-            **model_to_dict(project, exclude_columns=exclude_columns),
+            **mapper.model_to_dict(project, exclude_columns=exclude_columns),
             "dep_name": dep_name,
             "last_name": last_name
         }
@@ -177,65 +159,72 @@ async def get_project(db: AsyncSession = Depends(get_db)):
     ]
     return {"project": projects}
 
+
 @app.get('/api/department/')
-async def get_department(db: AsyncSession = Depends(get_db)):
-    Department = Base.classes.department
+async def get_department(db: AsyncSession = Depends(mapper.get_db)):
+    Department = mapper.Base.classes.department
     result = await db.execute(
         select(Department)
     )
     departments = result.scalars().all()
-    return {"department": [model_to_dict(department) for department in departments]} 
+    return {"department": [mapper.model_to_dict(department) for department in departments]}
+
 
 @app.get('/api/address/')
-async def get_address(db: AsyncSession = Depends(get_db)):
-    Address = Base.classes.address
+async def get_address(db: AsyncSession = Depends(mapper.get_db)):
+    Address = mapper.Base.classes.address
     result = await db.execute(
         select(Address)
     )
     addresses = result.scalars().all()
-    return {"address": [model_to_dict(adress) for adress in addresses]} 
+    return {"address": [mapper.model_to_dict(address) for address in addresses]}
+
 
 @app.get('/api/type/')
-async def get_type(db: AsyncSession = Depends(get_db)):
-    Type = Base.classes.type
+async def get_type(db: AsyncSession = Depends(mapper.get_db)):
+    Type = mapper.Base.classes.type
     result = await db.execute(
         select(Type)
     )
     types = result.scalars().all()
-    return {"type": [model_to_dict(type) for type in types]}
+    return {"type": [mapper.model_to_dict(type) for type in types]}
+
 
 @app.get('/api/education_degree/')
-async def get_education_degree(db: AsyncSession = Depends(get_db)):
-    Education_degree = Base.classes.education_degree
+async def get_education_degree(db: AsyncSession = Depends(mapper.get_db)):
+    Education_degree = mapper.Base.classes.education_degree
     result = await db.execute(
         select(Education_degree)
     )
     education_degree = result.scalars().all()
-    return {"education_degree": [model_to_dict(education_degree) for education_degree in education_degree]}
+    return {"education_degree": [mapper.model_to_dict(education_degree) for education_degree in education_degree]}
+
 
 @app.get('/api/job/')
-async def get_job(db: AsyncSession = Depends(get_db)):
-    Job = Base.classes.job
+async def get_job(db: AsyncSession = Depends(mapper.get_db)):
+    Job = mapper.Base.classes.job
     result = await db.execute(
         select(Job)
     )
     jobs = result.scalars().all()
-    return {"job": [model_to_dict(job) for job in jobs]}
+    return {"job": [mapper.model_to_dict(job) for job in jobs]}
+
 
 @app.get('/api/skill/')
-async def get_skill(db: AsyncSession = Depends(get_db)):
-    Skill = Base.classes.skill
+async def get_skill(db: AsyncSession = Depends(mapper.get_db)):
+    Skill = mapper.Base.classes.skill
     result = await db.execute(
         select(Skill)
     )
     skills = result.scalars().all()
-    return {"skill": [model_to_dict(skill) for skill in skills]}
+    return {"skill": [mapper.model_to_dict(skill) for skill in skills]}
+
 
 @app.get('/api/experience_level/')
-async def get_experience_level(db: AsyncSession = Depends(get_db)):
-    Experience_level = Base.classes.experience_level
+async def get_experience_level(db: AsyncSession = Depends(mapper.get_db)):
+    Experience_level = mapper.Base.classes.experience_level
     result = await db.execute(
         select(Experience_level)
     )
     experience_levels = result.scalars().all()
-    return {"experience_level": [model_to_dict(experience_level) for experience_level in experience_levels]}
+    return {"experience_level": [mapper.model_to_dict(experience_level) for experience_level in experience_levels]}
