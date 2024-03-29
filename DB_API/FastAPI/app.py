@@ -13,10 +13,15 @@ SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = automap_base()
 
-def model_to_dict(model_instance):
+def model_to_dict(model_instance, exclude_columns=None):
+    exclude_columns = exclude_columns or []
     if hasattr(model_instance.__class__, '__table__'):
-        return {column.name: getattr(model_instance, column.name) for column in model_instance.__class__.__table__.columns}
-    return {}
+        table = model_instance.__class__.__table__
+    return {
+        column.name: getattr(model_instance, column.name)
+        for column in table.columns
+        if column.name not in exclude_columns
+    }
 
 async def reflect_tables():
     async with engine.begin() as conn:
@@ -35,14 +40,38 @@ async def startup_event():
 
 @app.get('/api/personal/')
 async def get_personal(db: AsyncSession = Depends(get_db)):
-    Employee = Base.classes.employee 
-    result = await db.execute(select(Employee))
-    employees = result.scalars().all()
-    return {"personal": [model_to_dict(employee) for employee in employees]}
+    Employee = Base.classes.employee
+    Exp_Level = Base.classes.experience_level
+    Type = Base.classes.type
+    result = await db.execute(
+        select(
+            Employee,
+            Exp_Level.exp_lvl_description,
+            Type.type_name
+        )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+    )
+    
+    # Specifying columns to exclude
+    exclude_columns = ['experience_level_id', 'type_id', 'address_id']
+    
+    employees = [
+        {
+            **model_to_dict(employee, exclude_columns=exclude_columns),
+            "exp_lvl_description": exp_lvl_description,
+            "type_name": type_name
+        }
+        for employee, exp_lvl_description, type_name in result.all()
+    ]
+    
+    return {"personal": employees}
 
-@app.get('/api/projekte/')
-async def get_personal(db: AsyncSession = Depends(get_db)):
+
+
+@app.get('/api/project/')
+async def get_projekt(db: AsyncSession = Depends(get_db)):
     Projects = Base.classes.project 
     result = await db.execute(select(Projects))
     projects = result.scalars().all()
-    return {"personal": [model_to_dict(project) for project in projects]}
+    return {"project": [model_to_dict(project) for project in projects]}

@@ -29,8 +29,9 @@ query = select(
 
 def print_query(query, engine):
     session = Session(engine)
-    result = session.execute(query)
-    employees = result.scalars().all()
-    return {"personal": [model_to_dict(employee) for employee in employees]} 
+    result = session.execute(query).all()
+    return result
+#    employees = result.scalars().all()
+#    return {"personal": [model_to_dict(employee) for employee in employees]} 
 
 print(print_query(query, engine))
