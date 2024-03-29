@@ -39,3 +39,10 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Employee))
     employees = result.scalars().all()
     return {"personal": [model_to_dict(employee) for employee in employees]}
+
+@app.get('/api/projekte/')
+async def get_personal(db: AsyncSession = Depends(get_db)):
+    Projects = Base.classes.project 
+    result = await db.execute(select(Projects))
+    projects = result.scalars().all()
+    return {"personal": [model_to_dict(project) for project in projects]}
