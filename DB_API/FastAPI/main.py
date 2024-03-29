@@ -5,9 +5,6 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import text
 
-# Assuming your models are correctly reflected or declared elsewhere
-# from your_models import Employee
-
 engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres", echo=True)
 SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -56,8 +53,7 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
-    
-    # Specifying columns to exclude
+
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
     
     employees = [
@@ -68,7 +64,6 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
         }
         for employee, exp_lvl_description, type_name in result.all()
     ]
-    
     return {"personal": employees}
 
 @app.get('/api/internal/')
@@ -86,8 +81,7 @@ async def get_internal(db: AsyncSession = Depends(get_db)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 1)
     )
-    
-    # Specifying columns to exclude
+
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
     
     internals = [
@@ -98,7 +92,6 @@ async def get_internal(db: AsyncSession = Depends(get_db)):
         }
         for internal, exp_lvl_description, type_name in result.all()
     ]
-    
     return {"internal": internals}
 
 @app.get('/api/external/')
@@ -116,8 +109,7 @@ async def get_external(db: AsyncSession = Depends(get_db)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 2)
     )
-    
-    # Specifying columns to exclude
+
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
     
     externals = [
@@ -128,7 +120,6 @@ async def get_external(db: AsyncSession = Depends(get_db)):
         }
         for external, exp_lvl_description, type_name in result.all()
     ]
-    
     return {"external": externals}
 
 @app.get('/api/stat/')
@@ -146,8 +137,7 @@ async def get_stat(db: AsyncSession = Depends(get_db)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 3)
     )
-    
-    # Specifying columns to exclude
+
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
     
     stats = [
@@ -158,7 +148,6 @@ async def get_stat(db: AsyncSession = Depends(get_db)):
         }
         for stat, exp_lvl_description, type_name in result.all()
     ]
-    
     return {"stat": stats}
 
 @app.get('/api/project/')
@@ -176,7 +165,6 @@ async def get_project(db: AsyncSession = Depends(get_db)):
         .join(Employee, Project.proj_manager == Employee.employee_id)
     )
 
-        # Specifying columns to exclude
     exclude_columns = ['department_id', 'proj_manager']
     
     projects = [
@@ -187,16 +175,13 @@ async def get_project(db: AsyncSession = Depends(get_db)):
         }
         for project, dep_name, last_name in result.all()
     ]
-    
     return {"project": projects}
 
 @app.get('/api/department/')
 async def get_department(db: AsyncSession = Depends(get_db)):
     Department = Base.classes.department
     result = await db.execute(
-        select(
-            Department
-        )
+        select(Department)
     )
     departments = result.scalars().all()
     return {"department": [model_to_dict(department) for department in departments]} 
@@ -205,9 +190,7 @@ async def get_department(db: AsyncSession = Depends(get_db)):
 async def get_address(db: AsyncSession = Depends(get_db)):
     Address = Base.classes.address
     result = await db.execute(
-        select(
-            Address
-        )
+        select(Address)
     )
     addresses = result.scalars().all()
     return {"address": [model_to_dict(adress) for adress in addresses]} 
@@ -216,9 +199,7 @@ async def get_address(db: AsyncSession = Depends(get_db)):
 async def get_type(db: AsyncSession = Depends(get_db)):
     Type = Base.classes.type
     result = await db.execute(
-        select(
-            Type
-        )
+        select(Type)
     )
     types = result.scalars().all()
     return {"types": [model_to_dict(type) for type in types]}
