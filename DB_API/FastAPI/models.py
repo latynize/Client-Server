@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, MetaData, select
 from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import Session
 import json
 engine = create_engine("postgresql://postgres:post@localhost/postgres")
@@ -21,7 +22,9 @@ Type = Base.classes.type
 query = select(
     Employee
 )
-session = Session(engine)
-result = session.execute(query)
-print(type(result.all()))
-#print(json.loads(result))
+
+def print_query(query, engine):
+    session = Session(engine)
+    result = session.execute(query).dict()
+    employee = result.scalars().all()
+    return {"personal": employee}   
