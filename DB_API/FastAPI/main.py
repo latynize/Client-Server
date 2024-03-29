@@ -85,15 +85,36 @@ async def get_project(db: AsyncSession = Depends(get_db)):
     )
 
         # Specifying columns to exclude
-    exclude_columns = []
+    exclude_columns = ['department_id', 'proj_manager']
     
     projects = [
         {
             **model_to_dict(project, exclude_columns=exclude_columns),
             "dep_name": dep_name,
-            "type_name": last_name
+            "last_name": last_name
         }
         for project, dep_name, last_name in result.all()
     ]
     
     return {"project": projects}
+
+@app.get('/api/department/')
+async def get_department(db: AsyncSession = Depends(get_db)):
+    Department = Base.classes.department
+    result = await db.execute(
+        select(
+            Department,
+        )
+    )
+
+        # Specifying columns to exclude
+    exclude_columns = []
+    
+    departments = [
+        {
+            **model_to_dict(department, exclude_columns=exclude_columns),
+        }
+        for department in result.all()
+    ]
+    
+    return {"department": departments}
