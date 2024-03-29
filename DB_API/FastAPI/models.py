@@ -32,6 +32,6 @@ def print_query(query, engine):
     result = session.execute(query).all()
     return result
 #    employees = result.scalars().all()
-#    return {"personal": [model_to_dict(employee) for employee in employees]} 
+    return {"personal": [model_to_dict(employee) for employee in employees]} 
 
 print(print_query(query, engine))

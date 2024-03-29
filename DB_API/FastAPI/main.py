@@ -67,7 +67,95 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
     
     return {"personal": employees}
 
+@app.get('/api/internal/')
+async def get_internal(db: AsyncSession = Depends(get_db)):
+    Employee = Base.classes.employee
+    Exp_Level = Base.classes.experience_level
+    Type = Base.classes.type
+    result = await db.execute(
+        select(
+            Employee,
+            Exp_Level.exp_lvl_description,
+            Type.type_name
+        )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .where(Employee.type_id == 1)
+    )
+    
+    # Specifying columns to exclude
+    exclude_columns = ['experience_level_id', 'type_id', 'address_id']
+    
+    internals = [
+        {
+            **model_to_dict(internal, exclude_columns=exclude_columns),
+            "exp_lvl_description": exp_lvl_description,
+            "type_name": type_name
+        }
+        for internal, exp_lvl_description, type_name in result.all()
+    ]
+    
+    return {"internal": internals}
 
+@app.get('/api/external/')
+async def get_external(db: AsyncSession = Depends(get_db)):
+    Employee = Base.classes.employee
+    Exp_Level = Base.classes.experience_level
+    Type = Base.classes.type
+    result = await db.execute(
+        select(
+            Employee,
+            Exp_Level.exp_lvl_description,
+            Type.type_name
+        )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .where(Employee.type_id == 2)
+    )
+    
+    # Specifying columns to exclude
+    exclude_columns = ['experience_level_id', 'type_id', 'address_id']
+    
+    externals = [
+        {
+            **model_to_dict(external, exclude_columns=exclude_columns),
+            "exp_lvl_description": exp_lvl_description,
+            "type_name": type_name
+        }
+        for external, exp_lvl_description, type_name in result.all()
+    ]
+    
+    return {"external": externals}
+
+@app.get('/api/stat/')
+async def get_stat(db: AsyncSession = Depends(get_db)):
+    Employee = Base.classes.employee
+    Exp_Level = Base.classes.experience_level
+    Type = Base.classes.type
+    result = await db.execute(
+        select(
+            Employee,
+            Exp_Level.exp_lvl_description,
+            Type.type_name
+        )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .where(Employee.type_id == 3)
+    )
+    
+    # Specifying columns to exclude
+    exclude_columns = ['experience_level_id', 'type_id', 'address_id']
+    
+    stats = [
+        {
+            **model_to_dict(stat, exclude_columns=exclude_columns),
+            "exp_lvl_description": exp_lvl_description,
+            "type_name": type_name
+        }
+        for stat, exp_lvl_description, type_name in result.all()
+    ]
+    
+    return {"stat": stats}
 
 @app.get('/api/project/')
 async def get_project(db: AsyncSession = Depends(get_db)):
@@ -103,18 +191,19 @@ async def get_department(db: AsyncSession = Depends(get_db)):
     Department = Base.classes.department
     result = await db.execute(
         select(
-            Department,
+            Department
         )
     )
+    departments = result.scalars().all()
+    return {"department": [model_to_dict(department) for department in departments]} 
 
-        # Specifying columns to exclude
-    exclude_columns = []
-    
-    departments = [
-        {
-            **model_to_dict(department, exclude_columns=exclude_columns),
-        }
-        for department in result.all()
-    ]
-    
-    return {"department": departments}
+@app.get('/api/address/')
+async def get_address(db: AsyncSession = Depends(get_db)):
+    Address = Base.classes.address
+    result = await db.execute(
+        select(
+            Address
+        )
+    )
+    addresses = result.scalars().all()
+    return {"address": [model_to_dict(adress) for adress in addresses]} 
