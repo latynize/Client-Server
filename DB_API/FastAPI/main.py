@@ -70,8 +70,30 @@ async def get_personal(db: AsyncSession = Depends(get_db)):
 
 
 @app.get('/api/project/')
-async def get_projekt(db: AsyncSession = Depends(get_db)):
-    Projects = Base.classes.project 
-    result = await db.execute(select(Projects))
-    projects = result.scalars().all()
-    return {"project": [model_to_dict(project) for project in projects]}
+async def get_project(db: AsyncSession = Depends(get_db)):
+    Project = Base.classes.project
+    Department = Base.classes.department
+    Employee = Base.classes.employee
+    result = await db.execute(
+        select(
+            Project,
+            Department.dep_name,
+            Employee.last_name
+        )
+        .join(Department, Project.department_id == Department.department_id)
+        .join(Employee, Project.proj_manager == Employee.employee_id)
+    )
+
+        # Specifying columns to exclude
+    exclude_columns = []
+    
+    projects = [
+        {
+            **model_to_dict(project, exclude_columns=exclude_columns),
+            "dep_name": dep_name,
+            "type_name": last_name
+        }
+        for project, dep_name, last_name in result.all()
+    ]
+    
+    return {"project": projects}
