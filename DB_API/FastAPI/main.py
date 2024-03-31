@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-import mapper
+from mapper import Mapper
 
-mapper = mapper.Mapper()
+mapper = Mapper()
 app = FastAPI()
 
 
@@ -18,7 +18,7 @@ async def shutdown_event():
 
 
 @app.get('/api/personal/')
-async def get_personal(db: AsyncSession = Depends(mapper.get_db)):
+async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
     Type = mapper.Base.classes.type
@@ -46,7 +46,7 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/internal/')
-async def get_internal(db: AsyncSession = Depends(mapper.get_db)):
+async def get_internal(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
     Type = mapper.Base.classes.type
@@ -75,7 +75,7 @@ async def get_internal(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/external/')
-async def get_external(db: AsyncSession = Depends(mapper.get_db)):
+async def get_external(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
     Type = mapper.Base.classes.type
@@ -104,7 +104,7 @@ async def get_external(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/stat/')
-async def get_stat(db: AsyncSession = Depends(mapper.get_db)):
+async def get_stat(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
     Type = mapper.Base.classes.type
@@ -133,7 +133,7 @@ async def get_stat(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/project/')
-async def get_project(db: AsyncSession = Depends(mapper.get_db)):
+async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
     Project = mapper.Base.classes.project
     Department = mapper.Base.classes.department
     Employee = mapper.Base.classes.employee
@@ -161,7 +161,7 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/department/')
-async def get_department(db: AsyncSession = Depends(mapper.get_db)):
+async def get_department(db: AsyncSession = Depends(mapper.get_db_session)):
     Department = mapper.Base.classes.department
     result = await db.execute(
         select(Department)
@@ -171,7 +171,7 @@ async def get_department(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/address/')
-async def get_address(db: AsyncSession = Depends(mapper.get_db)):
+async def get_address(db: AsyncSession = Depends(mapper.get_db_session)):
     Address = mapper.Base.classes.address
     result = await db.execute(
         select(Address)
@@ -181,7 +181,7 @@ async def get_address(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/type/')
-async def get_type(db: AsyncSession = Depends(mapper.get_db)):
+async def get_type(db: AsyncSession = Depends(mapper.get_db_session)):
     Type = mapper.Base.classes.type
     result = await db.execute(
         select(Type)
@@ -191,7 +191,7 @@ async def get_type(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/education_degree/')
-async def get_education_degree(db: AsyncSession = Depends(mapper.get_db)):
+async def get_education_degree(db: AsyncSession = Depends(mapper.get_db_session)):
     Education_degree = mapper.Base.classes.education_degree
     result = await db.execute(
         select(Education_degree)
@@ -201,7 +201,7 @@ async def get_education_degree(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/job/')
-async def get_job(db: AsyncSession = Depends(mapper.get_db)):
+async def get_job(db: AsyncSession = Depends(mapper.get_db_session)):
     Job = mapper.Base.classes.job
     result = await db.execute(
         select(Job)
@@ -211,7 +211,7 @@ async def get_job(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/skill/')
-async def get_skill(db: AsyncSession = Depends(mapper.get_db)):
+async def get_skill(db: AsyncSession = Depends(mapper.get_db_session)):
     Skill = mapper.Base.classes.skill
     result = await db.execute(
         select(Skill)
@@ -221,7 +221,7 @@ async def get_skill(db: AsyncSession = Depends(mapper.get_db)):
 
 
 @app.get('/api/experience_level/')
-async def get_experience_level(db: AsyncSession = Depends(mapper.get_db)):
+async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)):
     Experience_level = mapper.Base.classes.experience_level
     result = await db.execute(
         select(Experience_level)
