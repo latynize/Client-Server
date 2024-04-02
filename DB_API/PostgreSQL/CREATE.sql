@@ -1,27 +1,27 @@
+-- Create the schema
 CREATE SCHEMA cioban;
 
+-- Set the search path to the new schema
 SET search_path TO cioban;
 
+-- Create the tables
 CREATE TABLE job (
     job_id SERIAL PRIMARY KEY,
     job_name VARCHAR(25),
     job_description VARCHAR(200),
     degree VARCHAR(25)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE skill (
     skill_id SERIAL PRIMARY KEY,
     skill_name VARCHAR(25),
     skill_description VARCHAR(200)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE education_degree (
     education_id SERIAL PRIMARY KEY,
     education_name VARCHAR(50)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE employee (
     employee_id SERIAL PRIMARY KEY,
@@ -34,40 +34,36 @@ CREATE TABLE employee (
     experience_level_id INT,
     type_id INT,
     address_id INT
-)
-ON DELETE CASCADE;
+    -- Foreign key constraints will be added after table creation
+);
 
 CREATE TABLE type (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(25),
     type_description VARCHAR(200)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE internal (
-    employee_id INT REFERENCES employee(employee_id),
-    job_id INT REFERENCES job(job_id),
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    job_id INT REFERENCES job(job_id) ON DELETE CASCADE,
     floor INT,
     room INT,
     PRIMARY KEY (employee_id)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE external (
-    employee_id INT REFERENCES employee(employee_id),
-    job_id INT REFERENCES job(job_id),
-    supervisor_id INT REFERENCES employee(employee_id),
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    job_id INT REFERENCES job(job_id) ON DELETE CASCADE,
+    supervisor_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
     PRIMARY KEY (employee_id)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE stat (
-    employee_id INT REFERENCES employee(employee_id),
-    education_id INT REFERENCES education_degree(education_id),
-    supervisor_id INT REFERENCES employee(employee_id),
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    education_id INT REFERENCES education_degree(education_id) ON DELETE CASCADE,
+    supervisor_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
     PRIMARY KEY (employee_id)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE address (
     address_id SERIAL PRIMARY KEY,
@@ -77,23 +73,21 @@ CREATE TABLE address (
     postcode INT,
     city VARCHAR(50),
     country VARCHAR(50)
-)
-ON ON DELETE CASCADE ;
+);
 
 CREATE TABLE experience_level (
     experience_level_id SERIAL PRIMARY KEY,
     exp_lvl_description VARCHAR(200), 
     years_of_experience INT
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE team (
     team_id SERIAL PRIMARY KEY,
     project_id INT,
     team_name VARCHAR(250),
     team_purpose VARCHAR(200)
-)
-ON DELETE CASCADE;
+    -- Foreign key constraints will be added after table creation
+);
 
 CREATE TABLE project (
     project_id SERIAL PRIMARY KEY,
@@ -105,58 +99,53 @@ CREATE TABLE project (
     current_fte DOUBLE PRECISION,
     start_date DATE,
     end_date DATE
-)
-ON DELETE CASCADE;
+    -- Foreign key constraints will be added after table creation
+);
 
 CREATE TABLE department (
     department_id SERIAL PRIMARY KEY,
     dep_name VARCHAR(45),
     dep_description VARCHAR(300)
-)
-ON DELETE CASCADE;
+);
 
 CREATE TABLE connection_job_skill (
     job_id INT,
     skill_id INT,
     PRIMARY KEY (job_id, skill_id),
-    FOREIGN KEY (job_id) REFERENCES job(job_id),
-    FOREIGN KEY (skill_id) REFERENCES skill(skill_id)
-)
-ON DELETE CASCADE;
+    FOREIGN KEY (job_id) REFERENCES job(job_id) ON DELETE CASCADE,
+    FOREIGN KEY (skill_id) REFERENCES skill(skill_id) ON DELETE CASCADE
+);
 
 CREATE TABLE connection_team_employee (
     team_id INT,
     employee_id INT,
     PRIMARY KEY (team_id, employee_id),
-    FOREIGN KEY (team_id) REFERENCES team(team_id),
-    FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
-)
-ON DELETE CASCADE;
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
+    FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
+);
 
 CREATE TABLE connection_education_skill (
     education_id INT,
     skill_id INT,
     PRIMARY KEY (education_id, skill_id),
-    FOREIGN KEY (education_id) REFERENCES education_degree(education_id),
-    FOREIGN KEY (skill_id) REFERENCES skill(skill_id)
-)
-ON DELETE CASCADE;
+    FOREIGN KEY (education_id) REFERENCES education_degree(education_id) ON DELETE CASCADE,
+    FOREIGN KEY (skill_id) REFERENCES skill(skill_id) ON DELETE CASCADE
+);
 
+-- Add foreign key constraints to previously created tables
 ALTER TABLE employee
-ADD CONSTRAINT fk_experience_level FOREIGN KEY (experience_level_id) REFERENCES experience_level(experience_level_id),
-ADD CONSTRAINT fk_type FOREIGN KEY (type_id) REFERENCES type(type_id), 
-ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES address(address_id)
-ON DELETE CASCADE;
+ADD CONSTRAINT fk_experience_level FOREIGN KEY (experience_level_id) REFERENCES experience_level(experience_level_id) ON DELETE CASCADE,
+ADD CONSTRAINT fk_type FOREIGN KEY (type_id) REFERENCES type(type_id) ON DELETE CASCADE, 
+ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES address(address_id) ON DELETE CASCADE;
 
 ALTER TABLE project
-ADD CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department(department_id),
-ADD CONSTRAINT fk_proj_manager FOREIGN KEY (proj_manager) REFERENCES employee(employee_id)
-ON DELETE CASCADE;
+ADD CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department(department_id) ON DELETE CASCADE,
+ADD CONSTRAINT fk_proj_manager FOREIGN KEY (proj_manager) REFERENCES employee(employee_id) ON DELETE CASCADE;
 
 ALTER TABLE team
-ADD CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES project(project_id)
-ON DELETE CASCADE;
+ADD CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE;
 
+-- Insert initial data
 INSERT INTO type (type_name, type_description) VALUES
 ('Intern', 'interne*r Mitarbeiter*in'),
 ('Extern', 'externe*r Mitarbeiter*in'),
