@@ -11,7 +11,7 @@ app = FastAPI()
 
 
 origins = [
-    "https://cioban.de",  
+    "https://cioban.de/",  
     "http://localhost:8000",  
 ]
 
