@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from mapper import Mapper
-from fastapi.middleware.cors import CORSMiddleware
+
 
 
 mapper = Mapper()
@@ -10,11 +11,11 @@ app = FastAPI()
 
 
 origins = [
-    "https://cioban.de",  # Add your origins here
-    "http://localhost:8000",  # Or your local development site
+    "https://cioban.de",  
+    "http://localhost:8000",  
 ]
 
-app.add_middleware(
+@app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
