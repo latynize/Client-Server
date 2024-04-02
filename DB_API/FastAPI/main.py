@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from mapper import Mapper
@@ -242,3 +242,15 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
     )
     experience_levels = result.scalars().all()
     return {"experience_level": [mapper.model_to_dict(experience_level) for experience_level in experience_levels]}
+
+@app.delete("/api/employee/{employee_id}/")
+async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
+    Employee = mapper.Base.classes.employee
+    try:
+        deletion_successful = await mapper.universal_delete(db, Employee, employee_id=employee_id)
+        if deletion_successful:
+            return {"status": "success", "message": "Employee deleted successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Employee not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting employee: {e}")

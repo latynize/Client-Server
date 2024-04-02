@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import text
+from sqlalchemy.future import select
 
 
 class Mapper:
@@ -40,3 +41,20 @@ class Mapper:
         
         return result_dict
 
+async def universal_delete(self, session, model_instance, **conditions) -> None:
+
+    query = select(model_instance)
+    for attr, value in conditions.items():
+        query = query.filter(getattr(model_instance, attr) == value)
+
+    results = await session.execute(query)
+    instances = results.scalars().all()
+
+    if not instances:
+        return False 
+
+    for instance in instances:
+        await session.delete(instance)
+
+    await session.commit()
+    return True  
