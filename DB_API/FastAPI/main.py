@@ -31,17 +31,20 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
-
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'entry_date', 'exp_lvl_description', 'type_name', 'experience_level_id', 'type_id', 'address_id']
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
+    
+    employees = []
+    for employee, exp_lvl_description, type_name in result.all():
+        employee_dict = mapper.model_to_dict(
+            employee, 
+            exclude_columns=exclude_columns, 
+            order_columns=order_columns
+        )
+        employee_dict['exp_lvl_description'] = exp_lvl_description
+        employee_dict['type_name'] = type_name
 
-    employees = [
-        {
-            **mapper.model_to_dict(employee, exclude_columns=exclude_columns),
-            "exp_lvl_description": exp_lvl_description,
-            "type_name": type_name
-        }
-        for employee, exp_lvl_description, type_name in result.all()
-    ]
+        employees.append(employee_dict)
     return {"personal": employees}
 
 
@@ -61,16 +64,20 @@ async def get_internal(db: AsyncSession = Depends(mapper.get_db_session)):
         .where(Employee.type_id == 1)
     )
 
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'type_id', 'experience_level_id', 'type_id']
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
 
-    internals = [
-        {
-            **mapper.model_to_dict(internal, exclude_columns=exclude_columns),
-            "exp_lvl_description": exp_lvl_description,
-            "type_name": type_name
-        }
-        for internal, exp_lvl_description, type_name in result.all()
-    ]
+    internals = []
+    for internal, exp_lvl_description, type_name in result.all():
+        internal_dict = mapper.model_to_dict(
+            internal, 
+            exclude_columns=exclude_columns, 
+            order_columns=order_columns
+        )
+        internal_dict['exp_lvl_description'] = exp_lvl_description
+        internal_dict['type_name'] = type_name
+
+        internals.append(internal_dict)
     return {"internal": internals}
 
 
@@ -90,16 +97,20 @@ async def get_external(db: AsyncSession = Depends(mapper.get_db_session)):
         .where(Employee.type_id == 2)
     )
 
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'type_id', 'experience_level_id', 'type_id']
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
 
-    externals = [
-        {
-            **mapper.model_to_dict(external, exclude_columns=exclude_columns),
-            "exp_lvl_description": exp_lvl_description,
-            "type_name": type_name
-        }
-        for external, exp_lvl_description, type_name in result.all()
-    ]
+    externals = []
+    for external, exp_lvl_description, type_name in result.all():
+        external_dict = mapper.model_to_dict(
+            external, 
+            exclude_columns=exclude_columns, 
+            order_columns=order_columns
+        )
+        external_dict['exp_lvl_description'] = exp_lvl_description
+        external_dict['type_name'] = type_name
+
+        externals.append(external_dict)
     return {"external": externals}
 
 
@@ -118,17 +129,20 @@ async def get_stat(db: AsyncSession = Depends(mapper.get_db_session)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 3)
     )
-
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'type_id', 'experience_level_id', 'type_id', 'address_id']
     exclude_columns = ['experience_level_id', 'type_id', 'address_id']
 
-    stats = [
-        {
-            **mapper.model_to_dict(stat, exclude_columns=exclude_columns),
-            "exp_lvl_description": exp_lvl_description,
-            "type_name": type_name
-        }
-        for stat, exp_lvl_description, type_name in result.all()
-    ]
+    stats = []
+    for stat, exp_lvl_description, type_name in result.all():
+        stat_dict = mapper.model_to_dict(
+            stat, 
+            exclude_columns=exclude_columns, 
+            order_columns=order_columns
+        )
+        stat_dict['exp_lvl_description'] = exp_lvl_description
+        stat_dict['type_name'] = type_name
+
+        stats.append(stat_dict)
     return {"stat": stats}
 
 
@@ -146,12 +160,12 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
         .join(Department, Project.department_id == Department.department_id)
         .join(Employee, Project.proj_manager == Employee.employee_id)
     )
-
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'type_id', 'experience_level_id', 'type_id']
     exclude_columns = ['department_id', 'proj_manager']
 
     projects = [
         {
-            **mapper.model_to_dict(project, exclude_columns=exclude_columns),
+            **mapper.model_to_dict(project, exclude_columns=exclude_columns, order_columns=order_columns),
             "dep_name": dep_name,
             "last_name": last_name
         }
