@@ -23,19 +23,15 @@ class Mapper:
         exclude_columns = set(exclude_columns or [])
         order_columns = order_columns or []
         
-        # Initialize the dictionary that will store your ordered and filtered attributes
         result_dict = {}
         
         if hasattr(model_instance.__class__, '__table__'):
             table = model_instance.__class__.__table__
             
-            # First, add columns in the order specified by 'order_columns'
             for column_name in order_columns:
                 if column_name in table.c and column_name not in exclude_columns:
                     result_dict[column_name] = getattr(model_instance, column_name)
             
-            # Then, add any remaining columns that were not specified in 'order_columns'
-            # and are not in 'exclude_columns'
             for column in table.c:
                 if column.name not in exclude_columns and column.name not in result_dict:
                     result_dict[column.name] = getattr(model_instance, column.name)
