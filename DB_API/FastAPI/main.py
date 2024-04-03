@@ -311,7 +311,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
     exp_levels = result.scalars().all()
     order_columns = ['experience_level_id', 'exp_lvl_description', 'years_of_experience']
     exp_level_list = [
-        mapper.model_to_dict(exp_level, order_columns=order_columns)
+        mapper.model_to_list(exp_level, order_columns=order_columns)
         for exp_level in exp_levels
     ]
     return {"experience_level": exp_level_list}
