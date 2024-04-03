@@ -2,7 +2,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import text
-from sqlalchemy.future import select
 
 
 class Mapper:

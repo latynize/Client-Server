@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import inspect
 from typing import List, Type, Any, Dict, Tuple
-from mapper import Mapper
-from method import Method
+from ..ORM.mapper import Mapper
+from ..Methods.method import Method
 
 # FastAPI Ordner umbennen - eher Persistenzlayer
 
@@ -14,10 +14,9 @@ from method import Method
 mapper = Mapper()
 app = FastAPI()
 
-
 origins = [
-    "https://cioban.de/",  
-    "http://localhost:8000",  
+    "https://cioban.de/",
+    "http://localhost:8000",
 ]
 
 app.add_middleware(
@@ -29,7 +28,6 @@ app.add_middleware(
 )
 
 
-        
 def create_pydantic_model_from_sqlalchemy(automap_class: Type, include_fields: list) -> Type[BaseModel]:
     map = inspect(automap_class)
     fields: Dict[str, Tuple[Type[Any], None]] = {}
@@ -39,6 +37,7 @@ def create_pydantic_model_from_sqlalchemy(automap_class: Type, include_fields: l
             python_type = column.type.python_type
             fields[field_name] = (python_type, None if column.nullable else ...)
     return create_model(automap_class.__name__ + "Pydantic", **fields)
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -62,14 +61,15 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
         .join(Type, Employee.type_id == Type.type_id)
     )
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'entry_date', 'exp_lvl_description', 'type_name']
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'entry_date',
+                     'exp_lvl_description', 'type_name']
 
     employees = []
     for row in result.all():
         employee, exp_lvl_description, type_name = row[0], row[1], row[2]
         employee_list = mapper.model_to_list(
-            employee, 
-            order_columns=order_columns, 
+            employee,
+            order_columns=order_columns,
             additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
         )
         employees.append(employee_list)
@@ -90,7 +90,8 @@ async def get_internal(db: AsyncSession = Depends(mapper.get_db_session)):
         .where(Employee.type_id == 1)
     )
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'exp_lvl_description', 'type_name']
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number',
+                     'exp_lvl_description', 'type_name']
 
     internals = []
     for row in result.all():
@@ -118,7 +119,8 @@ async def get_external(db: AsyncSession = Depends(mapper.get_db_session)):
         .where(Employee.type_id == 2)
     )
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'exp_lvl_description', 'type_name']
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number',
+                     'exp_lvl_description', 'type_name']
 
     externals = []
     for row in result.all():
@@ -146,7 +148,8 @@ async def get_stat(db: AsyncSession = Depends(mapper.get_db_session)):
         .where(Employee.type_id == 3)
     )
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'exp_lvl_description', 'type_name']
+    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number',
+                     'exp_lvl_description', 'type_name']
 
     stats = []
     for row in result.all():
@@ -176,12 +179,12 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
         .join(Department, Project.department_id == Department.department_id)
         .join(Employee, Project.proj_manager == Employee.employee_id)
     )
-    
+
     order_columns = [
-        'project_id', 'proj_name', 'dep_name', 'proj_priority', 
+        'project_id', 'proj_name', 'dep_name', 'proj_priority',
         'supervisor', 'needed_fte', 'current_fte', 'start_date', 'end_date'
     ]
-    
+
     exclude_columns = ['department_id', 'proj_manager']
 
     projects = []
@@ -189,12 +192,12 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
         project, dep_name, supervisor = row[0], row[1], row[2]
 
         project_list = mapper.model_to_list(
-            project, 
-            exclude_columns, 
-            order_columns, 
+            project,
+            exclude_columns,
+            order_columns,
             additional_fields={'dep_name': dep_name, 'supervisor': supervisor}
         )
-        
+
         projects.append(project_list)
 
     return {"project": projects}
@@ -207,7 +210,7 @@ async def get_department(db: AsyncSession = Depends(mapper.get_db_session)):
         select(Department)
     )
     departments = result.scalars().all()
-    order_columns = ['department_id', 'dep_name','dep_description']
+    order_columns = ['department_id', 'dep_name', 'dep_description']
     department_list = [
         mapper.model_to_list(department, order_columns=order_columns)
         for department in departments
@@ -237,7 +240,7 @@ async def get_type(db: AsyncSession = Depends(mapper.get_db_session)):
         select(Type)
     )
     types = result.scalars().all()
-    order_columns = ['type_id', 'type_name','type_description']
+    order_columns = ['type_id', 'type_name', 'type_description']
     type_list = [
         mapper.model_to_list(type, order_columns=order_columns)
         for type in types
@@ -258,6 +261,7 @@ async def get_education_degree(db: AsyncSession = Depends(mapper.get_db_session)
         for edu_degree in edu_degrees
     ]
     return {"education_degree": edu_degree_list}
+
 
 @app.get('/api/job/')
 async def get_job(db: AsyncSession = Depends(mapper.get_db_session)):
@@ -316,10 +320,12 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.ge
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting employee: {e}")
 
+
 @app.post("/api/employee/")
 async def create_employees(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
-    EmployeeCreate = create_pydantic_model_from_sqlalchemy(Employee, ['first_name', 'last_name', 'email', 'position_id'])  # Adjust fields as necessary
+    EmployeeCreate = create_pydantic_model_from_sqlalchemy(Employee, ['first_name', 'last_name', 'email',
+                                                                      'position_id'])  # Adjust fields as necessary
     employee_data = List[EmployeeCreate]
     for data in employee_data:
         new_employee = Employee(**data.dict())
