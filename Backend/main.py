@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import inspect
 from typing import List, Type, Any, Dict, Tuple
-from ..ORM.mapper import Mapper
-from ..Methods.method import Method
+from mapper import Mapper
+from method import Method
 
 # FastAPI Ordner umbennen - eher Persistenzlayer
 
