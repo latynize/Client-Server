@@ -1,9 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import create_model, BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import inspect
+from typing import List, Type, Any, Dict, Tuple
 from mapper import Mapper
+from method import Method
 
+# FastAPI Ordner umbennen - eher Persistenzlayer
 
 
 mapper = Mapper()
@@ -23,35 +28,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-async def universal_delete(model_instance, db: AsyncSession = Depends(mapper.get_db_session), **conditions) -> None:
 
-    query = select(model_instance)
-    for attr, value in conditions.items():
-        query = query.filter(getattr(model_instance, attr) == value)
-
-    results = await db.execute(query)
-    instances = results.scalars().all()
-
-    if not instances:
-        return False 
-
-    for instance in instances:
-        await db.delete(instance)
-
-    await db.commit()
-    return True  
-
-async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
-    async with db() as db:
-        new_entry = model_instance(**data)
-        db.add(new_entry)
-        try:
-            await db.commit()
-            await db.refresh(new_entry)
-            return new_entry
-        except Exception as e:
-            await db.rollback()
-            raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
+        
+def create_pydantic_model_from_sqlalchemy(automap_class: Type, include_fields: list) -> Type[BaseModel]:
+    map = inspect(automap_class)
+    fields: Dict[str, Tuple[Type[Any], None]] = {}
+    for field_name in include_fields:
+        column = map.columns.get(field_name)
+        if column is not None:
+            python_type = column.type.python_type
+            fields[field_name] = (python_type, None if column.nullable else ...)
+    return create_model(automap_class.__name__ + "Pydantic", **fields)
 
 @app.on_event("startup")
 async def startup_event():
@@ -321,7 +308,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     try:
-        deletion_successful = await universal_delete(Employee, db, employee_id=employee_id)
+        deletion_successful = await Method.universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
@@ -330,10 +317,16 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.ge
         raise HTTPException(status_code=400, detail=f"Error deleting employee: {e}")
 
 @app.post("/api/employee/")
-async def create_employee(employee_data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
+async def create_employees(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
+    EmployeeCreate = create_pydantic_model_from_sqlalchemy(Employee, ['first_name', 'last_name', 'email', 'position_id'])  # Adjust fields as necessary
+    employee_data = List[EmployeeCreate]
+    for data in employee_data:
+        new_employee = Employee(**data.dict())
+        db.add(new_employee)
     try:
-        new_employee = await universal_insert(db, Employee, employee_data)
-        return new_employee
+        await db.commit()
+        return {"message": "Employees created successfully"}
     except Exception as e:
+        await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating employee: {e}")
