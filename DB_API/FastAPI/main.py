@@ -328,3 +328,12 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.ge
             raise HTTPException(status_code=404, detail="Employee not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting employee: {e}")
+
+@app.post("/api/employee/")
+async def create_employee(employee_data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
+    Employee = mapper.Base.classes.employee
+    try:
+        new_employee = await universal_insert(db, Employee, employee_data)
+        return new_employee
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error creating employee: {e}")
