@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from mapper import Mapper
+from ORM.mapper import Mapper
 
 class Method:
 
