@@ -40,23 +40,3 @@ class Mapper:
                 ordered_list[column_name] = model_list[column_name]
 
         return ordered_list
-
-
-
-    async def universal_delete(self, session, model_instance, **conditions) -> None:
-
-        query = select(model_instance)
-        for attr, value in conditions.items():
-            query = query.filter(getattr(model_instance, attr) == value)
-
-        results = await session.execute(query)
-        instances = results.scalars().all()
-
-        if not instances:
-            return False 
-
-        for instance in instances:
-            await session.delete(instance)
-
-        await session.commit()
-        return True  

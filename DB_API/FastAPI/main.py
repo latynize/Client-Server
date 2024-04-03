@@ -23,6 +23,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+async def universal_delete(model_instance, db: AsyncSession = Depends(mapper.get_db_session), **conditions) -> None:
+
+    query = select(model_instance)
+    for attr, value in conditions.items():
+        query = query.filter(getattr(model_instance, attr) == value)
+
+    results = await db.execute(query)
+    instances = results.scalars().all()
+
+    if not instances:
+        return False 
+
+    for instance in instances:
+        await db.delete(instance)
+
+    await db.commit()
+    return True  
+
+async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
+    async with db() as db:
+        new_entry = model_instance(**data)
+        db.add(new_entry)
+        try:
+            await db.commit()
+            await db.refresh(new_entry)
+            return new_entry
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     await mapper.reflect_tables()
@@ -50,12 +80,12 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
     employees = []
     for row in result.all():
         employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        employee_list = mapper.model_to_list(
+        employee_dict = mapper.model_to_list(
             employee, 
             order_columns=order_columns, 
             additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
         )
-        employees.append(employee_list)
+        employees.append(employee_dict)
 
     return {"personal": employees}
 
@@ -78,12 +108,12 @@ async def get_internal(db: AsyncSession = Depends(mapper.get_db_session)):
     internals = []
     for row in result.all():
         employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        internal_list = mapper.model_to_list(
+        internal_dict = mapper.model_to_list(
             employee,
             order_columns=order_columns,
             additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
         )
-        internals.append(internal_list)
+        internals.append(internal_dict)
 
     return {"internal": internals}
 
@@ -106,12 +136,12 @@ async def get_external(db: AsyncSession = Depends(mapper.get_db_session)):
     externals = []
     for row in result.all():
         employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        external_list = mapper.model_to_list(
+        external_dict = mapper.model_to_list(
             employee,
             order_columns=order_columns,
             additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
         )
-        externals.append(external_list)
+        externals.append(external_dict)
 
     return {"external": externals}
 
@@ -134,12 +164,12 @@ async def get_stat(db: AsyncSession = Depends(mapper.get_db_session)):
     stats = []
     for row in result.all():
         employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        stat_list = mapper.model_to_list(
+        stat_dict = mapper.model_to_list(
             employee,
             order_columns=order_columns,
             additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
         )
-        stats.append(stat_list)
+        stats.append(stat_dict)
 
     return {"stat": stats}
 
@@ -171,14 +201,14 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
     for row in result.all():
         project, dep_name, supervisor = row[0], row[1], row[2]
 
-        project_list = mapper.model_to_list(
+        project_dict = mapper.model_to_list(
             project, 
             exclude_columns, 
             order_columns, 
             additional_fields={'dep_name': dep_name, 'supervisor': supervisor}
         )
         
-        projects.append(project_list)
+        projects.append(project_dict)
 
     return {"project": projects}
 
@@ -191,11 +221,11 @@ async def get_department(db: AsyncSession = Depends(mapper.get_db_session)):
     )
     departments = result.scalars().all()
     order_columns = ['department_id', 'dep_name','dep_description']
-    department_list = [
+    departments_list = [
         mapper.model_to_list(department, order_columns=order_columns)
         for department in departments
     ]
-    return {"department": department_list}
+    return {"department": departments_list}
 
 
 @app.get('/api/address/')
@@ -206,11 +236,11 @@ async def get_address(db: AsyncSession = Depends(mapper.get_db_session)):
     )
     addresses = result.scalars().all()
     order_columns = ['address_id', 'company', 'house_number', 'postcode', 'city', 'country']
-    address_list = [
+    addresses_list = [
         mapper.model_to_list(address, order_columns=order_columns)
         for address in addresses
     ]
-    return {"address": address_list}
+    return {"address": addresses_list}
 
 
 @app.get('/api/type/')
@@ -221,11 +251,11 @@ async def get_type(db: AsyncSession = Depends(mapper.get_db_session)):
     )
     types = result.scalars().all()
     order_columns = ['type_id', 'type_name','type_description']
-    type_list = [
+    types_list = [
         mapper.model_to_list(type, order_columns=order_columns)
         for type in types
     ]
-    return {"type": type_list}
+    return {"type": types_list}
 
 
 @app.get('/api/education_degree/')
@@ -236,11 +266,11 @@ async def get_education_degree(db: AsyncSession = Depends(mapper.get_db_session)
     )
     edu_degrees = result.scalars().all()
     order_columns = ['education_id', 'education_name']
-    edu_degree_list = [
+    edu_degrees_list = [
         mapper.model_to_list(edu_degree, order_columns=order_columns)
         for edu_degree in edu_degrees
     ]
-    return {"education_degree": edu_degree_list}
+    return {"education_degree": edu_degrees_list}
 
 @app.get('/api/job/')
 async def get_job(db: AsyncSession = Depends(mapper.get_db_session)):
@@ -281,7 +311,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
     exp_levels = result.scalars().all()
     order_columns = ['experience_level_id', 'exp_lvl_description', 'years_of_experience']
     exp_level_list = [
-        mapper.model_to_list(exp_level, order_columns=order_columns)
+        mapper.model_to_dict(exp_level, order_columns=order_columns)
         for exp_level in exp_levels
     ]
     return {"experience_level": exp_level_list}
@@ -291,7 +321,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     try:
-        deletion_successful = await mapper.universal_delete(db, Employee, employee_id=employee_id)
+        deletion_successful = await universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
