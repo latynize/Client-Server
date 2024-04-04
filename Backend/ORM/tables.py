@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date, DoublePrecision, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DoublePrecision
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
