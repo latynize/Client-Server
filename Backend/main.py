@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import inspect
 from typing import List, Type, Any, Dict, Tuple
-from Backend.ORM.mapper import Mapper
-from Backend.API_Endpoints.helper import Helper
+from ORM.mapper import Mapper
+from helper import Helper
 
 # FastAPI Ordner umbennen - eher Persistenzlayer
 
@@ -20,13 +20,14 @@ origins = [
     "https://localhost:8000",
 ]
 
-app.add_middleware(
-    Type[CORSMiddleware],
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+# app.add_middleware(
+#    Type[CORSMiddleware],
+#    allow_origins=origins,
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+# )
 
 
 def create_pydantic_model_from_sqlalchemy(automap_class: Type, include_fields: list) -> Type[BaseModel]:
