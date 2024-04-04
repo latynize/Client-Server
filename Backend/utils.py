@@ -1,11 +1,10 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from mapper import Mapper
+from Backend.ORM.mapper import Mapper
 
-class Method:
+
+class Methods:
 
     async def universal_delete(model_instance, db: AsyncSession = Depends(Mapper.get_db_session), **conditions) -> None:
 
@@ -17,21 +16,21 @@ class Method:
         instances = results.scalars().all()
 
         if not instances:
-            return False 
+            return False
 
         for instance in instances:
             await db.delete(instance)
 
         await db.commit()
-        return True  
+        return True
 
     async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(Mapper.get_db_session)):
-            new_entry = model_instance(**data)
-            db.add(new_entry)
-            try:
-                await db.commit()
-                await db.refresh(new_entry)
-                return new_entry
-            except Exception as e:
-                await db.rollback()
-                raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
+        new_entry = model_instance(**data)
+        db.add(new_entry)
+        try:
+            await db.commit()
+            await db.refresh(new_entry)
+            return new_entry
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")

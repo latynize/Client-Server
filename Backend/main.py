@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import inspect
 from typing import List, Type, Any, Dict, Tuple
-from mapper import Mapper
-from method import Method
+from Backend.ORM.mapper import Mapper
+from utils import Methods
 
 # FastAPI Ordner umbennen - eher Persistenzlayer
 
@@ -21,7 +21,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -312,7 +312,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     try:
-        deletion_successful = await Method.universal_delete(Employee, db, employee_id=employee_id)
+        deletion_successful = await Methods.universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
