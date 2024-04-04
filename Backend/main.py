@@ -4,12 +4,9 @@ from pydantic import create_model, BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import inspect
-from typing import List, Type, Any, Dict, Tuple
+from typing import List
 from ORM.mapper import Mapper
 from helper import Helper
-
-# FastAPI Ordner umbennen - eher Persistenzlayer
-
 
 mapper = Mapper()
 app = FastAPI()
@@ -28,17 +25,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def create_pydantic_model_from_sqlalchemy(automap_class: Type, include_fields: list) -> Type[BaseModel]:
-    map = inspect(automap_class)
-    fields: Dict[str, Tuple[Type[Any], None]] = {}
-    for field_name in include_fields:
-        column = map.columns.get(field_name)
-        if column is not None:
-            python_type = column.type.python_type
-            fields[field_name] = (python_type, None if column.nullable else ...)
-    return create_model(automap_class.__name__ + "Pydantic", **fields)
 
 
 @app.on_event("startup")
