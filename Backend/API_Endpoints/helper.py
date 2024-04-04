@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from Backend.ORM.mapper import Mapper
 
 
-class Methods:
+class Helper:
 
     async def universal_delete(model_instance, db: AsyncSession = Depends(Mapper.get_db_session), **conditions) -> None:
 

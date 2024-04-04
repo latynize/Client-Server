@@ -6,7 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy import inspect
 from typing import List, Type, Any, Dict, Tuple
 from Backend.ORM.mapper import Mapper
-from utils import Methods
+from Backend.API_Endpoints.helper import Helper
 
 # FastAPI Ordner umbennen - eher Persistenzlayer
 
@@ -15,13 +15,14 @@ mapper = Mapper()
 app = FastAPI()
 
 origins = [
-    "https://cioban.de/",
+    "http://localhost",
     "http://localhost:8000",
+    "https://localhost:8000",
 ]
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
+    Type[CORSMiddleware],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -312,7 +313,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     try:
-        deletion_successful = await Methods.universal_delete(Employee, db, employee_id=employee_id)
+        deletion_successful = await Helper.universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
