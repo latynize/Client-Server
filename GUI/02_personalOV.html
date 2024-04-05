@@ -149,24 +149,27 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#personalTable').DataTable({
-                "paging": false,
-                "searching": false,
-                "info": false,
-                "columnDefs": [
-                    {
-                        "targets": 6,
-                        "render": function (data, type, row) {
-                            var date = moment(data);
-                            if (type === 'display') {
-                                return date.format('DD.MM.YYYY');
-                            }
-                            return date.format('YYYYMMDD');
-                        }
+ $(document).ready(function () {
+    $('#personalTable').DataTable({
+        "paging": false,
+        "searching": false,
+        "info": false,
+        "columnDefs": [
+            {
+                "targets": 6,
+                "render": function (data, type, row) {
+                    if (type === 'display' && data) {
+                        var date = new Date(data);
+                        var day = date.getDate().toString().padStart(2, '0');
+                        var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        var year = date.getFullYear();
+                        return day + '.' + month + '.' + year;
                     }
-                ]
-            });
+                    return data;
+                }
+            }
+        ]
+    });
 
             fetch("https://cioban.de/api/employee")
     .then(response => {
