@@ -115,21 +115,21 @@
   });
 
   fetch("https://cioban.de/api/type")
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-      let table = $('#typeTable').DataTable();
-      // Zugriff auf das Array von Objekten mit dem Schlüssel "type"
-      data.type.forEach((element, index) => {
-        table.row.add([
-          element.type_id,
-          element.type_name,
-          element.type_description
-        ]).draw();
-      });
-    })
-    .catch(error => console.log(error));
-});
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    let table = $('#typeTable').DataTable({
+      columns: [
+        { data: "type.type_id" },
+        { data: "type.type_name" },
+        { data: "type.type_description" }
+      ]
+    });
+    data.type.forEach((element, index) => {
+      table.row.add(element).draw();
+    });
+  })
+  .catch(error => console.log(error));
     </script>
 </body>
 
