@@ -4,6 +4,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import text
 
 
+
 class Mapper:
     def __init__(self):
         self.engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres", echo=True)

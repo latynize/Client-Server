@@ -1,12 +1,15 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import create_model, BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import List
-from ORM.mapper import Mapper
-from helper import Helper
+from sqlalchemy import inspect
+from typing import List, Type, Any, Dict, Tuple
+from ORM.mapper import Mapper as mapper
+from helper import Helper as helper
+import ORM.tables as tables
 
-mapper = Mapper()
+mapper = mapper()
 app = FastAPI()
 
 origins = [
@@ -15,14 +18,14 @@ origins = [
     "https://cioban.de",
 ]
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.on_event("startup")
 async def startup_event():
@@ -34,7 +37,7 @@ async def shutdown_event():
     await mapper.engine.dispose()
 
 
-@app.get('/api/employee/')
+@app.get('/api/personal/')
 async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
@@ -297,7 +300,7 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     try:
-        deletion_successful = await Helper.universal_delete(Employee, db, employee_id=employee_id)
+        deletion_successful = await helper.universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
@@ -307,11 +310,9 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.ge
 
 
 @app.post("/api/employee/")
-async def create_employees(db: AsyncSession = Depends(mapper.get_db_session)):
+async def create_employees(employee_data: List[tables.EmployeeCreate], db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
-    EmployeeCreate = Helper.create_pydantic_model_from_sqlalchemy(Employee, ['first_name', 'last_name', 'email',
-                                                                             'position_id'])
-    employee_data = List[EmployeeCreate]
+
     for data in employee_data:
         new_employee = Employee(**data.dict())
         db.add(new_employee)
