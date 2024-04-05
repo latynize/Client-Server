@@ -21,7 +21,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,7 +37,7 @@ async def shutdown_event():
     await mapper.engine.dispose()
 
 
-@app.get('/api/personal/')
+@app.get('/api/employee/')
 async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
