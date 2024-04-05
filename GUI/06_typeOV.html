@@ -121,8 +121,6 @@
       let table = $('#typeTable').DataTable();
       // Zugriff auf das Array von Objekten mit dem Schlüssel "type"
       data.type.forEach((element, index) => {
-        console.log(element);
-        console.log(element.type_id);
         table.row.add([
           element.type_id,
           element.type_name,
