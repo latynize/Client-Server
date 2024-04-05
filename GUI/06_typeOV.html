@@ -120,6 +120,8 @@
           console.log(data);
           let table = $('#typeTable').DataTable();
           data.forEach((element, index) => {
+            console.log(element);
+            console.log(element.type_ID);
             table.row.add([
               element.type_ID,
               element.type_name,
