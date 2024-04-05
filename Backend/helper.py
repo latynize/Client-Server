@@ -1,16 +1,15 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import inspect
-from pydantic import create_model, BaseModel
-from typing import Type, Any, Dict, Tuple
+from typing import Any, Dict
 from ORM.mapper import Mapper
 from ORM.tables import Employee, Department, ExperienceLevel, Type, Job, Project, Skill
 
 
 class Helper:
 
-    async def universal_delete(model_instance, db: AsyncSession = Depends(Mapper.get_db_session), **conditions) -> None:
+    @staticmethod
+    async def universal_delete(model_instance, db: AsyncSession = Depends(Mapper.get_db_session), **conditions) -> bool:
 
         query = select(model_instance)
         for attr, value in conditions.items():
@@ -28,6 +27,7 @@ class Helper:
         await db.commit()
         return True
 
+    @staticmethod
     async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(Mapper.get_db_session)):
         new_entry = model_instance(**data)
         db.add(new_entry)
@@ -38,7 +38,8 @@ class Helper:
         except Exception as e:
             await db.rollback()
             raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
-        
+
+    @staticmethod
     async def universal_update(entity_class, db: AsyncSession, entity_id: int, update_data: dict):
         try:
             entity = await db.get(entity_class, entity_id)
@@ -55,19 +56,19 @@ class Helper:
             await db.rollback()
             raise e
 
-def build_search_query(criteria: Dict[str, Any], session) -> Any:
+    @staticmethod
+    def build_search_query(criteria: Dict[str, Any], session) -> Any:
 
-    query = select(Employee)
+        query = select(Employee)
 
-    for key, value in criteria.items():
-        if key == 'department' and value:
-            query = query.join(Department).where(Department.dep_name == value)
-        elif key == 'job' and value:
-            query = query.join(Employee.job).where(Job.job_name == value)
-        elif key == 'experienceLevel' and value:
-            query = query.join(ExperienceLevel).where(ExperienceLevel.exp_lvl_description == value)
-        elif key == 'project' and value:
-            query = query.join(Employee.projects).where(Project.proj_name == value)
-        # Add more conditions as needed
+        for key, value in criteria.items():
+            if key == 'department' and value:
+                query = query.join(Department).where(Department.dep_name == value)
+            elif key == 'job' and value:
+                query = query.join(Employee.job).where(Job.job_name == value)
+            elif key == 'experienceLevel' and value:
+                query = query.join(ExperienceLevel).where(ExperienceLevel.exp_lvl_description == value)
+            elif key == 'project' and value:
+                query = query.join(Employee.projects).where(Project.proj_name == value)
 
-    return query
+        return query
