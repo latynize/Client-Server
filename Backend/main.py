@@ -221,7 +221,7 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
         'project_id': row.project_id,
         'project_name': row.project_name,
         'department_name': row.department_name,
-        'supervisor_last_name': row.supervisor_last_name,
+        'supervisor': row.supervisor_last_name,
         'proj_priority': row.proj_priority,
         'needed_fte': row.needed_fte,
         'current_fte': row.current_fte,
@@ -239,13 +239,9 @@ async def get_department(db: AsyncSession = Depends(mapper.get_db_session)):
     result = await db.execute(
         select(Department)
     )
-    departments = result.scalars().all()
-    order_columns = ['department_id', 'dep_name', 'dep_description']
-    department_list = [
-        mapper.model_to_list(department, order_columns=order_columns)
-        for department in departments
-    ]
-    return {"department": department_list}
+    departments = result.mappings().all()
+
+    return {"department": departments}
 
 
 @app.get('/api/address/')
@@ -254,13 +250,9 @@ async def get_address(db: AsyncSession = Depends(mapper.get_db_session)):
     result = await db.execute(
         select(Address)
     )
-    addresses = result.scalars().all()
-    order_columns = ['address_id', 'company', 'house_number', 'postcode', 'city', 'country']
-    address_list = [
-        mapper.model_to_list(address, order_columns=order_columns)
-        for address in addresses
-    ]
-    return {"address": address_list}
+    addresses = result.mappings().all()
+
+    return {"address": addresses}
 
 
 @app.get('/api/type/')
@@ -269,13 +261,9 @@ async def get_type(db: AsyncSession = Depends(mapper.get_db_session)):
     result = await db.execute(
         select(Type)
     )
-    types = result.scalars().all()
-    order_columns = ['type_id', 'type_name', 'type_description']
-    type_list = [
-        mapper.model_to_list(type, order_columns=order_columns)
-        for type in types
-    ]
-    return {"type": type_list}
+    types = result.mappings().all()
+
+    return {"type": types}
 
 
 @app.get('/api/education_degree/')
@@ -284,13 +272,9 @@ async def get_education_degree(db: AsyncSession = Depends(mapper.get_db_session)
     result = await db.execute(
         select(Education_degree)
     )
-    edu_degrees = result.scalars().all()
-    order_columns = ['education_id', 'education_name']
-    edu_degree_list = [
-        mapper.model_to_list(edu_degree, order_columns=order_columns)
-        for edu_degree in edu_degrees
-    ]
-    return {"education_degree": edu_degree_list}
+    edu_degrees = result.mappings().all()
+
+    return {"education_degree": edu_degrees}
 
 
 @app.get('/api/job/')
@@ -299,13 +283,9 @@ async def get_job(db: AsyncSession = Depends(mapper.get_db_session)):
     result = await db.execute(
         select(Job)
     )
-    jobs = result.scalars().all()
-    order_columns = ['job_id', 'job_name', 'job_description', 'degree']
-    job_list = [
-        mapper.model_to_list(job, order_columns=order_columns)
-        for job in jobs
-    ]
-    return {"job": job_list}
+    jobs = result.mappings().all()
+
+    return {"job": jobs}
 
 
 @app.get('/api/skill/')
@@ -314,13 +294,9 @@ async def get_skill(db: AsyncSession = Depends(mapper.get_db_session)):
     result = await db.execute(
         select(Skill)
     )
-    skills = result.scalars().all()
-    order_columns = ['skill_id', 'skill_name', 'skill_description']
-    skill_list = [
-        mapper.model_to_list(skill, order_columns=order_columns)
-        for skill in skills
-    ]
-    return {"skill": skill_list}
+    skills = result.mappings().all()
+
+    return {"skill": skills}
 
 
 @app.get('/api/experience_level/')
@@ -329,13 +305,9 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
     result = await db.execute(
         select(Experience_level)
     )
-    exp_levels = result.scalars().all()
-    order_columns = ['experience_level_id', 'exp_lvl_description', 'years_of_experience']
-    exp_level_list = [
-        mapper.model_to_list(exp_level, order_columns=order_columns)
-        for exp_level in exp_levels
-    ]
-    return {"experience_level": exp_level_list}
+    exp_levels = result.mappings().all()
+
+    return {"experience_level": exp_levels}
 
 
 @app.delete("/api/employee/{employee_id}/")
