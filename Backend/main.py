@@ -12,6 +12,8 @@ import ORM.tables as tables
 mapper = mapper()
 app = FastAPI()
 
+# CORS settings
+
 origins = [
     "http://localhost",
     "http://localhost:8000",
@@ -27,6 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Event handlers
+
 @app.on_event("startup")
 async def startup_event():
     await mapper.reflect_tables()
@@ -36,6 +40,9 @@ async def startup_event():
 async def shutdown_event():
     await mapper.engine.dispose()
 
+# API endpoints
+
+# CRUD operations for the Employee table
 
 @app.get('/api/employee/')
 async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
@@ -74,8 +81,48 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
 
     return {"personal": employees}
 
+@app.delete("/api/employee/{employee_id}/")
+async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
+    Employee = mapper.Base.classes.employee
+    try:
+        deletion_successful = await helper.universal_delete(Employee, db, employee_id=employee_id)
+        if deletion_successful:
+            return {"status": "success", "message": "Employee deleted successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Employee not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting employee: {e}")
 
 
+@app.post("/api/employee/")
+async def create_employees(employee_data: List[tables.Employee], db: AsyncSession = Depends(mapper.get_db_session)):
+    Employee = mapper.Base.classes.employee
+
+    for data in employee_data:
+        new_employee = Employee(**data.dict())
+        db.add(new_employee)
+    try:
+        await db.commit()
+        return {"message": "Employees created successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error creating employee: {e}")
+
+@app.put("/api/employee/{employee_id}/")  
+async def update_employee(employee_id: int, update_data: tables.Employee, db: AsyncSession = Depends(mapper.get_db_session)):
+    Employee = mapper.Base.classes.employee
+    update_data_dict = update_data.dict(exclude_none=True)
+
+    try:
+        update_successful = await helper.universal_update(Employee, db, employee_id, update_data_dict)
+        if update_successful:
+            return {"status": "success", "message": "Employee updated successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Employee not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")
+    
+# Read Internal, External, Stat employees
 
 @app.get('/api/internal/')
 async def get_internal(db: AsyncSession = Depends(mapper.get_db_session)):
@@ -193,6 +240,7 @@ async def get_stat(db: AsyncSession = Depends(mapper.get_db_session)):
 
     return {"stat": stats}
 
+# CRUD operations for the Project table
 
 @app.get('/api/project/')
 async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
@@ -231,7 +279,47 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
 
     return {"project": projects}
 
+@app.delete("/api/project/{project_id}/")
+async def delete_project(project_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
+    Project = mapper.Base.classes.project
+    try:
+        deletion_successful = await helper.universal_delete(Project, db, project_id=project_id)
+        if deletion_successful:
+            return {"status": "success", "message": "Project deleted successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting project: {e}")
+    
+@app.post("/api/project/")
+async def create_project(project_data: List[tables.Project], db: AsyncSession = Depends(mapper.get_db_session)):
+    Project = mapper.Base.classes.project
 
+    for data in project_data:
+        new_project = Project(**data.dict())
+        db.add(new_project)
+    try:
+        await db.commit()
+        return {"message": "Project created successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error creating project: {e}")
+
+@app.put("/api/project/{project_id}/")  
+async def update_project(projecte_id: int, update_data: tables.Project, db: AsyncSession = Depends(mapper.get_db_session)):
+    Project = mapper.Base.classes.employee
+    update_data_dict = update_data.dict(exclude_none=True)
+
+    try:
+        update_successful = await helper.universal_update(Project, db, projecte_id, update_data_dict)
+        if update_successful:
+            return {"status": "success", "message": "Project updated successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
+
+# Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 
 @app.get('/api/department/')
 async def get_department(db: AsyncSession = Depends(mapper.get_db_session)):
@@ -308,45 +396,3 @@ async def get_experience_level(db: AsyncSession = Depends(mapper.get_db_session)
     exp_levels = result.mappings().all()
 
     return {"experience_level": exp_levels}
-
-
-@app.delete("/api/employee/{employee_id}/")
-async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
-    Employee = mapper.Base.classes.employee
-    try:
-        deletion_successful = await helper.universal_delete(Employee, db, employee_id=employee_id)
-        if deletion_successful:
-            return {"status": "success", "message": "Employee deleted successfully."}
-        else:
-            raise HTTPException(status_code=404, detail="Employee not found")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error deleting employee: {e}")
-
-
-@app.post("/api/employee/")
-async def create_employees(employee_data: List[tables.Employee], db: AsyncSession = Depends(mapper.get_db_session)):
-    Employee = mapper.Base.classes.employee
-
-    for data in employee_data:
-        new_employee = Employee(**data.dict())
-        db.add(new_employee)
-    try:
-        await db.commit()
-        return {"message": "Employees created successfully"}
-    except Exception as e:
-        await db.rollback()
-        raise HTTPException(status_code=400, detail=f"Error creating employee: {e}")
-
-@app.put("/api/employee/{employee_id}/")  
-async def update_employee(employee_id: int, update_data: tables.Employee, db: AsyncSession = Depends(mapper.get_db_session)):
-    Employee = mapper.Base.classes.employee
-    update_data_dict = update_data.dict(exclude_none=True)
-
-    try:
-        update_successful = await helper.universal_update(Employee, db, employee_id, update_data_dict)
-        if update_successful:
-            return {"status": "success", "message": "Employee updated successfully."}
-        else:
-            raise HTTPException(status_code=404, detail="Employee not found")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")

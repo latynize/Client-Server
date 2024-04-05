@@ -76,6 +76,15 @@ class DepartmentBase(BaseModel):
     dep_name: str
     dep_description: str
 
+class SearchCriteria(BaseModel):
+    department: Optional[str] = None
+    job: Optional[str] = None
+    experienceLevel: Optional[str] = None
+    project: Optional[str] = None
+    personal: Optional[str] = None
+    skill: Optional[str] = None
+    fte: Optional[str] = None
+
 class Job(JobBase):
     pass
 
