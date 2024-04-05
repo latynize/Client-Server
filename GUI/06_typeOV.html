@@ -106,31 +106,31 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>  
   <script>        
-  $(document).ready(function () {
-      // DataTable initialization
-      $('#typeTable').DataTable({
-        "paging": false, // Deaktiviere die Anzeige der Seitenzahl
-        "searching": false, // Deaktiviere die Suchfunktion
-        "info": false // Deaktiviere die Anzeige "Showing x to y of z entries"
-      });
+$(document).ready(function () {
+  // DataTable initialization
+  $('#typeTable').DataTable({
+    "paging": false, // Deaktiviere die Anzeige der Seitenzahl
+    "searching": false, // Deaktiviere die Suchfunktion
+    "info": false // Deaktiviere die Anzeige "Showing x to y of z entries"
+  });
 
-      fetch("http://localhost:8000/api/type")
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-          let table = $('#typeTable').DataTable();
-          data.forEach((element, index) => {
-            console.log(element);
-            console.log(element.type_ID);
-            table.row.add([
-              element.type_ID,
-              element.type_name,
-              element.type_description
-            ]).draw();
-          });
-        })
-        .catch(error => console.log(error));
-    });
+  fetch("http://localhost:8000/api/type")
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      let table = $('#typeTable').DataTable();
+      Object.values(data).forEach((element, index) => { // Zugriff auf die Werte des empfangenen Objekts
+        console.log(element);
+        console.log(element.type_id);
+        table.row.add([
+          element.type_id,
+          element.type_name,
+          element.type_description
+        ]).draw();
+      });
+    })
+    .catch(error => console.log(error));
+});
     </script>
 </body>
 
