@@ -15,7 +15,6 @@ origins = [
     "https://cioban.de",
 ]
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,7 +34,7 @@ async def shutdown_event():
     await mapper.engine.dispose()
 
 
-@app.get('/api/personal/')
+@app.get('/api/employee/')
 async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
@@ -310,8 +309,8 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.ge
 @app.post("/api/employee/")
 async def create_employees(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
-    EmployeeCreate = create_pydantic_model_from_sqlalchemy(Employee, ['first_name', 'last_name', 'email',
-                                                                      'position_id'])  # Adjust fields as necessary
+    EmployeeCreate = Helper.create_pydantic_model_from_sqlalchemy(Employee, ['first_name', 'last_name', 'email',
+                                                                             'position_id'])
     employee_data = List[EmployeeCreate]
     for data in employee_data:
         new_employee = Employee(**data.dict())
