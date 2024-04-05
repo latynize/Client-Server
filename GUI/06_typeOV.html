@@ -107,28 +107,29 @@
   <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>  
   <script>        
   $(document).ready(function () {
-      // DataTable initialization
-      $('#typeTable').DataTable({
-        "paging": false, // Deaktiviere die Anzeige der Seitenzahl
-        "searching": false, // Deaktiviere die Suchfunktion
-        "info": false // Deaktiviere die Anzeige "Showing x to y of z entries"
-      });
+  // DataTable initialization
+  $('#typeTable').DataTable({
+    "paging": false, // Deaktiviere die Anzeige der Seitenzahl
+    "searching": false, // Deaktiviere die Suchfunktion
+    "info": false // Deaktiviere die Anzeige "Showing x to y of z entries"
+  });
 
-      fetch("http://localhost:8000/api/type")
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-          let table = $('#typeTable').DataTable();
-          data.forEach((element, index) => {
-            table.row.add([
-              element.type_ID,
-              element.type_name,
-              element.type_description
-            ]).draw();
-          });
-        })
-        .catch(error => console.log(error));
-    });
+  fetch("http://localhost:8000/api/type")
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      let table = $('#typeTable').DataTable();
+      // Zugriff auf das Array von Objekten mit dem Schlüssel "type"
+      data.type.forEach((element, index) => {
+        table.row.add([
+          element.type_id,
+          element.type_name,
+          element.type_description
+        ]).draw();
+      });
+    })
+    .catch(error => console.log(error));
+});
     </script>
 </body>
 
