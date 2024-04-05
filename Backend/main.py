@@ -54,7 +54,7 @@ async def search(criteria: tables.SearchCriteria, db: AsyncSession = Depends(map
 # CRUD operations for the Employee table
 
 @app.get('/api/employee/')
-async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
+async def get_employee(db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
     Exp_Level = mapper.Base.classes.experience_level
     Type = mapper.Base.classes.type
@@ -88,7 +88,7 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
         'type_name': row.type_name
     } for row in result.mappings().all()] 
 
-    return {"personal": employees}
+    return {"employee": employees}
 
 @app.delete("/api/employee/{employee_id}/")
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.get_db_session)):
