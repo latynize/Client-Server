@@ -148,49 +148,58 @@
     <script src="/assets/js/script.min.js?h=42e12609a61a066a00adf585de460324"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-<script>        
-    $(document).ready(function() {
-    $('#personalTable').DataTable({
-        "paging": false,
-        "searching": false,
-        "info": false,
-        "columnDefs": [
-            {
-                "targets": 6,
-                "render": function ( data, type, row ) {
-                    var date = moment(data);
-                    if (type === 'display') {
-                        return date.format('DD.MM.YYYY');
+    <script>
+        $(document).ready(function () {
+            $('#personalTable').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+                "columnDefs": [
+                    {
+                        "targets": 6,
+                        "render": function (data, type, row) {
+                            var date = moment(data);
+                            if (type === 'display') {
+                                return date.format('DD.MM.YYYY');
+                            }
+                            return date.format('YYYYMMDD');
+                        }
                     }
-                    return date.format('YYYYMMDD');
-                }
-            }
-        ]
-    });
-    
-    fetch("https://cioban.de/api/employee")
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            let table = $('#personalTable').DataTable();
-            data.personal.forEach(element => {
-                let entryDate = element.entry_date; // Keine Formatierung hier
-                table.row.add([
-                    element.employee_ID,
-                    element.first_name,
-                    element.last_name,
-                    element.free_fte,
-                    element.e_mail,
-                    element.phone_number,
-                    entryDate,
-                    element.exp_lvl_description,
-                    element.type_name,
-                ]).draw();
+                ]
             });
-        })
-        .catch(error => console.log(error));
-});
-</script>
+
+            fetch("https://cioban.de/api/employee")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data || !data.personal || !Array.isArray(data.personal)) {
+            throw new Error('Unexpected data format');
+        }
+
+        console.log(data);
+
+        let table = $('#personalTable').DataTable();
+
+        data.personal.forEach(element => {
+            table.row.add([
+                element.employee_ID,
+                element.first_name,
+                element.last_name,
+                element.free_fte,
+                element.e_mail,
+                element.phone_number,
+                element.entry_date, 
+                element.exp_lvl_description,
+                element.type_name,
+            ]).draw();
+        });
+    })
+    .catch(error => console.error('Error fetching data:', error));
+    </script>
 </body>
 
 </html>
