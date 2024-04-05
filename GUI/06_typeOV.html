@@ -115,23 +115,30 @@
   });
 
   fetch("https://cioban.de/api/type")
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    let table = $('#typeTable').DataTable({
-      columns: [
-        { data: "type.type_id" },
-        { data: "type.type_name" },
-        { data: "type.type_description" }
-      ]
-    });
-    data.type.forEach((element, index) => {
-      table.row.add(element).draw();
-    });
-  })
-  .catch(error => console.log(error));
-});
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data || !data.type || !Array.isArray(data.type)) {
+            throw new Error('Unexpected data format');
+        }
 
+        console.log(data);
+
+        let table = $('#typeTable').DataTable();
+
+        data.type.forEach(element => {
+            table.row.add([
+                element.type.type_id,
+                element.type.type_name,
+                element.type.type_description
+            ]).draw();
+        });
+    })
+    .catch(error => console.error('Error fetching data:', error));
     </script>
 </body>
 
