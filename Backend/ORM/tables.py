@@ -76,42 +76,51 @@ class DepartmentBase(BaseModel):
     dep_name: str
     dep_description: str
 
-class JobCreate(JobBase):
+class SearchCriteria(BaseModel):
+    department: Optional[str] = None
+    job: Optional[str] = None
+    experienceLevel: Optional[str] = None
+    project: Optional[str] = None
+    personal: Optional[str] = None
+    skill: Optional[str] = None
+    fte: Optional[str] = None
+
+class Job(JobBase):
     pass
 
-class SkillCreate(SkillBase):    
+class Skill(SkillBase):    
     pass
 
-class EducationDegreeCreate(EducationDegreeBase):
+class EducationDegree(EducationDegreeBase):
     pass
 
-class EmployeeCreate(EmployeeBase):
+class Employee(EmployeeBase):
     pass
 
-class TypeCreate(TypeBase):
+class Type(TypeBase):
     pass
 
-class InternalCreate(InternalBase):
+class Internal(InternalBase):
     pass
 
-class ExternalCreate(ExternalBase):
+class External(ExternalBase):
     pass
 
-class StatCreate(StatBase):
+class Stat(StatBase):
     pass
 
-class AddressCreate(AddressBase):
+class Address(AddressBase):
     pass
 
-class ExperienceLevelCreate(ExperienceLevelBase):
+class ExperienceLevel(ExperienceLevelBase):
     pass
 
-class TeamCreate(TeamBase):
+class Team(TeamBase):
     pass
 
-class ProjectCreate(ProjectBase):
+class Project(ProjectBase):
     pass
 
-class DepartmentCreate(DepartmentBase):
+class Department(DepartmentBase):
     pass
 
