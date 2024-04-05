@@ -114,21 +114,31 @@
         "info": false // Deaktiviere die Anzeige "Showing x to y of z entries"
       });
 
-      fetch("https://cioban.de:8000/api/type")
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-      let table = $('#typeTable').DataTable();
-      // Zugriff auf das Array von Objekten mit dem Schlüssel "type"
-      data.type.forEach((element, index) => {
-        table.row.add([
-          element.type_id,
-          element.type_name,
-          element.type_description
-        ]).draw();
-      });
+      fetch("https://cioban.de/api/type")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
     })
-    .catch(error => console.log(error));
+    .then(data => {
+        if (!data || !data.type || !Array.isArray(data.type)) {
+            throw new Error('Unexpected data format');
+        }
+
+        console.log(data);
+
+        let table = $('#typeTable').DataTable();
+
+        data.type.forEach(element => {
+            table.row.add([
+                element.type.type_id,
+                element.type.type_name,
+                element.type.type_description
+            ]).draw();
+        });
+    })
+    .catch(error => console.error('Error fetching data:', error));
 });
     </script>
 </body>
