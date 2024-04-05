@@ -163,12 +163,12 @@
         ]
     });
     
-    fetch("http://localhost:8000/api/personal")
+    fetch("https://cioban.de:8000/api/personal")
         .then(response => response.json())
         .then(data => {
             console.log(data);
             let table = $('#personalTable').DataTable();
-            data.forEach(element => {
+            data.personal.forEach(element => {
                 let entryDate = element.entry_date; // Keine Formatierung hier
                 table.row.add([
                     element.employee_ID,

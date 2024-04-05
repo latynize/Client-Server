@@ -114,12 +114,12 @@
               "info": false
           });
 
-          fetch("http://localhost:8000/api/job")
+          fetch("https://cioban.de:8000/api/job")
               .then(response => response.json())
               .then(data => {
                   console.log(data);
                   let table = $('#jobTable').DataTable();
-                  data.forEach((element, index) => {
+                  data.job.forEach((element, index) => {
                       table.row.add([
                           element.job_ID,
                           element.job_name,

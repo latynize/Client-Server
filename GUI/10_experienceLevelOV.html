@@ -115,12 +115,12 @@
           });
 
           // Fetch und Datenverarbeitung hier
-          fetch("http://localhost:8000/api/experience_level")
+          fetch("https://cioban.de:8000/api/experience_level")
               .then(response => response.json())
               .then(data => {
                   console.log(data);
                   let table = $('#experienceLevelTable').DataTable();
-                  data.forEach((element, index) => {
+                  data.experience_level.forEach((element, index) => {
                       table.row.add([
                           element.experience_level_ID,
                           element.years_of_experience,
