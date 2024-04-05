@@ -44,25 +44,37 @@ async def get_personal(db: AsyncSession = Depends(mapper.get_db_session)):
     Type = mapper.Base.classes.type
 
     result = await db.execute(
-        select(Employee, Exp_Level.exp_lvl_description, Type.type_name)
+        select(
+            Employee.employee_id, 
+            Employee.first_name, 
+            Employee.last_name, 
+            Employee.free_fte, 
+            Employee.e_mail, 
+            Employee.phone_number, 
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description, 
+            Type.type_name
+        )
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
+    db.expire_all()
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number', 'entry_date',
-                     'exp_lvl_description', 'type_name']
-
-    employees = []
-    for row in result.all():
-        employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        employee_list = mapper.model_to_list(
-            employee,
-            order_columns=order_columns,
-            additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
-        )
-        employees.append(employee_list)
+    employees = [{
+        'employee_id': row.employee_id, 
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()] 
 
     return {"personal": employees}
+
+
 
 
 @app.get('/api/internal/')
@@ -72,24 +84,34 @@ async def get_internal(db: AsyncSession = Depends(mapper.get_db_session)):
     Type = mapper.Base.classes.type
 
     result = await db.execute(
-        select(Employee, Exp_Level.exp_lvl_description, Type.type_name)
+        select(
+            Employee.employee_id, 
+            Employee.first_name, 
+            Employee.last_name, 
+            Employee.free_fte, 
+            Employee.e_mail, 
+            Employee.phone_number, 
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description, 
+            Type.type_name
+        )
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 1)
     )
+    db.expire_all()
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number',
-                     'exp_lvl_description', 'type_name']
-
-    internals = []
-    for row in result.all():
-        employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        internal_list = mapper.model_to_list(
-            employee,
-            order_columns=order_columns,
-            additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
-        )
-        internals.append(internal_list)
+    internals = [{
+        'employee_id': row.employee_id, 
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()] 
 
     return {"internal": internals}
 
@@ -101,24 +123,34 @@ async def get_external(db: AsyncSession = Depends(mapper.get_db_session)):
     Type = mapper.Base.classes.type
 
     result = await db.execute(
-        select(Employee, Exp_Level.exp_lvl_description, Type.type_name)
+        select(
+            Employee.employee_id, 
+            Employee.first_name, 
+            Employee.last_name, 
+            Employee.free_fte, 
+            Employee.e_mail, 
+            Employee.phone_number, 
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description, 
+            Type.type_name
+        )
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 2)
     )
+    db.expire_all()
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number',
-                     'exp_lvl_description', 'type_name']
-
-    externals = []
-    for row in result.all():
-        employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        external_list = mapper.model_to_list(
-            employee,
-            order_columns=order_columns,
-            additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
-        )
-        externals.append(external_list)
+    externals = [{
+        'employee_id': row.employee_id, 
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()] 
 
     return {"external": externals}
 
@@ -130,24 +162,34 @@ async def get_stat(db: AsyncSession = Depends(mapper.get_db_session)):
     Type = mapper.Base.classes.type
 
     result = await db.execute(
-        select(Employee, Exp_Level.exp_lvl_description, Type.type_name)
+        select(
+            Employee.employee_id, 
+            Employee.first_name, 
+            Employee.last_name, 
+            Employee.free_fte, 
+            Employee.e_mail, 
+            Employee.phone_number, 
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description, 
+            Type.type_name
+        )
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 3)
     )
+    db.expire_all()
 
-    order_columns = ['employee_id', 'first_name', 'last_name', 'free_fte', 'e_mail', 'phone_number',
-                     'exp_lvl_description', 'type_name']
-
-    stats = []
-    for row in result.all():
-        employee, exp_lvl_description, type_name = row[0], row[1], row[2]
-        stat_list = mapper.model_to_list(
-            employee,
-            order_columns=order_columns,
-            additional_fields={'exp_lvl_description': exp_lvl_description, 'type_name': type_name}
-        )
-        stats.append(stat_list)
+    stats = [{
+        'employee_id': row.employee_id, 
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()] 
 
     return {"stat": stats}
 
@@ -160,35 +202,35 @@ async def get_project(db: AsyncSession = Depends(mapper.get_db_session)):
 
     result = await db.execute(
         select(
-            Project,
-            Department.dep_name,
-            Employee.last_name.label('supervisor')
+            Project.project_id,
+            Project.proj_name.label('project_name'),
+            Department.dep_name.label('department_name'),
+            Employee.last_name.label('supervisor_last_name'),
+            Project.proj_priority,
+            Project.needed_fte,
+            Project.current_fte,
+            Project.start_date,
+            Project.end_date
         )
         .join(Department, Project.department_id == Department.department_id)
         .join(Employee, Project.proj_manager == Employee.employee_id)
     )
+    db.expire_all()
 
-    order_columns = [
-        'project_id', 'proj_name', 'dep_name', 'proj_priority',
-        'supervisor', 'needed_fte', 'current_fte', 'start_date', 'end_date'
-    ]
-
-    exclude_columns = ['department_id', 'proj_manager']
-
-    projects = []
-    for row in result.all():
-        project, dep_name, supervisor = row[0], row[1], row[2]
-
-        project_list = mapper.model_to_list(
-            project,
-            exclude_columns,
-            order_columns,
-            additional_fields={'dep_name': dep_name, 'supervisor': supervisor}
-        )
-
-        projects.append(project_list)
+    projects = [{
+        'project_id': row.project_id,
+        'project_name': row.project_name,
+        'department_name': row.department_name,
+        'supervisor_last_name': row.supervisor_last_name,
+        'proj_priority': row.proj_priority,
+        'needed_fte': row.needed_fte,
+        'current_fte': row.current_fte,
+        'start_date': row.start_date.isoformat() if row.start_date else None,
+        'end_date': row.end_date.isoformat() if row.end_date else None
+    } for row in result.mappings().all()]
 
     return {"project": projects}
+
 
 
 @app.get('/api/department/')
@@ -310,7 +352,7 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(mapper.ge
 
 
 @app.post("/api/employee/")
-async def create_employees(employee_data: List[tables.EmployeeCreate], db: AsyncSession = Depends(mapper.get_db_session)):
+async def create_employees(employee_data: List[tables.Employee], db: AsyncSession = Depends(mapper.get_db_session)):
     Employee = mapper.Base.classes.employee
 
     for data in employee_data:
@@ -322,3 +364,17 @@ async def create_employees(employee_data: List[tables.EmployeeCreate], db: Async
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating employee: {e}")
+
+@app.put("/api/employee/{employee_id}/")  
+async def update_employee(employee_id: int, update_data: tables.Employee, db: AsyncSession = Depends(mapper.get_db_session)):
+    Employee = mapper.Base.classes.employee
+    update_data_dict = update_data.dict(exclude_none=True)
+
+    try:
+        update_successful = await helper.universal_update(Employee, db, employee_id, update_data_dict)
+        if update_successful:
+            return {"status": "success", "message": "Employee updated successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Employee not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")

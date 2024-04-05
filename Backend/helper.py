@@ -38,12 +38,19 @@ class Helper:
             await db.rollback()
             raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
         
-    def create_pydantic_model_from_sqlalchemy(automap_class: Type, include_fields: list) -> Type[BaseModel]:
-        map = inspect(automap_class)
-        fields: Dict[str, Tuple[Type[Any], None]] = {}
-        for field_name in include_fields:
-            column = map.columns.get(field_name)
-            if column is not None:
-                python_type = column.type.python_type
-                fields[field_name] = (python_type, None if column.nullable else ...)
-        return create_model(automap_class.__name__ + "Pydantic", **fields)
+    async def universal_update(entity_class, db: AsyncSession, entity_id: int, update_data: dict):
+        try:
+            entity = await db.get(entity_class, entity_id)
+            if not entity:
+                return False 
+
+            for key, value in update_data.items():
+                if hasattr(entity, key):
+                    setattr(entity, key, value)
+            
+            await db.commit()
+            return True  
+        except Exception as e:
+            await db.rollback()
+            raise e
+
