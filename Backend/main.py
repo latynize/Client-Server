@@ -14,20 +14,20 @@ app = FastAPI()
 
 # CORS settings
 
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-    "https://cioban.de",
-]
+# origins = [
+#     "http://localhost",
+#     "http://localhost:8000",
+#     "https://cioban.de",
+# ]
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 # Event handlers
 
@@ -41,6 +41,15 @@ async def shutdown_event():
     await mapper.engine.dispose()
 
 # API endpoints
+
+# Search endpoint
+
+@app.post("/search/")
+async def search(criteria: tables.SearchCriteria, db: AsyncSession = Depends(mapper.get_db_session)):
+    query = helper.build_search_query(criteria.dict(exclude_none=True))
+    result = await db.execute(query)
+    data = result.mappings().fetchall()
+    return {"search": data}
 
 # CRUD operations for the Employee table
 
