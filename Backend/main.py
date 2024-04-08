@@ -10,25 +10,6 @@ import ORM.tables as tables
 Mapper = mapper()
 app = FastAPI()
 
-# CORS settings
-
-# origins = [
-#     "http://localhost",
-#     "http://localhost:8000",
-#     "https://cioban.de",
-# ]
-
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# Event handlers
-
 @app.on_event("startup")
 async def startup_event():
     await Mapper.reflect_tables()
@@ -338,6 +319,10 @@ async def update_project(project_id: int, update_data: tables.Project,
             raise HTTPException(status_code=404, detail="Project not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
+    
+# Read all Employees in project
+
+
 
 
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
