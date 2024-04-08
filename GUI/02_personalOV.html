@@ -7,7 +7,7 @@
     <title>Cioban</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="/assets/css/styles.min.css?h=12dcb8c580a2b938de3a50e03bbd8ba2">
+    <link rel="stylesheet" href="/assets/css/styles.min.css?h=1efc71b03721ab3a65e5f675122c74d0">
 </head>
 
 <body><!-- Start: Navbar With Button -->
@@ -65,11 +65,15 @@
                 <option value="erstellen">Erstellen</option>
                 <option value="löschen">Löschen</option>
             </select>
-            <div id="eingabefelder"></div><button class="btn text-truncate add-another-btn" style="color: black"
-                onclick="closePopup()">Schließen</button>
-            <button style="color: black" class="btn text-truncate add-another-btn"
-                onclick="applyChanges()">Anwenden</button>
+            <div id="eingabefelder"></div>
+            <div id="buttons">
+                <!--             <button class="btn text-truncate add-another-btn" style="color: black" onclick="closePopup()">Schließen</button> -->
+                <!--         <button style="color: black" class="btn text-truncate add-another-btn" onclick="applyChanges()">Anwenden</button> -->
+            </div>
+
+
             <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="success-message" class="success-message" style="display: none;"></div>
         </div>
     </div>
     <div class="orgTable" style="z-index: 1;">
@@ -145,10 +149,10 @@
         </div>
     </footer><!-- End: Footer Multi Column -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/script.min.js?h=cab28f65e1f2a8c513a9e794c2c42cea"></script>
+    <script src="/assets/js/script.min.js?h=3b03f2677b6cc24f239c1b0fa6554618"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script>
+<script>        
  $(document).ready(function () {
     $('#personalTable').DataTable({
         "paging": false,
