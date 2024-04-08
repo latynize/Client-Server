@@ -1,7 +1,9 @@
+from operator import and_, or_
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import List
+from sqlalchemy.orm import joinedload
+from typing import Any, Dict, List, Optional
 from ORM.mapper import Mapper as mapper
 from helper import Helper as helper
 import ORM.tables as tables
@@ -12,7 +14,6 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup_event():
     await Mapper.reflect_tables()
-    print(Mapper.Base.classes.keys())
 
 
 @app.on_event("shutdown")
@@ -24,13 +25,67 @@ async def shutdown_event():
 # Search endpoint
 
 @app.post("/api/search/")
-async def search(criteria: tables.SearchCriteria, db: AsyncSession = Depends(mapper.get_db_session)):
-    query = helper.build_search_query(criteria.dict(exclude_none=True))
-    result = await db.execute(query)
-    await db.commit() 
-    data = result.mappings().all()
+async def search_employees(filters: Dict[str, Any], db: AsyncSession = Depends(Mapper.get_db_session)) -> Any:
+    Employee = Mapper.Base.classes.employee
+    Job = Mapper.Base.classes.job
+    Type = Mapper.Base.classes.type
+    ExperienceLevel = Mapper.Base.classes.experience_level
+    Skill = Mapper.Base.classes.skill
+    Project = Mapper.Base.classes.project
+    Department = Mapper.Base.classes.department
+    ConnectionJobSkill = Mapper.Base.classes.connection_job_skill
+    ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
 
-    return {"data": data}
+    query = (select(Employee)
+            .join(Type)
+            .join(ExperienceLevel)
+            .join(Department, isouter=True)
+            .join(Project, isouter=True)
+            .join(Job, isouter=True)
+            .join(Skill, isouter=True)
+            .join(ConnectionJobSkill, isouter=True)
+            .join(ConnectionTeamEmployee, isouter=True)
+    )
+
+    conditions = []
+
+    if 'department' in filters:
+        conditions.append(Department.dep_name == filters['department'])
+    if 'type' in filters:
+         conditions.append(Type.type_name == filters['type'])
+    if 'job' in filters:
+        conditions.append(Job.job_name == filters['job'])
+    if 'experience_level' in filters:
+        conditions.append(ExperienceLevel.exp_lvl_description == filters['experience_level'])
+    if 'skill' in filters:
+        conditions.append(Skill.skill_name == filters['skill'])
+    if 'fte' in filters:
+        conditions.append(Employee.free_fte >= filters['fte'])
+    if 'project' in filters:
+        conditions.append(Project.proj_name == filters['project'])
+
+    if conditions:
+        query = query.filter(and_(*conditions))
+
+    result = await db.execute(query)
+
+    db.expire_all()
+
+    employees = [{
+        'employee_id': row.employee_id,
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name,
+        'team_name': row.team_name
+    } for row in result.mappings().all()]
+
+    return {"employee": employees}
+    
 
 # search projects, read all employees in project
 
@@ -39,8 +94,9 @@ async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_
     Project = Mapper.Base.classes.project
     Employee = Mapper.Base.classes.employee
     Team = Mapper.Base.classes.team
+    Exp_Level = Mapper.Base.classes.experience_level
+    Type = Mapper.Base.classes.type
     ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
-    p_id = project_id
 
     result = await db.execute(
         select(
@@ -50,13 +106,17 @@ async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_
             Employee.free_fte, 
             Employee.e_mail, 
             Employee.phone_number,
-            Employee.entry_date, 
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description,
+            Type.type_name, 
             Team.team_name
             )
             .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)
             .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)
             .join(Project, Team.project_id == Project.project_id)
-            .filter(Project.project_id == p_id.index)
+            .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+            .join(Type, Employee.type_id == Type.type_id)
+            .filter(Project.project_id == project_id)
     )
     db.expire_all()
 
@@ -69,7 +129,8 @@ async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_
         'phone_number': row.phone_number,
         'entry_date': row.entry_date,
         'exp_lvl_description': row.exp_lvl_description,
-        'type_name': row.type_name
+        'type_name': row.type_name,
+        'team_name': row.team_name
     } for row in result.mappings().all()]
 
     return {"employee": employees}

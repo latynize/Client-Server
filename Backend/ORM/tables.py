@@ -18,7 +18,6 @@ class EducationDegreeBase(BaseModel):
     education_name: str
 
 class EmployeeBase(BaseModel):
-    employee_id: int
     first_name: str
     last_name: str
     free_fte: float

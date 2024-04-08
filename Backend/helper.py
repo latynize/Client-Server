@@ -1,15 +1,14 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import Any, Dict
-from ORM.mapper import Mapper
-from ORM.tables import Employee, Department, ExperienceLevel, Job, Project, Skill
+from typing import Any, Dict, List
+from ORM.mapper import Mapper as mapper
 
 
 class Helper:
 
     @staticmethod
-    async def universal_delete(model_instance, db: AsyncSession = Depends(Mapper.get_db_session), **conditions) -> bool:
+    async def universal_delete(model_instance, db: AsyncSession = Depends(mapper.get_db_session), **conditions) -> bool:
 
         query = select(model_instance)
         for attr, value in conditions.items():
@@ -27,7 +26,7 @@ class Helper:
         await db.commit()
         return True
 
-    async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(Mapper.get_db_session)):
+    async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
         new_entry = model_instance(**data)
         db.add(new_entry)
         try:
@@ -53,20 +52,3 @@ class Helper:
         except Exception as e:
             await db.rollback()
             raise e
-
-def build_search_query(criteria: Dict[str, Any], session) -> Any:
-
-    query = select(Employee)
-
-    for key, value in criteria.items():
-        if key == 'department' and value:
-            query = query.join(Department).where(Department.dep_name == value)
-        elif key == 'job' and value:
-            query = query.join(Employee.job).where(Job.job_name == value)
-        elif key == 'experienceLevel' and value:
-            query = query.join(ExperienceLevel).where(ExperienceLevel.exp_lvl_description == value)
-        elif key == 'project' and value:
-            query = query.join(Employee.projects).where(Project.proj_name == value)
-        # Add more conditions as needed
-
-        return query
