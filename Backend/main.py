@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import inspect
-from typing import List, Type, Any, Dict, Tuple
+from typing import List
 from ORM.mapper import Mapper as mapper
 from helper import Helper as helper
 import ORM.tables as tables
@@ -13,12 +12,12 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup_event():
     await Mapper.reflect_tables()
+    print(Mapper.Base.classes.keys())
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await Mapper.engine.dispose()
-
 
 # API endpoints
 

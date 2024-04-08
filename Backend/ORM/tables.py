@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional, List
+from typing import Optional
 
 class JobBase(BaseModel):
     job_id: int

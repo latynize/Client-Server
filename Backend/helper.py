@@ -1,9 +1,7 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import inspect
-from pydantic import create_model, BaseModel
-from typing import Type, Any, Dict, Tuple
+from typing import Any, Dict
 from ORM.mapper import Mapper
 from ORM.tables import Employee, Department, ExperienceLevel, Job, Project, Skill
 

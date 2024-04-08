@@ -109,25 +109,25 @@ CREATE TABLE department (
 );
 
 CREATE TABLE connection_job_skill (
+	cjs SERIAL PRIMARY KEY,
     job_id INT,
     skill_id INT,
-    PRIMARY KEY (job_id, skill_id),
     FOREIGN KEY (job_id) REFERENCES job(job_id) ON DELETE CASCADE,
     FOREIGN KEY (skill_id) REFERENCES skill(skill_id) ON DELETE CASCADE
 );
 
 CREATE TABLE connection_team_employee (
+	cte_id SERIAL PRIMARY KEY,
     team_id INT,
     employee_id INT,
-    PRIMARY KEY (team_id, employee_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
 );
 
 CREATE TABLE connection_education_skill (
+	ces_id SERIAL PRIMARY KEY,
     education_id INT,
     skill_id INT,
-    PRIMARY KEY (education_id, skill_id),
     FOREIGN KEY (education_id) REFERENCES education_degree(education_id) ON DELETE CASCADE,
     FOREIGN KEY (skill_id) REFERENCES skill(skill_id) ON DELETE CASCADE
 );
