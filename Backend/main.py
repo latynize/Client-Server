@@ -1,33 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import create_model, BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import inspect
-from typing import List, Type, Any, Dict, Tuple
+from typing import List
 from ORM.mapper import Mapper as mapper
 from helper import Helper as helper
 import ORM.tables as tables
 
 mapper = mapper()
 app = FastAPI()
-
-# CORS settings
-
-# origins = [
-#     "http://localhost",
-#     "http://localhost:8000",
-#     "https://cioban.de",
-# ]
-
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
 
 # Event handlers
 
@@ -46,10 +26,12 @@ async def shutdown_event():
 
 @app.post("/search/")
 async def search(criteria: tables.SearchCriteria, db: AsyncSession = Depends(mapper.get_db_session)):
-    query = helper.build_search_query(criteria.dict(exclude_none=True))
+    query = await helper.build_search_query(criteria.dict(exclude_none=True), db)
     result = await db.execute(query)
-    data = result.mappings().fetchall()
-    return {"search": data}
+    await db.commit() 
+    data = result.mappings().all()
+
+    return {"data": data}
 
 # CRUD operations for the Employee table
 
