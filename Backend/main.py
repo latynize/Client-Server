@@ -7,7 +7,7 @@ from ORM.mapper import Mapper as mapper
 from helper import Helper as helper
 import ORM.tables as tables
 
-Mapper = Mapper()
+Mapper = mapper()
 app = FastAPI()
 
 # CORS settings
@@ -97,7 +97,7 @@ async def get_employee(db: AsyncSession = Depends(Mapper.get_db_session)):
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
     Employee = Mapper.Base.classes.employee
     try:
-        deletion_successful = await Helper.universal_delete(Employee, db, employee_id=employee_id)
+        deletion_successful = await helper.universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
@@ -128,7 +128,7 @@ async def update_employee(employee_id: int, update_data: tables.Employee,
     update_data_dict = update_data.dict(exclude_none=True)
 
     try:
-        update_successful = await Helper.universal_update(Employee, db, employee_id, update_data_dict)
+        update_successful = await helper.universal_update(Employee, db, employee_id, update_data_dict)
         if update_successful:
             return {"status": "success", "message": "Employee updated successfully."}
         else:
@@ -300,7 +300,7 @@ async def get_project(db: AsyncSession = Depends(Mapper.get_db_session)):
 async def delete_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
     Project = Mapper.Base.classes.project
     try:
-        deletion_successful = await Helper.universal_delete(Project, db, project_id=project_id)
+        deletion_successful = await helper.universal_delete(Project, db, project_id=project_id)
         if deletion_successful:
             return {"status": "success", "message": "Project deleted successfully."}
         else:
@@ -331,7 +331,7 @@ async def update_project(project_id: int, update_data: tables.Project,
     update_data_dict = update_data.dict(exclude_none=True)
 
     try:
-        update_successful = await Helper.universal_update(Project, db, project_id, update_data_dict)
+        update_successful = await helper.universal_update(Project, db, project_id, update_data_dict)
         if update_successful:
             return {"status": "success", "message": "Project updated successfully."}
         else:
