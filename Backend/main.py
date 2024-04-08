@@ -24,7 +24,7 @@ async def shutdown_event():
 
 # Search endpoint
 
-@app.post("/search/")
+@app.post("/api/search/")
 async def search(criteria: tables.SearchCriteria, db: AsyncSession = Depends(mapper.get_db_session)):
     query = helper.build_search_query(criteria.dict(exclude_none=True))
     result = await db.execute(query)
@@ -32,6 +32,49 @@ async def search(criteria: tables.SearchCriteria, db: AsyncSession = Depends(map
     data = result.mappings().all()
 
     return {"data": data}
+
+# search projects, read all employees in project
+
+@app.post("/api/project/employee")
+async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
+    Project = Mapper.Base.classes.project
+    Employee = Mapper.Base.classes.employee
+    Team = Mapper.Base.classes.team
+    ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
+    p_id = project_id
+
+    result = await db.execute(
+        select(
+            Employee.employee_id, 
+            Employee.first_name, 
+            Employee.last_name,
+            Employee.free_fte, 
+            Employee.e_mail, 
+            Employee.phone_number,
+            Employee.entry_date, 
+            Team.team_name
+            )
+            .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)
+            .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)
+            .join(Project, Team.project_id == Project.project_id)
+            .filter(Project.project_id == p_id.index)
+    )
+    db.expire_all()
+
+    employees = [{
+        'employee_id': row.employee_id,
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()]
+
+    return {"employee": employees}
+
 
 
 # CRUD operations for the Employee table
@@ -319,11 +362,6 @@ async def update_project(project_id: int, update_data: tables.Project,
             raise HTTPException(status_code=404, detail="Project not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
-    
-# Read all Employees in project
-
-
-
 
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 

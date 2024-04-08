@@ -3,18 +3,22 @@ from datetime import date
 from typing import Optional, List
 
 class JobBase(BaseModel):
+    job_id: int
     job_name: str
     job_description: str
     degree: str
 
 class SkillBase(BaseModel):
+    skill_id: int
     skill_name: str
     skill_description: str
 
 class EducationDegreeBase(BaseModel):
+    education_id: int
     education_name: str
 
 class EmployeeBase(BaseModel):
+    employee_id: int
     first_name: str
     last_name: str
     free_fte: float
@@ -26,6 +30,7 @@ class EmployeeBase(BaseModel):
     address_id: int
 
 class TypeBase(BaseModel):
+    type_id: int
     type_name: str
     type_description: str
 
@@ -46,6 +51,7 @@ class StatBase(BaseModel):
     supervisor_id: int
 
 class AddressBase(BaseModel):
+    address_id: int
     company: str
     street: str
     house_number: int
@@ -63,6 +69,7 @@ class TeamBase(BaseModel):
     team_purpose: str
 
 class ProjectBase(BaseModel):
+    project_id: int
     department_id: int
     proj_name: str
     proj_priority: str
