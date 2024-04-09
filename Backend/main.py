@@ -227,6 +227,8 @@ async def update_employee(employee_id: int, update_data: tables.Employee,
 @app.get('/api/employee/{employee_id}/')
 async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
     Employee = Mapper.Base.classes.employee
+    Exp_Level = Mapper.Base.classes.experience_level
+    Type = Mapper.Base.classes.type
 
     result = await db.execute(
         select(
@@ -237,10 +239,12 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper
             Employee.e_mail,
             Employee.phone_number,
             Employee.entry_date,
-            Employee.experience_level_id,
-            Employee.type_id,
+            Exp_Level.exp_lvl_description,
+            Type.type_name,
             Employee.address_id
         )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
         .where (Employee.employee_id == employee_id)
     )
     db.expire_all()
@@ -253,8 +257,8 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper
         'e_mail': row.e_mail,
         'phone_number': row.phone_number,
         'entry_date': row.entry_date,
-        'experience_level_id': row.experience_level_id,
-        'type_id': row.type_id,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name,
         'address_id': row.address_id
     } for row in result.mappings().all()]
 
