@@ -178,38 +178,6 @@
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
   <script>
     $(document).ready(function() {
-var priorityValues = {
-    'gering': 1,
-    'niedrig': 2,
-    'mittel': 3,
-    'hoch': 4
-};
-
-$('#projectTable').DataTable({
-    "paging": false,
-    "searching": false,
-    "info": false,
-    "columnDefs": [
-        {
-            "targets": [7, 8],
-            "render": function ( data, type, row ) {
-                if (type === 'display') {
-                    return formatDateForDisplay(data);
-                }
-                return formatDateForSorting(data);
-            }
-        },
-        {
-            "targets": 3,
-            "render": function ( data, type, row ) {
-                if (type === 'sort') {
-                    return priorityValues[data];
-                }
-                return data;
-            }
-        }
-    ]
-});
 
 function formatDateForDisplay(dateString) {
     var dateParts = dateString.split('-');
