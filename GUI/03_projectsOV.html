@@ -211,7 +211,7 @@ $('#projectTable').DataTable({
         }
     ]
 });
-fetch("https://cioban.de:8000/api/project")
+fetch("https://cioban.de/api/project")
     .then(response => response.json())
     .then(data => {
         console.log(data);
