@@ -193,11 +193,10 @@ $('#projectTable').DataTable({
         {
             "targets": [7, 8],
             "render": function ( data, type, row ) {
-                var date = moment(data);
                 if (type === 'display') {
-                    return date.format('DD.MM.YYYY');
+                    return formatDateForDisplay(data);
                 }
-                return date.format('YYYYMMDD');
+                return formatDateForSorting(data);
             }
         },
         {
@@ -211,6 +210,17 @@ $('#projectTable').DataTable({
         }
     ]
 });
+
+function formatDateForDisplay(dateString) {
+    var dateParts = dateString.split('-');
+    return dateParts[2] + '.' + dateParts[1] + '.' + dateParts[0];
+}
+
+function formatDateForSorting(dateString) {
+    var dateParts = dateString.split('-');
+    return dateParts[0] + dateParts[1] + dateParts[2];
+}
+
 fetch("https://cioban.de/api/project")
     .then(response => response.json())
     .then(data => {
