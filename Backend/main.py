@@ -26,7 +26,6 @@ async def shutdown_event():
 
 @app.post("/api/search/")
 async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db: AsyncSession = Depends(Mapper.get_db_session)):
- 
     Employee = Mapper.Base.classes.employee
     ExperienceLevel = Mapper.Base.classes.experience_level
     Type = Mapper.Base.classes.type
@@ -56,19 +55,19 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
         for criteria in data:
             criteria_dict = criteria.dict()
             for key, value in criteria_dict.items():
-                if key == "department":
+                if key == "department" and value is not None:
                     query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id).\
                         join(Team, ConnectionTeamEmployee.team_id == Team.team_id).\
                         join(Project, Team.project_id == Project.project_id).\
                         join(Department, Project.department_id == Department.department_id).\
                         filter(Department.dep_name == value)
-                elif key == "job":
+                elif key == "job" and value is not None:
                     query = query.join(Internal, isouter=True).\
                         join(Job, Internal.job_id == Job.job_id, isouter=True, full=True).\
                         filter(or_(Job.job_id == value, External.job_id == value))
-                elif key == "experienceLevel":
+                elif key == "experienceLevel" and value is not None:
                     query = query.filter(ExperienceLevel.exp_lvl_description == value)
-                elif key == "project":
+                elif key == "project" and value is not None:
                     ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
                     TeamAlias = aliased(Team)
                     ProjectAlias = aliased(Project)
@@ -76,13 +75,13 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
                         join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id).\
                         join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id).\
                         filter(ProjectAlias.proj_name == value)
-                elif key == "personal":
+                elif key == "personal" and value is not None:
                     query = query.filter(Type.type_name == value)
-                elif key == "skill":
+                elif key == "skill" and value is not None:
                     query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True).\
                         join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id, isouter=True).\
                         filter(Skill.skill_name == value)
-                elif key == "fte":
+                elif key == "fte" and value is not None:
                     query = query.filter(Employee.free_fte == value)
 
     result = await db.execute(query)
@@ -105,7 +104,7 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
 
 # search projects, read all employees in project
 
-@app.post("/api/project/employee/{project_id}/")
+@app.get("/api/project/employee/{project_id}/")
 async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
     Project = Mapper.Base.classes.project
     Employee = Mapper.Base.classes.employee
