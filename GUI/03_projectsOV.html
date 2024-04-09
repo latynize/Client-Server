@@ -178,16 +178,6 @@
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
   <script>
 
-function formatDateForDisplay(dateString) {
-    var dateParts = dateString.split('-');
-    return dateParts[2] + '.' + dateParts[1] + '.' + dateParts[0];
-}
-
-function formatDateForSorting(dateString) {
-    var dateParts = dateString.split('-');
-    return dateParts[0] + dateParts[1] + dateParts[2];
-}
-
 fetch("https://cioban.de/api/project")
     .then(response => response.json())
     .then(data => {
@@ -210,7 +200,7 @@ fetch("https://cioban.de/api/project")
         });
     })
     .catch(error => console.log(error));
-    
+
 
 </script>
 </body>
