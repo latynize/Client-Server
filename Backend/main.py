@@ -25,44 +25,56 @@ async def shutdown_event():
 # Search endpoint
 
 @app.post("/api/search/")
-async def search_employees(filters: Dict[str, Any], db: AsyncSession = Depends(Mapper.get_db_session)) -> Any:
+async def search_employees(search_data: List[tables.SearchCriteria], db: AsyncSession = Depends(Mapper.get_db_session)) -> Any:
     Employee = Mapper.Base.classes.employee
     Job = Mapper.Base.classes.job
     Type = Mapper.Base.classes.type
-    ExperienceLevel = Mapper.Base.classes.experience_level
+    Exp_Level = Mapper.Base.classes.experience_level
     Skill = Mapper.Base.classes.skill
     Project = Mapper.Base.classes.project
     Department = Mapper.Base.classes.department
     ConnectionJobSkill = Mapper.Base.classes.connection_job_skill
     ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
+    Team = Mapper.Base.classes.team
 
-    query = (select(Employee)
-            .join(Type)
-            .join(ExperienceLevel)
-            .join(Department, isouter=True)
-            .join(Project, isouter=True)
-            .join(Job, isouter=True)
-            .join(Skill, isouter=True)
-            .join(ConnectionJobSkill, isouter=True)
-            .join(ConnectionTeamEmployee, isouter=True)
+    query = (select(            
+            Employee.employee_id, 
+            Employee.first_name, 
+            Employee.last_name,
+            Employee.free_fte, 
+            Employee.e_mail, 
+            Employee.phone_number,
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description,
+            Type.type_name 
+            )
+        .join(Type, Employee.type_id == Type.type_id)  
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)  
+        .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)  
+        .join(Team, ConnectionTeamEmployee.team_id == Team.team_id) 
+        .join(Project, Team.project_id == Project.project_id) 
+        .join(Department, Project.department_id == Department.department_id)  
+        .join(ConnectionJobSkill, Skill.skill_id == ConnectionJobSkill.skill_id)  
+        .join(Job, ConnectionJobSkill.job_id == Job.job_id) 
+        .join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id)
     )
 
     conditions = []
 
-    if 'department' in filters:
-        conditions.append(Department.dep_name == filters['department'])
-    if 'type' in filters:
-         conditions.append(Type.type_name == filters['type'])
-    if 'job' in filters:
-        conditions.append(Job.job_name == filters['job'])
-    if 'experience_level' in filters:
-        conditions.append(ExperienceLevel.exp_lvl_description == filters['experience_level'])
-    if 'skill' in filters:
-        conditions.append(Skill.skill_name == filters['skill'])
-    if 'fte' in filters:
-        conditions.append(Employee.free_fte >= filters['fte'])
-    if 'project' in filters:
-        conditions.append(Project.proj_name == filters['project'])
+    if 'department' in search_data:
+        conditions.append(Department.dep_name == search_data['department'])
+    if 'type' in search_data:
+         conditions.append(Type.type_name == search_data['type'])
+    if 'job' in search_data:
+        conditions.append(Job.job_name == search_data['job'])
+    if 'experience_level' in search_data:
+        conditions.append(Exp_Level.exp_lvl_description == search_data['experience_level'])
+    if 'skill' in search_data:
+        conditions.append(Skill.skill_name == search_data['skill'])
+    if 'fte' in search_data:
+        conditions.append(Employee.free_fte >= search_data['fte'])
+    if 'project' in search_data:
+        conditions.append(Project.proj_name == search_data['project'])
 
     if conditions:
         query = query.filter(and_(*conditions))
