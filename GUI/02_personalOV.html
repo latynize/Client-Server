@@ -183,7 +183,7 @@
         return response.json();
     })
     .then(data => {
-        if (!data || !data.personal || !Array.isArray(data.personal)) {
+        if (!data || !data.employee || !Array.isArray(data.employee)) {
             throw new Error('Unexpected data format');
         }
 
