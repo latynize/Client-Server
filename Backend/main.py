@@ -25,63 +25,65 @@ async def shutdown_event():
 # Search endpoint
 
 @app.post("/api/search/")
-async def search_employees(search_data: List[tables.SearchCriteria], db: AsyncSession = Depends(Mapper.get_db_session)) -> Any:
+async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db: AsyncSession = Depends(Mapper.get_db_session)):
+ 
     Employee = Mapper.Base.classes.employee
-    Job = Mapper.Base.classes.job
+    ExperienceLevel = Mapper.Base.classes.experience_level
     Type = Mapper.Base.classes.type
-    Exp_Level = Mapper.Base.classes.experience_level
-    Skill = Mapper.Base.classes.skill
-    Project = Mapper.Base.classes.project
     Department = Mapper.Base.classes.department
-    ConnectionJobSkill = Mapper.Base.classes.connection_job_skill
-    ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
+    Project = Mapper.Base.classes.project
     Team = Mapper.Base.classes.team
+    Job = Mapper.Base.classes.job
+    Skill = Mapper.Base.classes.skill
+    ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
+    Internal = Mapper.Base.classes.internal
+    External = Mapper.Base.classes.external
+    ConnectionJobSkill = Mapper.Base.classes.connection_job_skill
 
-    query = (select(            
-            Employee.employee_id, 
-            Employee.first_name, 
-            Employee.last_name,
-            Employee.free_fte, 
-            Employee.e_mail, 
-            Employee.phone_number,
-            Employee.entry_date,
-            Exp_Level.exp_lvl_description,
-            Type.type_name 
-            )
-        .join(Type, Employee.type_id == Type.type_id)  
-        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)  
-        .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)  
-        .join(Team, ConnectionTeamEmployee.team_id == Team.team_id) 
-        .join(Project, Team.project_id == Project.project_id) 
-        .join(Department, Project.department_id == Department.department_id)  
-        .join(ConnectionJobSkill, Skill.skill_id == ConnectionJobSkill.skill_id)  
-        .join(Job, ConnectionJobSkill.job_id == Job.job_id) 
-        .join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id)
+    # Base query
+    query = (select(
+        Employee.employee_id, 
+        Employee.first_name, 
+        Employee.last_name, 
+        Employee.free_fte, 
+        Employee.e_mail, 
+        ExperienceLevel.exp_lvl_description, 
+        Type.type_name)
+        .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
     )
 
-    conditions = []
-
-    if 'department' in search_data:
-        conditions.append(Department.dep_name == search_data['department'])
-    if 'type' in search_data:
-         conditions.append(Type.type_name == search_data['type'])
-    if 'job' in search_data:
-        conditions.append(Job.job_name == search_data['job'])
-    if 'experience_level' in search_data:
-        conditions.append(Exp_Level.exp_lvl_description == search_data['experience_level'])
-    if 'skill' in search_data:
-        conditions.append(Skill.skill_name == search_data['skill'])
-    if 'fte' in search_data:
-        conditions.append(Employee.free_fte >= search_data['fte'])
-    if 'project' in search_data:
-        conditions.append(Project.proj_name == search_data['project'])
-
-    if conditions:
-        query = query.filter(and_(*conditions))
+    if data:
+        for criteria in data:
+            criteria_dict = criteria.dict()
+            for key, value in criteria_dict.items():
+                if key == "department":
+                    query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id).\
+                        join(Team, ConnectionTeamEmployee.team_id == Team.team_id).\
+                        join(Project, Team.project_id == Project.project_id).\
+                        join(Department, Project.department_id == Department.department_id).\
+                        filter(Department.dep_name == value)
+                elif key == "job":
+                    query = query.join(Internal, isouter=True).\
+                        join(Job, Internal.job_id == Job.job_id, isouter=True, full=True).\
+                        filter(or_(Job.job_id == value, External.job_id == value))
+                elif key == "experienceLevel":
+                    query = query.filter(ExperienceLevel.exp_lvl_description == value)
+                elif key == "project":
+                    query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id).\
+                        join(Team, ConnectionTeamEmployee.team_id == Team.team_id).\
+                        join(Project, Team.project_id == Project.project_id).\
+                        filter(Project.proj_name == value)
+                elif key == "personal":
+                    query = query.filter(Type.type_name == value)
+                elif key == "skill":
+                    query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True).\
+                        join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id, isouter=True).\
+                        filter(Skill.skill_name == value)
+                elif key == "fte":
+                    query = query.filter(Employee.free_fte == value)
 
     result = await db.execute(query)
-
-    db.expire_all()
 
     employees = [{
         'employee_id': row.employee_id,
@@ -232,6 +234,43 @@ async def update_employee(employee_id: int, update_data: tables.Employee,
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")
 
+@app.get('/api/employee/{employee_id}/')
+async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
+    Employee = Mapper.Base.classes.employee
+    Exp_Level = Mapper.Base.classes.experience_level
+    Type = Mapper.Base.classes.type
+
+    result = await db.execute(
+        select(
+            Employee.employee_id,
+            Employee.first_name,
+            Employee.last_name,
+            Employee.free_fte,
+            Employee.e_mail,
+            Employee.phone_number,
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description,
+            Type.type_name
+        )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .where(Employee.employee_id == employee_id)
+    )
+    db.expire_all()
+
+    employee = [{
+        'employee_id': row.employee_id,
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()]
+
+    return {"employee": employee}
 
 # Read Internal, External, Stat employees
 
