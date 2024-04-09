@@ -174,11 +174,7 @@
     </footer><!-- End: Footer Multi Column -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/script.min.js?h=967d7ef22ca135c77651403670e2a1b9"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-
     <script>
-document.addEventListener('DOMContentLoaded', function() {
     $(document).ready(function () {
         $('#projectTable').DataTable({
             "paging": false,
@@ -198,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             ]
         });
-
+    
         fetch("https://cioban.de/api/project")
             .then(response => {
                 if (!response.ok) {
@@ -210,11 +206,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!data || !data.project || !Array.isArray(data.project)) {
                     throw new Error('Unexpected data format');
                 }
-
+    
                 console.log(data);
-
+    
                 let table = $('#projectTable').DataTable();
-
+    
                 data.project.forEach(element => {
                     let startdate = element.start_date;
                     let enddate = element.end_date;
@@ -230,50 +226,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         enddate
                     ]).draw();
                 });
-
-                // Get the popup elements
-                var popupContainer = document.getElementById('popupContainer-project');
-                var popupContent = document.getElementById('popupContent-project');
-                var rowDataDiv = document.getElementById('rowData-project');
-                var closeBtn = document.getElementById('closeBtn-project');
-
-                // Get the number of columns
-                var numColumns = table.rows[0].cells.length;
-                var columnHeaders = [];
-                for (var i = 0; i < numColumns; i++) {
-                    columnHeaders.push(table.rows[0].cells[i].innerHTML);
-                }
-
-                // Style content
-                popupContent.style.padding = '40px';
-                popupContent.style.borderRadius = '20px';
-                popupContent.style.fontSize = '16px';
-                popupContent.style.border = '1px solid lightgrey';
-                popupContent.style.borderRadius = '5px';
-
-                // Attach click event listener to each row
-                var rows = table.getElementsByTagName('tr');
-                for (var i = 0; i < rows.length; i++) {
-                    rows[i].onclick = function() {
-                        // On single click, show popup with row data
-                        var rowData = '';
-                        for (var j = 0; j < numColumns; j++) {
-                            rowData += columnHeaders[j] + ': ' + this.cells[j].innerHTML + '<br>';
-                        }
-                        rowDataDiv.innerHTML = rowData;
-                        popupContainer.style.display = 'block';
-                    };
-                }
-
-                // Attach click event listener to close button
-                closeBtn.onclick = function() {
-                    // Hide the popup
-                    popupContainer.style.display = 'none';
-                };
             })
             .catch(error => console.error('Error fetching data:', error));
     });
-
+    
     function formatDate(dateString) {
         if (dateString) {
             var date = new Date(dateString);
@@ -284,8 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return dateString;
     }
-});
-</script>
+    </script>
 </body>
 
 </html>
