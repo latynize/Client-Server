@@ -2,7 +2,7 @@ from operator import and_, or_
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import aliased
 from typing import Any, Dict, List, Optional
 from ORM.mapper import Mapper as mapper
 from helper import Helper as helper
@@ -40,7 +40,6 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
     External = Mapper.Base.classes.external
     ConnectionJobSkill = Mapper.Base.classes.connection_job_skill
 
-    # Base query
     query = (select(
         Employee.employee_id, 
         Employee.first_name, 
@@ -70,10 +69,13 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
                 elif key == "experienceLevel":
                     query = query.filter(ExperienceLevel.exp_lvl_description == value)
                 elif key == "project":
-                    query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id).\
-                        join(Team, ConnectionTeamEmployee.team_id == Team.team_id).\
-                        join(Project, Team.project_id == Project.project_id).\
-                        filter(Project.proj_name == value)
+                    ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
+                    TeamAlias = aliased(Team)
+                    ProjectAlias = aliased(Project)
+                    query = query.join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id).\
+                        join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id).\
+                        join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id).\
+                        filter(ProjectAlias.proj_name == value)
                 elif key == "personal":
                     query = query.filter(Type.type_name == value)
                 elif key == "skill":
@@ -103,7 +105,7 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
 
 # search projects, read all employees in project
 
-@app.post("/api/project/employee")
+@app.post("/api/project/employee/{project_id}/")
 async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
     Project = Mapper.Base.classes.project
     Employee = Mapper.Base.classes.employee
@@ -430,6 +432,43 @@ async def get_project(db: AsyncSession = Depends(Mapper.get_db_session)):
 
     return {"project": projects}
 
+@app.get('/api/project/{project_id}/')
+async def get_project_by_id(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
+    Project = Mapper.Base.classes.project
+    Department = Mapper.Base.classes.department
+    Employee = Mapper.Base.classes.employee
+
+    result = await db.execute(
+        select(
+            Project.project_id,
+            Project.proj_name.label('project_name'),
+            Department.dep_name.label('department_name'),
+            Employee.last_name.label('supervisor_last_name'),
+            Project.proj_priority,
+            Project.needed_fte,
+            Project.current_fte,
+            Project.start_date,
+            Project.end_date
+        )
+        .join(Department, Project.department_id == Department.department_id)
+        .join(Employee, Project.proj_manager == Employee.employee_id)
+        .where(Project.project_id == project_id)
+    )
+    db.expire_all()
+
+    project = [{
+        'project_id': row.project_id,
+        'project_name': row.project_name,
+        'department_name': row.department_name,
+        'supervisor': row.supervisor_last_name,
+        'proj_priority': row.proj_priority,
+        'needed_fte': row.needed_fte,
+        'current_fte': row.current_fte,
+        'start_date': row.start_date.isoformat() if row.start_date else None,
+        'end_date': row.end_date.isoformat() if row.end_date else None
+    } for row in result.mappings().all()]
+
+    return {"project": project}
 
 @app.delete("/api/project/{project_id}/")
 async def delete_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
