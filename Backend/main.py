@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from ORM.mapper import Mapper as mapper
 from helper import Helper as helper
 import ORM.tables as tables
@@ -51,38 +51,52 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
         .join(Type, Employee.type_id == Type.type_id)
     )
 
+
     if data:
         for criteria in data:
             criteria_dict = criteria.dict()
-            for key, value in criteria_dict.items():
-                if key == "department" and value is not None:
-                    query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id).\
-                        join(Team, ConnectionTeamEmployee.team_id == Team.team_id).\
-                        join(Project, Team.project_id == Project.project_id).\
-                        join(Department, Project.department_id == Department.department_id).\
-                        filter(Department.dep_name == value)
-                elif key == "job" and value is not None:
-                    query = query.join(Internal, isouter=True).\
-                        join(Job, Internal.job_id == Job.job_id, isouter=True, full=True).\
-                        filter(or_(Job.job_id == value, External.job_id == value))
-                elif key == "experienceLevel" and value is not None:
-                    query = query.filter(ExperienceLevel.exp_lvl_description == value)
-                elif key == "project" and value is not None:
-                    ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
-                    TeamAlias = aliased(Team)
-                    ProjectAlias = aliased(Project)
-                    query = query.join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id).\
-                        join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id).\
-                        join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id).\
-                        filter(ProjectAlias.proj_name == value)
-                elif key == "personal" and value is not None:
-                    query = query.filter(Type.type_name == value)
-                elif key == "skill" and value is not None:
-                    query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True).\
-                        join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id, isouter=True).\
-                        filter(Skill.skill_name == value)
-                elif key == "fte" and value is not None:
-                    query = query.filter(Employee.free_fte == value)
+            
+            if "department" in criteria_dict and criteria_dict["department"] is not None:
+                value = criteria_dict["department"]
+                query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)\
+                            .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)\
+                            .join(Project, Team.project_id == Project.project_id)\
+                            .join(Department, Project.department_id == Department.department_id)\
+                            .filter(Department.dep_name == value)
+            
+            if "job" in criteria_dict and criteria_dict["job"] is not None:
+                value = criteria_dict["job"]
+                query = query.join(Internal, isouter=True)\
+                            .join(Job, Internal.job_id == Job.job_id, isouter=True, full=True)\
+                            .filter(or_(Job.job_id == value, External.job_id == value))
+            
+            if "experienceLevel" in criteria_dict and criteria_dict["experienceLevel"] is not None:
+                value = criteria_dict["experienceLevel"]
+                query = query.filter(ExperienceLevel.exp_lvl_description == value)
+            
+            if "project" in criteria_dict and criteria_dict["project"] is not None:
+                value = criteria_dict["project"]
+                ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
+                TeamAlias = aliased(Team)
+                ProjectAlias = aliased(Project)
+                query = query.join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id)\
+                            .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id)\
+                            .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id)\
+                            .filter(ProjectAlias.proj_name == value)
+            
+            if "personal" in criteria_dict and criteria_dict["personal"] is not None:
+                value = criteria_dict["personal"]
+                query = query.filter(Type.type_name == value)
+            
+            if "skill" in criteria_dict and criteria_dict["skill"] is not None:
+                value = criteria_dict["skill"]
+                query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True)\
+                            .join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id, isouter=True)\
+                            .filter(Skill.skill_name == value)
+            
+            if "fte" in criteria_dict and criteria_dict["fte"] is not None:
+                value = criteria_dict["fte"]
+                query = query.filter(Employee.free_fte == value)
 
     result = await db.execute(query)
 

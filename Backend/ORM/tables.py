@@ -68,7 +68,6 @@ class TeamBase(BaseModel):
     team_purpose: str
 
 class ProjectBase(BaseModel):
-    project_id: int
     department_id: int
     proj_name: str
     proj_priority: str
