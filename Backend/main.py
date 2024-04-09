@@ -241,6 +241,7 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper
             Employee.type_id,
             Employee.address_id
         )
+        .where (Employee.employee_id == employee_id)
     )
     db.expire_all()
 
