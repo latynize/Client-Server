@@ -2,6 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
+from sqlalchemy import or_
+from sqlalchemy.sql import func
 from typing import List, Optional
 from ORM.mapper import Mapper
 from helper import Helper as h
@@ -48,7 +50,8 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         Employee.entry_date,
         ExperienceLevel.exp_lvl_description, 
         Type.type_name,
-        Department.dep_name)
+        ExperienceLevel.exp_lvl_description
+        )
         .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
@@ -62,16 +65,21 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
                 .join(Project, Team.project_id == Project.project_id) \
                 .join(Department, Project.department_id == Department.department_id) \
                 .filter(Department.dep_name == criteria.department)
+
             if criteria.job is not None:
+                Job_Internal = aliased(Job)
+                Job_External = aliased(Job)
                 query = query \
-                .join(Internal, Employee.employee_id == Internal.employee_id) \
-                .join(Job, Internal.job_id == Job.job_id) \
-                .join(External, Employee.employee_id == External.employee_id) \
-                .join(Job, External.job_id == Job.job_id) \
-                .filter(Job.job_name == criteria.job)
+                    .join(Internal, Employee.employee_id == Internal.employee_id, isouter=True) \
+                    .join(Job_Internal, Internal.job_id == Job_Internal.job_id, isouter=True) \
+                    .join(External, Employee.employee_id == External.employee_id, isouter=True) \
+                    .join(Job_External, External.job_id == Job_External.job_id, isouter=True) \
+                    .filter(or_(
+                        Job_Internal.job_name == criteria.job,
+                        Job_External.job_name == criteria.job
+                    ))
             if criteria.experienceLevel is not None:
                 query = query \
-                    .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id) \
                     .filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
             if criteria.project is not None:
                 query = query \
@@ -106,8 +114,7 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         'phone_number': row.phone_number,
         'entry_date': row.entry_date,
         'exp_lvl_description': row.exp_lvl_description,
-        'type_name': row.type_name,
-        'dep_name': row.dep_name
+        'type_name': row.type_name
     } for row in result.mappings().all()]
 
     return {"employee": employees}
