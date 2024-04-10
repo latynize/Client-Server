@@ -113,7 +113,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
 
     return {"employee": employees}
     
-    
 
 # search projects, read all employees in project
 
@@ -162,7 +161,6 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
     } for row in result.mappings().all()]
 
     return {"employee": employees}
-
 
 
 # CRUD operations for the Employee table
