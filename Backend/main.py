@@ -68,7 +68,7 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
                 query = query.filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
             if criteria.project:
                 query = query.join(Project, isouter=True).filter(Project.proj_name == criteria.project)
-            if criteria.personal:
+            if criteria.type:
                 query = query.filter(Type.type_name == criteria.personal)
             if criteria.skill:
                 query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True).join(Skill, isouter=True).filter(Skill.skill_name == criteria.skill)
