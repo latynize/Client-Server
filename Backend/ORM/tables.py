@@ -83,7 +83,7 @@ class DepartmentBase(BaseModel):
 
 class SearchCriteria(BaseModel):
     department: Optional[str] = None
-    job: Optional[int] = None
+    job: Optional[str] = None
     experienceLevel: Optional[str] = None
     project: Optional[str] = None
     type: Optional[str] = None
