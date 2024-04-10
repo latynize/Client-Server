@@ -25,7 +25,7 @@ async def shutdown_event():
 # Search endpoint
 
 @app.post("/api/search/")
-async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(Mapper.get_db_session)):
+async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
     ExperienceLevel = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -50,7 +50,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
-
 
     if data:
         for criteria in data:
