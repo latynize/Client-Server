@@ -111,65 +111,75 @@
   <script src="/assets/js/script.min.js?h=5ee7a0051dae7f3bbbed7896a07eea4d"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-  <script>
-    $(document).ready(function() {
-var priorityValues = {
-    'gering': 1,
-    'niedrig': 2,
-    'mittel': 3,
-    'hoch': 4
-};
-
-$('#projectTable').DataTable({
-    "paging": false,
-    "searching": false,
-    "info": false,
-    "columnDefs": [
-        {
-            "targets": [7, 8],
-            "render": function ( data, type, row ) {
-                var date = moment(data);
-                if (type === 'display') {
-                    return date.format('DD.MM.YYYY');
-                }
-                return date.format('YYYYMMDD');
-            }
-        },
-        {
-            "targets": 3,
-            "render": function ( data, type, row ) {
-                if (type === 'sort') {
-                    return priorityValues[data];
-                }
-                return data;
-            }
-        }
-    ]
-});
-fetch("https://cioban.de:8000/api/project")
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        let table = $('#projectTable').DataTable();
-        data.project.forEach(element => {
-            let startdate = element.start_date;
-            let enddate = element.end_date;
-            table.row.add([
-                element.project_ID,
-                element.proj_name,
-                element.dep_name,
-                element.proj_priority,
-                element.last_name,
-                element.needed_fte,
-                element.current_fte,
-                startdate,
-                enddate
-            ]).draw();
+    <script>
+        $(document).ready(function() {
+            var priorityValues = {
+                'gering': 1,
+                'niedrig': 2,
+                'mittel': 3,
+                'hoch': 4
+            };
+    
+            $('#projectTable').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+                "columnDefs": [
+                    {
+                        "targets": [7, 8],
+                        "render": function ( data, type, row ) {
+                            if (type === 'display') {
+                                return formatDate(data);
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        "targets": 3,
+                        "render": function ( data, type, row ) {
+                            if (type === 'sort') {
+                                return priorityValues[data];
+                            }
+                            return data;
+                        }
+                    }
+                ]
+            });
+    
+            fetch("https://cioban.de/api/project")
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    let table = $('#projectTable').DataTable();
+                    data.project.forEach(element => {
+                        let startdate = formatDate(element.start_date);
+                        let enddate = formatDate(element.end_date);
+                        table.row.add([
+                            element.project_id,
+                            element.project_name,
+                            element.department_name,
+                            element.supervisor,
+                            element.proj_priority,
+                            element.needed_fte,
+                            element.current_fte,
+                            startdate,
+                            enddate
+                        ]).draw();
+                    });
+                })
+                .catch(error => console.log(error));
         });
-    })
-    .catch(error => console.log(error));
-});
-</script>
+    
+        // Funktion zur Formatierung des Datums (DD.MM.YYYY)
+        function formatDate(dateString) {
+            if (!dateString) return ""; // Überprüfen, ob das Datum vorhanden ist
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+    </script>
 </body>
 
 </html>
