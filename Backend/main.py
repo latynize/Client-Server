@@ -58,7 +58,10 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
                 DepartmentAlias = aliased(Department)
                 ProjectAlias = aliased(Project)
                 TeamAlias = aliased(Team)
-                query = query.join(TeamAlias, Employee.teams).join(ProjectAlias, TeamAlias.project).join(DepartmentAlias, ProjectAlias.department).filter(DepartmentAlias.dep_name == criteria.department)
+                query = query.join(TeamAlias, Employee.) \
+                .join(ProjectAlias, TeamAlias.project) \
+                .join(DepartmentAlias, ProjectAlias.department) \
+                .filter(DepartmentAlias.dep_name == criteria.department)
             if criteria.job:
                 query = query.join(Internal, isouter=True).filter(Internal.job_id == criteria.job)
             if criteria.experienceLevel:
