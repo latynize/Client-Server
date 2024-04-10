@@ -1,43 +1,42 @@
-from operator import and_, or_
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
 from typing import List, Optional
-from ORM.mapper import Mapper as mapper
-from helper import Helper as helper
-import ORM.tables as tables
+from ORM.mapper import Mapper
+from helper import Helper as h
+import ORM.tables as t
 
-Mapper = mapper()
+m = Mapper()
 app = FastAPI()
 
 @app.on_event("startup")
 async def startup_event():
-    await Mapper.reflect_tables()
+    await m.reflect_tables()
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await Mapper.engine.dispose()
+    await m.engine.dispose()
 
 # API endpoints
 
 # Search endpoint
 
 @app.post("/api/search/")
-async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
-    ExperienceLevel = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
-    Department = Mapper.Base.classes.department
-    Project = Mapper.Base.classes.project
-    Team = Mapper.Base.classes.team
-    Job = Mapper.Base.classes.job
-    Skill = Mapper.Base.classes.skill
-    ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
-    Internal = Mapper.Base.classes.internal
-    External = Mapper.Base.classes.external
-    ConnectionJobSkill = Mapper.Base.classes.connection_job_skill
+async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    ExperienceLevel = m.Base.classes.experience_level
+    Type = m.Base.classes.type
+    Department = m.Base.classes.department
+    Project = m.Base.classes.project
+    Team = m.Base.classes.team
+    Job = m.Base.classes.job
+    Skill = m.Base.classes.skill
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+    Internal = m.Base.classes.internal
+    External = m.Base.classes.external
+    ConnectionJobSkill = m.Base.classes.connection_job_skill
 
     query = (select(
         Employee.employee_id, 
@@ -51,52 +50,51 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
         .join(Type, Employee.type_id == Type.type_id)
     )
 
-
-    if data:
+    if data is not None:
         for criteria in data:
-            criteria_dict = criteria.dict()
-            
-            if "department" in criteria_dict and criteria_dict["department"] is not None:
-                value = criteria_dict["department"]
-                query = query.join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)\
-                            .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)\
-                            .join(Project, Team.project_id == Project.project_id)\
-                            .join(Department, Project.department_id == Department.department_id)\
-                            .filter(Department.dep_name == value)
-            
-            if "job" in criteria_dict and criteria_dict["job"] is not None:
-                value = criteria_dict["job"]
-                query = query.join(Internal, isouter=True)\
-                            .join(Job, Internal.job_id == Job.job_id, isouter=True, full=True)\
-                            .filter(or_(Job.job_id == value, External.job_id == value))
-            
-            if "experienceLevel" in criteria_dict and criteria_dict["experienceLevel"] is not None:
-                value = criteria_dict["experienceLevel"]
-                query = query.filter(ExperienceLevel.exp_lvl_description == value)
-            
-            if "project" in criteria_dict and criteria_dict["project"] is not None:
-                value = criteria_dict["project"]
-                ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
-                TeamAlias = aliased(Team)
+            if criteria.department is not None:
+                DepartmentAlias = aliased(Department)
                 ProjectAlias = aliased(Project)
-                query = query.join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id)\
-                            .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id)\
-                            .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id)\
-                            .filter(ProjectAlias.proj_name == value)
-            
-            if "personal" in criteria_dict and criteria_dict["personal"] is not None:
-                value = criteria_dict["personal"]
-                query = query.filter(Type.type_name == value)
-            
-            if "skill" in criteria_dict and criteria_dict["skill"] is not None:
-                value = criteria_dict["skill"]
-                query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True)\
-                            .join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id, isouter=True)\
-                            .filter(Skill.skill_name == value)
-            
-            if "fte" in criteria_dict and criteria_dict["fte"] is not None:
-                value = criteria_dict["fte"]
-                query = query.filter(Employee.free_fte == value)
+                TeamAlias = aliased(Team)
+                ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
+                query = query \
+                .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
+                .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
+                .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
+                .join(DepartmentAlias, ProjectAlias.department_id == DepartmentAlias.department_id) \
+                .filter(DepartmentAlias.dep_name == criteria.department)
+            if criteria.job is not None:
+                query = query \
+                .join(Internal, Employee.employee_id == Internal.employee_id) \
+                .join(Job, Internal.job_id == Job.job_id) \
+                .join(External, Employee.employee_id == External.employee_id) \
+                .join(Job, External.job_id == Job.job_id) \
+                .filter(Job.job_name == criteria.job)
+            if criteria.experienceLevel is not None:
+                query = query \
+                    .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id) \
+                    .filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
+            if criteria.project is not None:
+                query = query \
+                .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
+                .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
+                .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
+                .filter(Project.proj_name == criteria.project)
+            if criteria.type is not None:
+                query = query \
+                .join(Type, Employee.type_id == Type.type_id) \
+                .filter(Type.type_name == criteria.type)
+            if criteria.skill is not None:
+                query = query \
+                .join(Internal, Employee.employee_id == Internal.employee_id) \
+                .join(Job, Internal.job_id == Job.job_id) \
+                .join(External, Employee.employee_id == External.employee_id) \
+                .join(Job, External.job_id == Job.job_id) \
+                .join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id) \
+                .join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id) \
+                .filter(Skill.skill_name == criteria.skill)
+            if criteria.fte is not None:
+                query = query.filter(Employee.free_fte >= criteria.fte)
 
     result = await db.execute(query)
 
@@ -119,13 +117,13 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
 # search projects, read all employees in project
 
 @app.get("/api/project/employee/{project_id}/")
-async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
-    Project = Mapper.Base.classes.project
-    Employee = Mapper.Base.classes.employee
-    Team = Mapper.Base.classes.team
-    Exp_Level = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
-    ConnectionTeamEmployee = Mapper.Base.classes.connection_team_employee
+async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Employee = m.Base.classes.employee
+    Team = m.Base.classes.team
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     result = await db.execute(
         select(
@@ -165,14 +163,13 @@ async def search_project(project_id: int, db: AsyncSession = Depends(Mapper.get_
     return {"employee": employees}
 
 
-
 # CRUD operations for the Employee table
 
 @app.get('/api/employee/')
-async def get_employee(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
-    Exp_Level = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
+async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
 
     result = await db.execute(
         select(
@@ -207,10 +204,10 @@ async def get_employee(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.delete("/api/employee/{employee_id}/")
-async def delete_employee(employee_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
+async def delete_employee(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
     try:
-        deletion_successful = await helper.universal_delete(Employee, db, employee_id=employee_id)
+        deletion_successful = await h.universal_delete(Employee, db, employee_id=employee_id)
         if deletion_successful:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
@@ -220,8 +217,8 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(Mapper.ge
 
 
 @app.post("/api/employee/")
-async def create_employees(employee_data: List[tables.Employee], db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
+async def create_employees(employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
 
     for data in employee_data:
         new_employee = Employee(**data.dict())
@@ -235,13 +232,13 @@ async def create_employees(employee_data: List[tables.Employee], db: AsyncSessio
 
 
 @app.put("/api/employee/{employee_id}/")
-async def update_employee(employee_id: int, update_data: tables.Employee,
-                          db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
+async def update_employee(employee_id: int, update_data: t.Employee,
+                          db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
     update_data_dict = update_data.dict(exclude_none=True)
 
     try:
-        update_successful = await helper.universal_update(Employee, db, employee_id, update_data_dict)
+        update_successful = await h.universal_update(Employee, db, employee_id, update_data_dict)
         if update_successful:
             return {"status": "success", "message": "Employee updated successfully."}
         else:
@@ -249,11 +246,12 @@ async def update_employee(employee_id: int, update_data: tables.Employee,
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")
 
+
 @app.get('/api/employee/{employee_id}/')
-async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
-    Exp_Level = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
+async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
 
     result = await db.execute(
         select(
@@ -265,11 +263,12 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper
             Employee.phone_number,
             Employee.entry_date,
             Exp_Level.exp_lvl_description,
-            Type.type_name
+            Type.type_name,
+            Employee.address_id
         )
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
-        .where(Employee.employee_id == employee_id)
+        .where (Employee.employee_id == employee_id)
     )
     db.expire_all()
 
@@ -282,7 +281,8 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper
         'phone_number': row.phone_number,
         'entry_date': row.entry_date,
         'exp_lvl_description': row.exp_lvl_description,
-        'type_name': row.type_name
+        'type_name': row.type_name,
+        'address_id': row.address_id
     } for row in result.mappings().all()]
 
     return {"employee": employee}
@@ -290,10 +290,10 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(Mapper
 # Read Internal, External, Stat employees
 
 @app.get('/api/internal/')
-async def get_internal(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
-    Exp_Level = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
+async def get_internal(db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
 
     result = await db.execute(
         select(
@@ -329,10 +329,10 @@ async def get_internal(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/external/')
-async def get_external(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
-    Exp_Level = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
+async def get_external(db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
 
     result = await db.execute(
         select(
@@ -368,10 +368,10 @@ async def get_external(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/stat/')
-async def get_stat(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Employee = Mapper.Base.classes.employee
-    Exp_Level = Mapper.Base.classes.experience_level
-    Type = Mapper.Base.classes.type
+async def get_stat(db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
 
     result = await db.execute(
         select(
@@ -409,10 +409,10 @@ async def get_stat(db: AsyncSession = Depends(Mapper.get_db_session)):
 # CRUD operations for the Project table
 
 @app.get('/api/project/')
-async def get_project(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Project = Mapper.Base.classes.project
-    Department = Mapper.Base.classes.department
-    Employee = Mapper.Base.classes.employee
+async def get_project(db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Department = m.Base.classes.department
+    Employee = m.Base.classes.employee
 
     result = await db.execute(
         select(
@@ -445,11 +445,12 @@ async def get_project(db: AsyncSession = Depends(Mapper.get_db_session)):
 
     return {"project": projects}
 
+
 @app.get('/api/project/{project_id}/')
-async def get_project_by_id(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
-    Project = Mapper.Base.classes.project
-    Department = Mapper.Base.classes.department
-    Employee = Mapper.Base.classes.employee
+async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Department = m.Base.classes.department
+    Employee = m.Base.classes.employee
 
     result = await db.execute(
         select(
@@ -483,11 +484,12 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(Mapper.g
 
     return {"project": project}
 
+
 @app.delete("/api/project/{project_id}/")
-async def delete_project(project_id: int, db: AsyncSession = Depends(Mapper.get_db_session)):
-    Project = Mapper.Base.classes.project
+async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
     try:
-        deletion_successful = await helper.universal_delete(Project, db, project_id=project_id)
+        deletion_successful = await h.universal_delete(Project, db, project_id=project_id)
         if deletion_successful:
             return {"status": "success", "message": "Project deleted successfully."}
         else:
@@ -497,8 +499,8 @@ async def delete_project(project_id: int, db: AsyncSession = Depends(Mapper.get_
 
 
 @app.post("/api/project/")
-async def create_project(project_data: List[tables.Project], db: AsyncSession = Depends(Mapper.get_db_session)):
-    Project = Mapper.Base.classes.project
+async def create_project(project_data: List[t.Project], db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
 
     for data in project_data:
         new_project = Project(**data.dict())
@@ -512,13 +514,13 @@ async def create_project(project_data: List[tables.Project], db: AsyncSession = 
 
 
 @app.put("/api/project/{project_id}/")
-async def update_project(project_id: int, update_data: tables.Project,
-                         db: AsyncSession = Depends(Mapper.get_db_session)):
-    Project = Mapper.Base.classes.employee
+async def update_project(project_id: int, update_data: t.Project,
+                         db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.employee
     update_data_dict = update_data.dict(exclude_none=True)
 
     try:
-        update_successful = await helper.universal_update(Project, db, project_id, update_data_dict)
+        update_successful = await h.universal_update(Project, db, project_id, update_data_dict)
         if update_successful:
             return {"status": "success", "message": "Project updated successfully."}
         else:
@@ -529,8 +531,8 @@ async def update_project(project_id: int, update_data: tables.Project,
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 
 @app.get('/api/department/')
-async def get_department(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Department = Mapper.Base.classes.department
+async def get_department(db: AsyncSession = Depends(m.get_db_session)):
+    Department = m.Base.classes.department
     result = await db.execute(
         select(Department)
     )
@@ -540,8 +542,8 @@ async def get_department(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/address/')
-async def get_address(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Address = Mapper.Base.classes.address
+async def get_address(db: AsyncSession = Depends(m.get_db_session)):
+    Address = m.Base.classes.address
     result = await db.execute(
         select(Address)
     )
@@ -551,8 +553,8 @@ async def get_address(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/type/')
-async def get_type(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Type = Mapper.Base.classes.type
+async def get_type(db: AsyncSession = Depends(m.get_db_session)):
+    Type = m.Base.classes.type
     result = await db.execute(
         select(Type)
     )
@@ -562,8 +564,8 @@ async def get_type(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/education_degree/')
-async def get_education_degree(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Education_degree = Mapper.Base.classes.education_degree
+async def get_education_degree(db: AsyncSession = Depends(m.get_db_session)):
+    Education_degree = m.Base.classes.education_degree
     result = await db.execute(
         select(Education_degree)
     )
@@ -573,8 +575,8 @@ async def get_education_degree(db: AsyncSession = Depends(Mapper.get_db_session)
 
 
 @app.get('/api/job/')
-async def get_job(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Job = Mapper.Base.classes.job
+async def get_job(db: AsyncSession = Depends(m.get_db_session)):
+    Job = m.Base.classes.job
     result = await db.execute(
         select(Job)
     )
@@ -584,8 +586,8 @@ async def get_job(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/skill/')
-async def get_skill(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Skill = Mapper.Base.classes.skill
+async def get_skill(db: AsyncSession = Depends(m.get_db_session)):
+    Skill = m.Base.classes.skill
     result = await db.execute(
         select(Skill)
     )
@@ -595,8 +597,8 @@ async def get_skill(db: AsyncSession = Depends(Mapper.get_db_session)):
 
 
 @app.get('/api/experience_level/')
-async def get_experience_level(db: AsyncSession = Depends(Mapper.get_db_session)):
-    Experience_level = Mapper.Base.classes.experience_level
+async def get_experience_level(db: AsyncSession = Depends(m.get_db_session)):
+    Experience_level = m.Base.classes.experience_level
     result = await db.execute(
         select(Experience_level)
     )

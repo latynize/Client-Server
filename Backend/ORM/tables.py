@@ -86,7 +86,7 @@ class SearchCriteria(BaseModel):
     job: Optional[int] = None
     experienceLevel: Optional[str] = None
     project: Optional[str] = None
-    personal: Optional[str] = None
+    type: Optional[str] = None
     skill: Optional[str] = None
     fte: Optional[float] = None
 
