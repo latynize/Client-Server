@@ -1,1 +1,73 @@
-<!DOCTYPE html><html data-bs-theme="light" lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"><title>Cioban</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"><link rel="stylesheet" href="/assets/css/styles.min.css?h=1efc71b03721ab3a65e5f675122c74d0"></head><body><!-- Start: login form --><div class="container full-height"><div class="row flex center v-center full-height"><div class="col-8 col-sm-4"><div class="form-box"><form><fieldset><legend>Sign in</legend><img id="avatar" class="avatar round" src="/assets/img/avatar.png?h=918044b254966c0c29a9633dfdc7313b"><input class="form-control" type="email" id="username" name="username" placeholder="username"><input class="form-control" type="password" id="password" name="password" placeholder="password"><button class="btn btn-primary d-block w-100" type="button" onclick = "checkLogin()">LOGIN </button></fieldset></form></div></div></div></div><!-- End: login form --><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script><script src="/assets/js/script.min.js?h=b91e3222b91e1d5c812614a4f089d4e9"></script></body></html>
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Cioban</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/styles.min.css?h=1efc71b03721ab3a65e5f675122c74d0">
+</head>
+
+<body><!-- Start: login form -->
+    <div class="container full-height">
+        <div class="row flex center v-center full-height">
+            <div class="col-8 col-sm-4">
+                <div class="form-box">
+                    <form>
+                        <fieldset>
+                            <legend>Sign in</legend><img id="avatar" class="avatar round"
+                                src="/assets/img/avatar.png?h=918044b254966c0c29a9633dfdc7313b"><input
+                                class="form-control" type="email" id="username" name="username"
+                                placeholder="username"><input class="form-control" type="password" id="password"
+                                name="password" placeholder="password"><button class="btn btn-primary d-block w-100"
+                                type="button" onclick="checkLogin()">LOGIN </button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div><!-- End: login form -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <script>
+        async function checkLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const hashedPassword = await new Promise((resolve, reject) => {
+                    bcrypt.hash(password, 12, function (err, hash) {
+                        if (err) reject(err);
+                        resolve(hash);
+                    });
+                });
+
+                console.log(hashedPassword);
+
+                //     const response = await fetch('/login', {
+                //         method: 'POST',
+                //         headers: {
+                //             'Content-Type': 'application/json'
+                //         },
+                //         body: JSON.stringify({ username, password: hashedPassword })
+                //     });
+
+                //     if (response.ok) {
+                //         // const data = await response.json();
+                //         // const accessToken = data.access_token;
+                //         // localStorage.setItem('accessToken', accessToken);
+                //         window.location.href = "01_startpage.html";
+                //     } else {
+                //         const data = await response.json();
+                //         alert(data.detail);
+                //     }
+            } catch (error) {
+                console.error('Fehler bei der Anmeldung:', error);
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/script.min.js?h=2160a6349c32947573f922bc20aee6be"></script>
+</body>
+
+</html>
