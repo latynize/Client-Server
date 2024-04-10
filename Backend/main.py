@@ -1,4 +1,3 @@
-from operator import and_, or_
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -51,7 +50,7 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         .join(Type, Employee.type_id == Type.type_id)
     )
 
-    if data:
+    if data is not None:
         for criteria in data:
             if criteria.department is not None:
                 DepartmentAlias = aliased(Department)
