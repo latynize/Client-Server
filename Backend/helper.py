@@ -36,7 +36,7 @@ class Helper:
             await db.rollback()
             raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
         
-    async def universal_update(entity_class, db: AsyncSession, entity_id: int, update_data: dict):
+    async def universal_update(entity_class, entity_id: int, update_data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
         try:
             entity = await db.get(entity_class, entity_id)
             if not entity:
