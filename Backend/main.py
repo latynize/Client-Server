@@ -54,25 +54,48 @@ async def search_function(data: Optional[List[tables.SearchCriteria]] = None, db
 
     if data:
         for criteria in data:
-            if criteria.department:
+            if criteria.department is not None:
                 DepartmentAlias = aliased(Department)
                 ProjectAlias = aliased(Project)
                 TeamAlias = aliased(Team)
-                query = query.join(TeamAlias, Employee.) \
-                .join(ProjectAlias, TeamAlias.project) \
-                .join(DepartmentAlias, ProjectAlias.department) \
+                ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
+                query = query \
+                .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
+                .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
+                .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
+                .join(DepartmentAlias, ProjectAlias.department_id == DepartmentAlias.department_id) \
                 .filter(DepartmentAlias.dep_name == criteria.department)
-            if criteria.job:
-                query = query.join(Internal, isouter=True).filter(Internal.job_id == criteria.job)
-            if criteria.experienceLevel:
-                query = query.filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
-            if criteria.project:
-                query = query.join(Project, isouter=True).filter(Project.proj_name == criteria.project)
-            if criteria.type:
-                query = query.filter(Type.type_name == criteria.personal)
-            if criteria.skill:
-                query = query.join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id, isouter=True).join(Skill, isouter=True).filter(Skill.skill_name == criteria.skill)
-            if criteria.fte:
+            if criteria.job is not None:
+                query = query \
+                .join(Internal, Employee.employee_id == Internal.employee_id) \
+                .join(Job, Internal.job_id == Job.job_id) \
+                .join(External, Employee.employee_id == External.employee_id) \
+                .join(Job, External.job_id == Job.job_id) \
+                .filter(Job.job_name == criteria.job)
+            if criteria.experienceLevel is not None:
+                query = query \
+                    .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id) \
+                    .filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
+            if criteria.project is not None:
+                query = query \
+                .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
+                .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
+                .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
+                .filter(Project.proj_name == criteria.project)
+            if criteria.type is not None:
+                query = query \
+                .join(Type, Employee.type_id == Type.type_id) \
+                .filter(Type.type_name == criteria.type)
+            if criteria.skill is not None:
+                query = query \
+                .join(Internal, Employee.employee_id == Internal.employee_id) \
+                .join(Job, Internal.job_id == Job.job_id) \
+                .join(External, Employee.employee_id == External.employee_id) \
+                .join(Job, External.job_id == Job.job_id) \
+                .join(ConnectionJobSkill, Job.job_id == ConnectionJobSkill.job_id) \
+                .join(Skill, ConnectionJobSkill.skill_id == Skill.skill_id) \
+                .filter(Skill.skill_name == criteria.skill)
+            if criteria.fte is not None:
                 query = query.filter(Employee.free_fte >= criteria.fte)
 
     result = await db.execute(query)
