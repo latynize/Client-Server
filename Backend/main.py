@@ -44,6 +44,8 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         Employee.last_name, 
         Employee.free_fte, 
         Employee.e_mail, 
+        Employee.phone_number,
+        Employee.entry_date,
         ExperienceLevel.exp_lvl_description, 
         Type.type_name)
         .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id)
@@ -53,16 +55,12 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     if data is not None:
         for criteria in data:
             if criteria.department is not None:
-                DepartmentAlias = aliased(Department)
-                ProjectAlias = aliased(Project)
-                TeamAlias = aliased(Team)
-                ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
                 query = query \
-                .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
-                .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
-                .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
-                .join(DepartmentAlias, ProjectAlias.department_id == DepartmentAlias.department_id) \
-                .filter(DepartmentAlias.dep_name == criteria.department)
+                .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id) \
+                .join(Team, ConnectionTeamEmployee.team_id == Team.team_id) \
+                .join(Project, Team.project_id == Project.project_id) \
+                .join(Department, Project.department_id == Department.department_id) \
+                .filter(Department.dep_name == criteria.department)
             if criteria.job is not None:
                 query = query \
                 .join(Internal, Employee.employee_id == Internal.employee_id) \
@@ -76,9 +74,9 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
                     .filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
             if criteria.project is not None:
                 query = query \
-                .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
-                .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
-                .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
+                .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id) \
+                .join(Team, ConnectionTeamEmployee.team_id == Team.team_id) \
+                .join(Project, Team.project_id == Project.project_id) \
                 .filter(Project.proj_name == criteria.project)
             if criteria.type is not None:
                 query = query \
@@ -232,8 +230,7 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
 
 
 @app.put("/api/employee/{employee_id}/")
-async def update_employee(employee_id: int, update_data: t.Employee,
-                          db: AsyncSession = Depends(m.get_db_session)):
+async def update_employee(employee_id: int, update_data: t.Employee, db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
     update_data_dict = update_data.dict(exclude_none=True)
 
@@ -514,8 +511,7 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
 
 
 @app.put("/api/project/{project_id}/")
-async def update_project(project_id: int, update_data: t.Project,
-                         db: AsyncSession = Depends(m.get_db_session)):
+async def update_project(project_id: int, update_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.employee
     update_data_dict = update_data.dict(exclude_none=True)
 
