@@ -25,7 +25,7 @@ async def shutdown_event():
 # Search endpoint
 
 @app.post("/api/search/")
-async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(m.get_db_session)):
+async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(Mapper.get_db_session)):
     Employee = m.Base.classes.employee
     ExperienceLevel = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -58,18 +58,12 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
                 DepartmentAlias = aliased(Department)
                 ProjectAlias = aliased(Project)
                 TeamAlias = aliased(Team)
-<<<<<<< Updated upstream
                 ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
                 query = query \
                 .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
                 .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
                 .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
                 .join(DepartmentAlias, ProjectAlias.department_id == DepartmentAlias.department_id) \
-=======
-                query = query.join(TeamAlias, Employee) \
-                .join(ProjectAlias, TeamAlias.project) \
-                .join(DepartmentAlias, ProjectAlias.department) \
->>>>>>> Stashed changes
                 .filter(DepartmentAlias.dep_name == criteria.department)
             if criteria.job is not None:
                 query = query \
@@ -120,6 +114,7 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     } for row in result.mappings().all()]
 
     return {"employee": employees}
+    
     
 
 # search projects, read all employees in project
