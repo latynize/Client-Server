@@ -20,8 +20,3 @@ class Mapper:
         async with self.SessionLocal() as session:
             await session.execute(text("SET search_path TO cioban"))
             yield session
-
-    async def get_db_session_login(self) -> AsyncSession:
-        async with self.SessionLocal() as session:
-            await session.execute(text("SET search_path TO login"))
-            yield session
