@@ -1,7 +1,6 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import Any, Dict, List
 from ORM.mapper import Mapper as mapper
 
 
