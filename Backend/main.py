@@ -40,12 +40,24 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     External = m.Base.classes.external
     ConnectionJobSkill = m.Base.classes.connection_job_skill
 
-    Job_Internal = aliased(Job)
-    Job_External = aliased(Job)
+    Job_Internal_1 = aliased(Job)
+    Job_Internal_2 = aliased(Job)
+    Job_External_1 = aliased(Job)
+    Job_External_2 = aliased(Job)   
     ConnectionJobSkillExternal = aliased(ConnectionJobSkill)
     ConnectionJobSkillInternal = aliased(ConnectionJobSkill)
     Skill_Internal = aliased(Skill)
     Skill_External = aliased(Skill)
+    ConnectionTeamEmployee_1 = aliased(ConnectionTeamEmployee)
+    ConnectionTeamEmployee_2 = aliased(ConnectionTeamEmployee)
+    Team_1 = aliased(Team)
+    Team_2 = aliased(Team)
+    Project_1 = aliased(Project)
+    Project_2 = aliased(Project)
+    Internal_1 = aliased(Internal)
+    Internal_2 = aliased(Internal)
+    External_1 = aliased(External)
+    External_2 = aliased(External)
 
     query = (select(
         Employee.employee_id, 
@@ -67,21 +79,21 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         for criteria in data:
             if criteria.department is not None:
                 query = query \
-                .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id) \
-                .join(Team, ConnectionTeamEmployee.team_id == Team.team_id) \
-                .join(Project, Team.project_id == Project.project_id) \
-                .join(Department, Project.department_id == Department.department_id) \
+                .join(ConnectionTeamEmployee_1, Employee.employee_id == ConnectionTeamEmployee_1.employee_id) \
+                .join(Team_1, ConnectionTeamEmployee_1.team_id == Team_1.team_id) \
+                .join(Project_1, Team_1.project_id == Project_1.project_id) \
+                .join(Department, Project_1.department_id == Department.department_id) \
                 .filter(Department.dep_name == criteria.department)
 
             if criteria.job is not None:
                 query = query \
-                    .join(Internal, Employee.employee_id == Internal.employee_id, isouter=True) \
-                    .join(Job_Internal, Internal.job_id == Job_Internal.job_id, isouter=True) \
-                    .join(External, Employee.employee_id == External.employee_id, isouter=True) \
-                    .join(Job_External, External.job_id == Job_External.job_id, isouter=True) \
+                    .join(Internal_1, Employee.employee_id == Internal_1.employee_id, isouter=True) \
+                    .join(Job_Internal_1, Internal_1.job_id == Job_Internal_1.job_id, isouter=True) \
+                    .join(External_1, Employee.employee_id == External_1.employee_id, isouter=True) \
+                    .join(Job_External_1, External_1.job_id == Job_External_1.job_id, isouter=True) \
                     .filter(or_(
-                        Job_Internal.job_name == criteria.job,
-                        Job_External.job_name == criteria.job
+                        Job_Internal_1.job_name == criteria.job,
+                        Job_External_1.job_name == criteria.job
                     ))
                 
             if criteria.experienceLevel is not None:
@@ -90,10 +102,10 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
                 
             if criteria.project is not None:
                 query = query \
-                .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id) \
-                .join(Team, ConnectionTeamEmployee.team_id == Team.team_id) \
-                .join(Project, Team.project_id == Project.project_id) \
-                .filter(Project.proj_name == criteria.project)
+                .join(ConnectionTeamEmployee_2, Employee.employee_id == ConnectionTeamEmployee_2.employee_id) \
+                .join(Team_2, ConnectionTeamEmployee_2.team_id == Team_2.team_id) \
+                .join(Project_2, Team_2.project_id == Project_2.project_id) \
+                .filter(Project_2.proj_name == criteria.project)
 
             if criteria.type is not None:
                 query = query \
@@ -101,12 +113,12 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
 
             if criteria.skill is not None:
                 query = query \
-                    .join(Internal, Employee.employee_id == Internal.employee_id, isouter=True) \
-                    .join(Job_Internal, Internal.job_id == Job_Internal.job_id, isouter=True) \
-                    .join(External, Employee.employee_id == External.employee_id, isouter=True) \
-                    .join(Job_External, External.job_id == Job_External.job_id, isouter=True) \
-                    .join(ConnectionJobSkillInternal, Job_Internal.job_id == ConnectionJobSkillInternal.job_id, isouter=True) \
-                    .join(ConnectionJobSkillExternal, Job_External.job_id == ConnectionJobSkillExternal.job_id, isouter=True) \
+                    .join(Internal_2, Employee.employee_id == Internal_2.employee_id, isouter=True) \
+                    .join(Job_Internal_2, Internal_2.job_id == Job_Internal_2.job_id, isouter=True) \
+                    .join(External_2, Employee.employee_id == External_2.employee_id, isouter=True) \
+                    .join(Job_External_2, External_2.job_id == Job_External_2.job_id, isouter=True) \
+                    .join(ConnectionJobSkillInternal, Job_Internal_2.job_id == ConnectionJobSkillInternal.job_id, isouter=True) \
+                    .join(ConnectionJobSkillExternal, Job_External_2.job_id == ConnectionJobSkillExternal.job_id, isouter=True) \
                     .join(Skill_Internal, ConnectionJobSkillInternal.skill_id == Skill_Internal.skill_id, isouter=True) \
                     .join(Skill_External, ConnectionJobSkillExternal.skill_id == Skill_External.skill_id, isouter=True) \
                     .filter(or_(
