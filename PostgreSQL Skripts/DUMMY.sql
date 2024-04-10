@@ -272,4 +272,4 @@ VALUES
     
 SET search_path TO login;
 
-INSERT INTO user_login (username, hashed_password) VALUES ('WI22', '$2a$12$aA1EnDZrC8Msq0Hyfcvx8eRFvj.Ww1pRvU.9Hwj4lYEeNkct0BeLa');
+INSERT INTO user_login (username, hashed_password) VALUES ('WI22', 'ecb79c5358a9d8596b62ba238e38822e8ec03d2a8177e0b99921eec4ff219304');
