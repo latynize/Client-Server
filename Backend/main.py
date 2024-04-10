@@ -1,4 +1,3 @@
-from operator import and_, or_
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -51,25 +50,18 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         .join(Type, Employee.type_id == Type.type_id)
     )
 
-
-    if data:
+    if data is not None:
         for criteria in data:
             if criteria.department is not None:
                 DepartmentAlias = aliased(Department)
                 ProjectAlias = aliased(Project)
                 TeamAlias = aliased(Team)
-<<<<<<< Updated upstream
                 ConnectionTeamEmployeeAlias = aliased(ConnectionTeamEmployee)
                 query = query \
                 .join(ConnectionTeamEmployeeAlias, Employee.employee_id == ConnectionTeamEmployeeAlias.employee_id) \
                 .join(TeamAlias, ConnectionTeamEmployeeAlias.team_id == TeamAlias.team_id) \
                 .join(ProjectAlias, TeamAlias.project_id == ProjectAlias.project_id) \
                 .join(DepartmentAlias, ProjectAlias.department_id == DepartmentAlias.department_id) \
-=======
-                query = query.join(TeamAlias, Employee) \
-                .join(ProjectAlias, TeamAlias.project) \
-                .join(DepartmentAlias, ProjectAlias.department) \
->>>>>>> Stashed changes
                 .filter(DepartmentAlias.dep_name == criteria.department)
             if criteria.job is not None:
                 query = query \
@@ -169,7 +161,6 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
     } for row in result.mappings().all()]
 
     return {"employee": employees}
-
 
 
 # CRUD operations for the Employee table
