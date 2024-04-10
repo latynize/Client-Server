@@ -80,7 +80,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
                     ))
             if criteria.experienceLevel is not None:
                 query = query \
-                    .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id) \
                     .filter(ExperienceLevel.exp_lvl_description == criteria.experienceLevel)
             if criteria.project is not None:
                 query = query \
@@ -115,8 +114,7 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         'phone_number': row.phone_number,
         'entry_date': row.entry_date,
         'exp_lvl_description': row.exp_lvl_description,
-        'type_name': row.type_name,
-        'job_name': row.job_name
+        'type_name': row.type_name
     } for row in result.mappings().all()]
 
     return {"employee": employees}
