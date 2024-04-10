@@ -47,7 +47,8 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         Employee.phone_number,
         Employee.entry_date,
         ExperienceLevel.exp_lvl_description, 
-        Type.type_name)
+        Type.type_name,
+        Department.dep_name)
         .join(ExperienceLevel, Employee.experience_level_id == ExperienceLevel.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
@@ -106,7 +107,7 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
         'entry_date': row.entry_date,
         'exp_lvl_description': row.exp_lvl_description,
         'type_name': row.type_name,
-        'team_name': row.team_name
+        'dep_name': row.dep_name
     } for row in result.mappings().all()]
 
     return {"employee": employees}
