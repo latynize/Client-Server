@@ -131,8 +131,8 @@
 
         data.education_degree.forEach(element => {
             table.row.add([
-                element.education_id,
-                element.education_name
+                element.education_degree.education_id,
+                element.education_degree.education_name
             ]).draw();
         });
     })
