@@ -132,9 +132,9 @@
 
         data.experience_level.forEach(element => {
             table.row.add([
-                element.experience_level_id,
-                element.years_of_experience,
-                element.exp_lvl_description
+                element.experience_level.experience_level_id,
+                element.experience_level.years_of_experience,
+                element.experience_level.exp_lvl_description
             ]).draw();
         });
     })
