@@ -181,74 +181,71 @@
 
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
-        $(document).ready(function() {
-            var priorityValues = {
-                'gering': 1,
-                'niedrig': 2,
-                'mittel': 3,
-                'hoch': 4
-            };
-        
-            $('#projectTable').DataTable({
-                "paging": false,
-                "searching": false,
-                "info": false,
-                "columnDefs": [
-                    {
-                        "targets": [7, 8],
-                        "render": function ( data, type, row ) {
-                            if (type === 'display') {
-                                return formatDate(data);
-                            }
-                            return data;
+    $(document).ready(function() {
+        var priorityValues = {
+            'gering': 1,
+            'niedrig': 2,
+            'mittel': 3,
+            'hoch': 4
+        };
+    
+        $('#projectTable').DataTable({
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "columnDefs": [
+                {
+                    "targets": [7, 8],
+                    "render": function ( data, type, row ) {
+                        if (type === 'display') {
+                            return formatDate(data);
                         }
-                    },
-                    {
-                        "targets": 3,
-                        "render": function ( data, type, row ) {
-                            if (type === 'sort') {
-                                return priorityValues[data];
-                            }
-                            return data;
-                        }
+                        return data;
                     }
-                ]
-            });
-        
-            fetch("https://cioban.de/api/project")
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    let table = $('#projectTable').DataTable();
-                    data.project.forEach(element => {
-                        let startdate = formatDate(element.start_date);
-                        let enddate = formatDate(element.end_date);
-                        table.row.add([
-                            element.project_id,
-                            element.project_name,
-                            element.department_name,
-                            element.supervisor,
-                            element.proj_priority,
-                            element.needed_fte,
-                            element.current_fte,
-                            startdate,
-                            enddate
-                        ]).draw();
-                    });
-                })
-                .catch(error => console.log(error));
+                },
+                {
+                    "targets": 3,
+                    "render": function ( data, type, row ) {
+                        if (type === 'sort') {
+                            return priorityValues[data];
+                        }
+                        return data;
+                    }
+                }
+            ]
         });
-        
-        // Funktion zur Formatierung des Datums (DD.MM.YYYY)
-        function formatDate(dateString) {
-            if (!dateString) return ""; // Überprüfen, ob das Datum vorhanden ist
-            const date = new Date(dateString);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        }
-        </script>
+    
+        fetch("https://cioban.de/api/project")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                let table = $('#projectTable').DataTable();
+                data.project.forEach(element => {
+                    let startdate = formatDate(element.start_date);
+                    let enddate = formatDate(element.end_date);
+                    table.row.add([
+                        element.project_id,
+                        element.project_name,
+                        element.department_name,
+                        element.supervisor,
+                        element.proj_priority,
+                        element.needed_fte,
+                        element.current_fte,
+                        startdate,
+                        enddate
+                    ]).draw();
+                });
+            })
+            .catch(error => console.log(error));
+    });
+    
+    // Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
+    function formatDate(dateString) {
+        if (!dateString) return ""; // Überprüfen, ob das Datum vorhanden ist
+        const parts = dateString.split('-');
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+    </script>
     </body>
 
 </html>
