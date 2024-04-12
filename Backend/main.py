@@ -201,10 +201,10 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
 # assign employees to team
 
 @app.post("/api/project/employee/{team_id}/")
-async def assign_employee_to_team(team_id: int, employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+async def assign_employee_to_team(team_id: int, team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
-    for data in employee_data:
+    for data in team_data:
         new_connection = ConnectionTeamEmployee(team_id=team_id, employee_id=data.employee_id)
         db.add(new_connection)
     try:
@@ -302,10 +302,9 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
 @app.put("/api/employee/{employee_id}/")
 async def update_employee(employee_id: int, update_data: t.Employee, db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
-    update_data_dict = update_data.dict(exclude_none=True)
 
     try:
-        update_successful = await h.universal_update(Employee, db, employee_id, update_data_dict)
+        update_successful = await h.universal_update(Employee, db, employee_id, update_data)
         if update_successful:
             return {"status": "success", "message": "Employee updated successfully."}
         else:
@@ -584,17 +583,17 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
 
 @app.put("/api/project/{project_id}/")
 async def update_project(project_id: int, update_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
-    Project = m.Base.classes.employee
-    update_data_dict = update_data.dict(exclude_none=True)
+    Project = m.Base.classes.project  # Correct the Project class reference
 
     try:
-        update_successful = await h.universal_update(Project, db, project_id, update_data_dict)
+        update_successful = await h.universal_update(Project, db, project_id, update_data)
         if update_successful:
             return {"status": "success", "message": "Project updated successfully."}
         else:
             raise HTTPException(status_code=404, detail="Project not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
+
 
 # CRUD operations for teams
 
@@ -674,6 +673,19 @@ async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating team: {e}")
+
+@app.put("/api/team/{team_id}/")
+async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+
+    try:
+        update_successful = await h.universal_update(Team, db, team_id, update_data)
+        if update_successful:
+            return {"status": "success", "message": "Team updated successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Team not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error updating team: {e}")
 
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 
