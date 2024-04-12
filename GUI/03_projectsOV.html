@@ -245,10 +245,10 @@ function formatDate(dateString) {
     const parts = dateString.split('-');
     console.log(parts);
     console.log(parts[2]+"."+parts[1]+"."+parts[0]);
-    const day = parts[2].toString();
-    const month = parts[1].toString();
-    const year = parts[0].toString();
-    return `${day}.${month}.${year}`;
+    const day = parts[2];
+    const month = parts[1];
+    const year = parts[0];
+    return parts[2]+"."+parts[1]+"."+parts[0];
 }
 </script>
     </body>
