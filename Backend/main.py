@@ -198,6 +198,33 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
     return {"employee": employees}
 
 
+#search projects, read all teams in project
+
+@app.get("/api/project/team/{project_id}/")
+async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Team = m.Base.classes.team
+
+    result = await db.execute(
+        select(
+            Team.team_id,
+            Team.team_name,
+            Team.team_purpose
+        )
+        .join(Project, Team.project_id == Project.project_id)
+        .filter(Project.project_id == project_id)
+    )
+    db.expire_all()
+
+    teams = [{
+        'team_id': row.team_id,
+        'team_name': row.team_name,
+        'team_purpose': row.team_purpose
+    } for row in result.mappings().all()]
+
+    return {"team": teams}
+
+
 # assign employees to team
 
 @app.post("/api/project/employee/{team_id}/")
@@ -595,7 +622,7 @@ async def update_project(project_id: int, update_data: t.Project, db: AsyncSessi
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
 
 
-# CRUD operations for teams
+# CRUD operations for team
 
 @app.get('/api/team/')
 async def get_team(db: AsyncSession = Depends(m.get_db_session)):
