@@ -244,6 +244,7 @@ function formatDate(dateString) {
     if (!dateString) return ""; // Überprüfen, ob das Datum vorhanden ist
     const parts = dateString.split('-');
     console.log(parts);
+    console.log(parts[2]+"."+parts[1]+"."+parts[0]);
     const day = parts[2];
     const month = parts[1];
     const year = parts[0];
