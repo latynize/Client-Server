@@ -9,7 +9,17 @@ class Helper:
 
     @staticmethod
     async def universal_delete(model_instance, db: AsyncSession = Depends(m.get_db_session), **conditions) -> bool:
+        """
+        Asynchrone Methode zum Löschen von Einträgen aus einer Datenbank basierend auf gegebenen Bedingungen.
 
+        Args:
+            model_instance: Das zu löschende Datenbankmodell.
+            db (AsyncSession, optional): Die Datenbanksitzung. Standardmäßig Depends(m.get_db_session).
+            **conditions: Bedingungen zur Bestimmung, welche Einträge zu löschen sind.
+
+        Returns:
+            bool: True, wenn das Löschen erfolgreich war, sonst False.
+        """
         query = select(model_instance)
         for attr, value in conditions.items():
             query = query.filter(getattr(model_instance, attr) == value)
