@@ -178,14 +178,14 @@
 
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             var priorityValues = {
                 'gering': 1,
                 'niedrig': 2,
                 'mittel': 3,
                 'hoch': 4
             };
-    
+
             $('#projectTable').DataTable({
                 "paging": false,
                 "searching": false,
@@ -193,7 +193,7 @@
                 "columnDefs": [
                     {
                         "targets": [7, 8],
-                        "render": function ( data, type, row ) {
+                        "render": function (data, type, row) {
                             if (type === 'display') {
                                 return formatDate(data);
                             }
@@ -202,7 +202,7 @@
                     },
                     {
                         "targets": 3,
-                        "render": function ( data, type, row ) {
+                        "render": function (data, type, row) {
                             if (type === 'sort') {
                                 return priorityValues[data];
                             }
@@ -211,7 +211,7 @@
                     }
                 ]
             });
-    
+
             fetch("https://cioban.de/api/project")
                 .then(response => response.json())
                 .then(data => {
@@ -235,14 +235,11 @@
                 })
                 .catch(error => console.log(error));
         });
-    
+
         // Funktion zur Formatierung des Datums (DD.MM.YYYY)
         function formatDate(dateString) {
             if (!dateString) return ""; // Überprüfen, ob das Datum vorhanden ist
-            const date = new Date(dateString);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
+            const [year, month, day] = dateString.split("-");
             return `${day}.${month}.${year}`;
         }
     </script>
