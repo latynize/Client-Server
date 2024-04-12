@@ -198,6 +198,39 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
     return {"employee": employees}
 
 
+# assign employees to team
+
+@app.post("/api/project/employee/{team_id}/")
+async def assign_employee_to_team(team_id: int, employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+
+    for data in employee_data:
+        new_connection = ConnectionTeamEmployee(team_id=team_id, employee_id=data.employee_id)
+        db.add(new_connection)
+    try:
+        await db.commit()
+        return {"message": "Employees assigned to team successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error assigning employees to team: {e}")
+
+
+# delete assignment emploees to team
+
+@app.delete("/api/project/employee/{team_id}/")
+async def delete_employee_from_team(team_id: int, employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+
+    for data in employee_data:
+        try:
+            deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, team_id=team_id, employee_id=data.employee_id)
+            if deletion_successful:
+                return {"status": "success", "message": "Employee deleted from team successfully."}
+            else:
+                raise HTTPException(status_code=404, detail="Employee not found in team")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
+
 # CRUD operations for the Employee table
 
 @app.get('/api/employee/')
@@ -486,6 +519,7 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db
     Project = m.Base.classes.project
     Department = m.Base.classes.department
     Employee = m.Base.classes.employee
+    Team = m.Base.classes.team
 
     result = await db.execute(
         select(
@@ -562,6 +596,84 @@ async def update_project(project_id: int, update_data: t.Project, db: AsyncSessi
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
 
+# CRUD operations for teams
+
+@app.get('/api/team/')
+async def get_team(db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+    Project = m.Base.classes.project
+
+    result = await db.execute(
+        select(
+            Team.team_id,
+            Team.team_name,
+            Team.team_purpose,
+            Project.proj_name.label('project_name')
+        )
+        .join(Project, Team.project_id == Project.project_id)
+    )
+    db.expire_all()
+
+    teams = [{
+        'team_id': row.team_id,
+        'team_name': row.team_name,
+        'team_purpose': row.team_purpose,
+        'project_name': row.project_name
+    } for row in result.mappings().all()]
+
+    return {"team": teams}
+
+@app.get('/api/team/{team_id}/')
+async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+    Project = m.Base.classes.project
+
+    result = await db.execute(
+        select(
+            Team.team_id,
+            Team.team_name,
+            Team.team_purpose,
+            Project.proj_name.label('project_name')
+        )
+        .join(Project, Team.project_id == Project.project_id)
+        .where(Team.team_id == team_id)
+    )
+    db.expire_all()
+
+    team = [{
+        'team_id': row.team_id,
+        'team_name': row.team_name,
+        'team_purpose': row.team_purpose,
+        'project_name': row.project_name
+    } for row in result.mappings().all()]
+
+    return {"team": team}
+
+@app.delete("/api/team/{team_id}/")
+async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+    try:
+        deletion_successful = await h.universal_delete(Team, db, team_id=team_id)
+        if deletion_successful:
+            return {"status": "success", "message": "Team deleted successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Team not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting team: {e}")
+    
+@app.post("/api/team/")
+async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+
+    for data in team_data:
+        new_team = Team(**data.dict())
+        db.add(new_team)
+    try:
+        await db.commit()
+        return {"message": "Team created successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error creating team: {e}")
 
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 
