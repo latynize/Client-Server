@@ -674,6 +674,19 @@ async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating team: {e}")
 
+@app.put("/api/team/{team_id}/")
+async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+
+    try:
+        update_successful = await h.universal_update(Team, db, team_id, update_data)
+        if update_successful:
+            return {"status": "success", "message": "Team updated successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Team not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error updating team: {e}")
+
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 
 @app.get('/api/department/')
