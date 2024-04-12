@@ -172,3 +172,9 @@ class ConnectionTeamEmployee(ConnectionTeamEmployeeBase):
 
 class SearchCriteria(SearchCriteriaBase):
     pass    
+
+class User_Login(User_LoginBase):
+    pass
+
+class Token(TokenBase):
+    pass
