@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -36,18 +37,18 @@ class Helper:
             await db.rollback()
             raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
         
-    async def universal_update(entity_class, entity_id: int, update_data: dict, db: AsyncSession = Depends(m.get_db_session)):
+    async def universal_update(entity_class, db: AsyncSession, entity_id: int, update_data: List):
         try:
             entity = await db.get(entity_class, entity_id)
             if not entity:
-                return False 
+                return False
 
-            for key, value in update_data.items():
+            for key, value in update_data:
                 if hasattr(entity, key):
                     setattr(entity, key, value)
-            
+
             await db.commit()
-            return True  
+            return True
         except Exception as e:
             await db.rollback()
             raise e

@@ -104,6 +104,10 @@ class SearchCriteria(BaseModel):
     skill: Optional[str] = None
     fte: Optional[float] = None
 
+class ConnectionTeamEmployeeBase(BaseModel):
+    team_id: int
+    employee_id: int
+
 
 class Job(JobBase):
     pass
@@ -154,4 +158,7 @@ class Project(ProjectBase):
 
 
 class Department(DepartmentBase):
+    pass
+
+class ConnectionTeamEmployee(ConnectionTeamEmployeeBase):
     pass
