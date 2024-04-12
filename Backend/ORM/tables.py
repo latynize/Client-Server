@@ -95,7 +95,7 @@ class DepartmentBase(BaseModel):
     dep_description: str
 
 
-class SearchCriteria(BaseModel):
+class SearchCriteriaBase(BaseModel):
     department: Optional[str] = None
     job: Optional[str] = None
     experienceLevel: Optional[str] = None
@@ -162,3 +162,6 @@ class Department(DepartmentBase):
 
 class ConnectionTeamEmployee(ConnectionTeamEmployeeBase):
     pass
+
+class SearchCriteria(SearchCriteriaBase):
+    pass    
