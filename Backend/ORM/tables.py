@@ -108,6 +108,13 @@ class ConnectionTeamEmployeeBase(BaseModel):
     team_id: int
     employee_id: int
 
+class User_LoginBase(BaseModel):
+    username: str
+    password: str
+
+class TokenBase(BaseModel):
+    access_token: str
+
 
 class Job(JobBase):
     pass
