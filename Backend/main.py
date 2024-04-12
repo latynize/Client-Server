@@ -578,9 +578,6 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db
     } for row in result.mappings().all()]
 
     return {"project": project}
-
-@app.get('/api/project/{project_name}/')
-async def get_project_by_name(project_name: str, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
     Department = m.Base.classes.department
     Employee = m.Base.classes.employee
