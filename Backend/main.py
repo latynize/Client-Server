@@ -579,6 +579,44 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db
 
     return {"project": project}
 
+@app.get('/api/project/{project_name}/')
+async def get_project_by_name(project_name: str, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Department = m.Base.classes.department
+    Employee = m.Base.classes.employee
+
+    result = await db.execute(
+        select(
+            Project.project_id,
+            Project.proj_name,
+            Department.dep_name,
+            Employee.last_name,
+            Project.proj_priority,
+            Project.needed_fte,
+            Project.current_fte,
+            Project.start_date,
+            Project.end_date
+        )
+        .join(Department, Project.department_id == Department.department_id)
+        .join(Employee, Project.proj_manager == Employee.employee_id)
+        .where(Project.proj_name == project_name)
+    )
+    db.expire_all()
+
+    project = [{
+        'project_id': row.project_id,
+        'project_name': row.project_name,
+        'department_name': row.department_name,
+        'supervisor': row.supervisor_last_name,
+        'proj_priority': row.proj_priority,
+        'needed_fte': row.needed_fte,
+        'current_fte': row.current_fte,
+        'start_date': row.start_date.isoformat() if row.start_date else None,
+        'end_date': row.end_date.isoformat() if row.end_date else None
+    } for row in result.mappings().all()]
+
+    return {"project": project}
+
 
 @app.delete("/api/project/{project_id}/")
 async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
@@ -602,7 +640,8 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
         db.add(new_project)
     try:
         await db.commit()
-        return {"message": "Project created successfully"}
+        new_project_id = new_project.project_id
+        return {"message": "Project created successfully", "Project ID": new_project_id}
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating project: {e}")
