@@ -198,7 +198,8 @@
                     "targets": [7, 8],
                     "render": function ( data, type, row ) {
                         if (type === 'display') {
-                            return formatDate(data);
+                            console.log("Dataelement"+data);
+                            return formatDate(data[2]);
                         }
                         return data;
                     }
