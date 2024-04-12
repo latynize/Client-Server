@@ -1,8 +1,14 @@
-from fastapi import FastAPI, Depends, HTTPException
+import os
+from fastapi.security import OAuth2PasswordBearer
+import jwt
+import datetime
+from jwt import ExpiredSignatureError, InvalidTokenError
+from fastapi import FastAPI, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
 from sqlalchemy import or_
+from sqlalchemy.sql import func
 from typing import List, Optional
 from ORM.mapper import Mapper
 from helper import Helper as h
@@ -827,3 +833,47 @@ async def get_experience_level(db: AsyncSession = Depends(m.get_db_session)):
     exp_levels = result.mappings().all()
 
     return {"experience_level": exp_levels}
+
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+def create_jwt(username):
+    payload = {
+        "username": username,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+@app.post('/api/login/')
+async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_session_login)):
+    Login = m_login.Base.classes.user_login
+    result = await db.execute(
+        select(Login)
+        .where(Login.username == data.username)
+        .where(Login.hashed_password == data.password)
+    )
+    login = result.mappings().first()
+    if login is not None:
+        token = create_jwt(data.username)
+        return {"status": "success", "message": "Login successful", "token": token}
+    else:
+        raise HTTPException(status_code=401, detail="Login failed")
+    
+@app.post('/api/verifyToken')
+async def verify_token(token: t.Token):
+    credentials_exception = HTTPException(
+        status_code=401, 
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token.access_token, SECRET_KEY, algorithms=["HS256"])
+        username: str = payload.get("username")
+        if username is None:
+            raise credentials_exception
+        return {"status": "success", "message": "Token is valid"}
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except InvalidTokenError:
+        raise credentials_exception
+    
