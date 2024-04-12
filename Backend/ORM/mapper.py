@@ -14,10 +14,10 @@ class Mapper:
         self.Base = automap_base()
 
     # Reflektiert die Tabellen der Datenbank als Metadaten
-    async def reflect_tables(self):
+    async def reflect_tables(self, schema="cioban"):
         async with self.engine.begin() as conn:
-            await conn.run_sync(self.metadata.reflect, schema="cioban")
-            await conn.run_sync(self.Base.prepare, reflect=True, schema="cioban")
+            await conn.run_sync(self.metadata.reflect, schema=schema)
+            await conn.run_sync(self.Base.prepare, reflect=True, schema=schema)
 
     # Generiert eine Session zur Datenbank und dem Schema "cioban"
     async def get_db_session(self) -> AsyncSession:

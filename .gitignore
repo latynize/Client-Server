@@ -2,3 +2,5 @@
 
 .idea/Client-Server.iml
 *.pyc
+.venv
+startUvicorn.bat

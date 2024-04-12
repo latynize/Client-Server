@@ -15,17 +15,19 @@ from helper import Helper as h
 import ORM.tables as t
 
 m = Mapper()
+m_login = Mapper()
 app = FastAPI()
-
 
 @app.on_event("startup")
 async def startup_event():
     await m.reflect_tables()
+    await m_login.reflect_tables(schema="login")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await m.engine.dispose()
+    await m_login.engine.dispose()
 
 
 # API endpoints
