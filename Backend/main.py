@@ -1,18 +1,15 @@
-import os
-from fastapi.security import OAuth2PasswordBearer
 import jwt
-import datetime
+import ORM.tables as t
 from jwt import ExpiredSignatureError, InvalidTokenError
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
 from sqlalchemy import or_
-from sqlalchemy.sql import func
 from typing import List, Optional
 from ORM.mapper import Mapper
 from helper import Helper as h
-import ORM.tables as t
+
 
 m = Mapper()
 m_login = Mapper()
@@ -730,7 +727,7 @@ async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)
             raise HTTPException(status_code=404, detail="Team not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting team: {e}")
-    
+
 @app.post("/api/team/")
 async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -837,15 +834,6 @@ async def get_experience_level(db: AsyncSession = Depends(m.get_db_session)):
     return {"experience_level": exp_levels}
 
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-def create_jwt(username):
-    payload = {
-        "username": username,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-    }
-    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-
 @app.post('/api/login/')
 async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_session_login)):
     Login = m_login.Base.classes.user_login
@@ -856,20 +844,20 @@ async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_se
     )
     login = result.mappings().first()
     if login is not None:
-        token = create_jwt(data.username)
+        token = h.create_jwt(data.username)
         return {"status": "success", "message": "Login successful", "token": token}
     else:
         raise HTTPException(status_code=401, detail="Login failed")
-    
+
 @app.post('/api/verifyToken')
 async def verify_token(token: t.Token):
     credentials_exception = HTTPException(
-        status_code=401, 
+        status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token.access_token, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token.access_token, h.SECRET_KEY, algorithms=["HS256"])
         username: str = payload.get("username")
         if username is None:
             raise credentials_exception
@@ -878,4 +866,3 @@ async def verify_token(token: t.Token):
         raise HTTPException(status_code=401, detail="Token has expired")
     except InvalidTokenError:
         raise credentials_exception
-    

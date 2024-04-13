@@ -1,3 +1,6 @@
+import datetime
+import os
+import jwt
 from typing import List
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +9,7 @@ from ORM.mapper import Mapper as m
 
 
 class Helper:
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
     @staticmethod
     async def universal_delete(model_instance, db: AsyncSession = Depends(m.get_db_session), **conditions) -> bool:
@@ -36,6 +40,7 @@ class Helper:
         await db.commit()
         return True
 
+    @staticmethod
     async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(m.get_db_session)):
         new_entry = model_instance(**data)
         db.add(new_entry)
@@ -46,7 +51,8 @@ class Helper:
         except Exception as e:
             await db.rollback()
             raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
-        
+
+    @staticmethod
     async def universal_update(entity_class, db: AsyncSession, entity_id: int, update_data: List):
         try:
             entity = await db.get(entity_class, entity_id)
@@ -62,3 +68,11 @@ class Helper:
         except Exception as e:
             await db.rollback()
             raise e
+
+    @staticmethod
+    def create_jwt(username):
+        payload = {
+            "username": username,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }
+        return jwt.encode(payload, Helper.SECRET_KEY, algorithm="HS256")

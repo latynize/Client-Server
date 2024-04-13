@@ -104,13 +104,16 @@ class SearchCriteriaBase(BaseModel):
     skill: Optional[str] = None
     fte: Optional[float] = None
 
+
 class ConnectionTeamEmployeeBase(BaseModel):
     team_id: int
     employee_id: int
 
+
 class User_LoginBase(BaseModel):
     username: str
     password: str
+
 
 class TokenBase(BaseModel):
     access_token: str
@@ -167,14 +170,18 @@ class Project(ProjectBase):
 class Department(DepartmentBase):
     pass
 
+
 class ConnectionTeamEmployee(ConnectionTeamEmployeeBase):
     pass
 
+
 class SearchCriteria(SearchCriteriaBase):
-    pass    
+    pass
+
 
 class User_Login(User_LoginBase):
     pass
+
 
 class Token(TokenBase):
     pass

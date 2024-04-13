@@ -19,12 +19,13 @@ class Mapper:
             await conn.run_sync(self.metadata.reflect, schema=schema)
             await conn.run_sync(self.Base.prepare, reflect=True, schema=schema)
 
-    # Generiert eine Session zur Datenbank und dem Schema "cioban"
+    # Generiert eine Session zum Datenbank Schema "cioban"
     async def get_db_session(self) -> AsyncSession:
         async with self.SessionLocal() as session:
             await session.execute(text("SET search_path TO cioban"))
             yield session
 
+    # Generiert eine Session zum Datenbank Schema "login"
     async def get_db_session_login(self) -> AsyncSession:
         async with self.SessionLocal() as session:
             await session.execute(text("SET search_path TO login"))
