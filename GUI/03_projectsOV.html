@@ -95,8 +95,7 @@
             </select>
             <div id="eingabefelder-projectEditPersonal"></div>
             <div is="buttons-projectEditPersonal">
-                <button class="btn text-truncate add-another-btn" style="color: black"
-                    onclick="closeEditPersonalPopup()">Zurück</button>
+
                 <!--         <button style="color: black" class="btn text-truncate add-another-btn" onclick="applyEditPersonalChanges()">Anwenden</button> -->
             </div>
             <div id="error-message-projectEditPersonal" class="error-message" style="display: none;"></div>
@@ -123,7 +122,39 @@
                 </tr>
             </thead>
             <tbody>
-
+                <tr>
+                    <td>1</td>
+                    <td>Website-Redesign</td>
+                    <td>Marketing</td>
+                    <td>John Doe</td>
+                    <td>Hoch</td>
+                    <td>2.5</td>
+                    <td>2.0</td>
+                    <td>2024-05-01</td>
+                    <td>2024-09-30</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Mobile App-Entwicklung</td>
+                    <td>Entwicklung</td>
+                    <td>Jane Smith</td>
+                    <td>Mittel</td>
+                    <td>3.0</td>
+                    <td>2.5</td>
+                    <td>2024-06-15</td>
+                    <td>2025-01-15</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>SEO-Optimierung</td>
+                    <td>Marketing</td>
+                    <td>Emily Johnson</td>
+                    <td>Niedrig</td>
+                    <td>1.0</td>
+                    <td>0.8</td>
+                    <td>2024-07-10</td>
+                    <td>2024-08-31</td>
+                </tr>
                 <!-- Hier werden die Zeilen dynamisch hinzugefügt -->
             </tbody>
         </table>
@@ -177,7 +208,7 @@
     </footer><!-- End: Footer Multi Column -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/script.min.js?h=a03f97f77fd20b7d142d0e1704392c63"></script>
- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
@@ -433,7 +464,7 @@ var closeBtn = document.createElement("button");
 } 
 
 function applyAddEmployeeTeam (){
-    if (validateProject()) {
+    if (validateProjectEditPersonal()) {
     //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt hinzugefügt werden
     }else{
         document.getElementById("error-message-projectEditPersonal").style.display = "block";
@@ -441,7 +472,7 @@ function applyAddEmployeeTeam (){
     }
 }
 function applyDeleteEmployeeTeam (){
-    if (validateProject()) {
+    if (validateProjectEditPersonal()) {
     //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt gelöscht werden
     }else{
         document.getElementById("error-message-projectEditPersonal").style.display = "block";
@@ -449,7 +480,7 @@ function applyDeleteEmployeeTeam (){
     }
 }
 
-function validateProject() {
+function validateProjectEditPersonal() {
   var inputs = document.querySelectorAll(
     '#eingabefelder-projectEditPersonal input[type="text"]'
   );
