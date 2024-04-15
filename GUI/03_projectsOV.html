@@ -165,7 +165,7 @@
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        let table = document.getElementById('projectTable').DataTable(); // Element mit ID 'projectTable' auswählen
+        let table = document.getElementById('projectTable'); // Element mit ID 'projectTable' auswählen
         data.project.forEach(element => {
             let startdate = formatDate(element.start_date);
             let enddate = formatDate(element.end_date);
