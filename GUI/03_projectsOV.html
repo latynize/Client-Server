@@ -196,7 +196,6 @@ function formatDate(dateString) {
 } */
 
 
-
 var selectedProjectId;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -247,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#projectTable tbody').on('click', 'tr', function () {
         selectedProjectId = $(this).find('td:first').text();
         var rowData = '';
-        $(this).find('td').each(function() {
-            rowData += $(this).text() + '<br>';
+        $(this).find('td').each(function(index) {
+            rowData += '<strong>' + table.columns(index).header().to$().text() + ':</strong> ' + $(this).text() + '<br>';
         });
         rowDataDiv.innerHTML = rowData;
         popupContainer.style.display = 'block';
@@ -373,6 +372,7 @@ function applyEditPersonalChanges() {
         closeEditPersonalPopup();
     }
 }
+
 
 
 </script>
