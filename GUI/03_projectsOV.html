@@ -127,7 +127,7 @@
 
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
-   $(document).ready(function() {
+  /*  $(document).ready(function() {
     var priorityValues = {
         'gering': 1,
         'niedrig': 2,
@@ -160,7 +160,7 @@
             }
         ]
     });
-
+ */
     fetch("https://cioban.de/api/project")
         .then(response => response.json())
         .then(data => {
@@ -183,9 +183,9 @@
             });
         })
         .catch(error => console.log(error));
-});
+// });
 
-// Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
+/* // Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
 function formatDate(dateString) {
     if (!dateString) return ""; // Check if the date is present
     const parts = dateString.split('-');
@@ -193,7 +193,7 @@ function formatDate(dateString) {
     const month = parts[1];
     const year = parts[0];
     return `${day}.${month}.${year}`;
-}
+} */
 </script>
     </body>
 
