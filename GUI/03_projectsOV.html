@@ -161,28 +161,29 @@
         ]
     });
  */
-    fetch("https://cioban.de/api/project")
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            let table = $('#projectTable').DataTable();
-            data.project.forEach(element => {
-                let startdate = formatDate(element.start_date);
-                let enddate = formatDate(element.end_date);
-                table.row.add([
-                    element.project_id,
-                    element.project_name,
-                    element.department_name,
-                    element.supervisor,
-                    element.proj_priority,
-                    element.needed_fte,
-                    element.current_fte,
-                    startdate,
-                    enddate
-                ]).draw();
-            });
-        })
-        .catch(error => console.log(error));
+ fetch("https://cioban.de/api/project")
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        let table = document.getElementById('projectTable').DataTable(); // Element mit ID 'projectTable' auswählen
+        data.project.forEach(element => {
+            let startdate = formatDate(element.start_date);
+            let enddate = formatDate(element.end_date);
+            let newRow = table.insertRow(); // Neue Zeile einfügen
+            newRow.innerHTML = `
+                <td>${element.project_id}</td>
+                <td>${element.project_name}</td>
+                <td>${element.department_name}</td>
+                <td>${element.supervisor}</td>
+                <td>${element.proj_priority}</td>
+                <td>${element.needed_fte}</td>
+                <td>${element.current_fte}</td>
+                <td>${startdate}</td>
+                <td>${enddate}</td>
+            `;
+        });
+    })
+    .catch(error => console.log(error));
 // });
 
 /* // Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
