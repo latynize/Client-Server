@@ -94,7 +94,7 @@
                 <option value="löschen">Löschen</option>
             </select>
             <div id="eingabefelder-projectEditPersonal"></div>
-            <div is="buttons-projectEditPersonal">
+            <div id="buttons-projectEditPersonal">
 
                 <!--         <button style="color: black" class="btn text-truncate add-another-btn" onclick="applyEditPersonalChanges()">Anwenden</button> -->
             </div>
@@ -357,9 +357,9 @@ function closeEditPersonalPopup() {
 function updateProjectEditPersonalInputs() {
     var auswahl = document.getElementById("auswahl-projectEditPersonal").value;
     var eingabefelderDiv = document.getElementById("eingabefelder-projectEditPersonal");
-    var testRename = document.getElementById("buttons-projectEditPersonal");
+    var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
     eingabefelderDiv.innerHTML = "";     
-    // testRename.innerHTML = "";
+    buttonsDiv.innerHTML = "";
 
 
 var closeBtn = document.createElement("button");
@@ -369,7 +369,7 @@ var closeBtn = document.createElement("button");
     closeBtn.onclick = function () {
       closeEditPersonalPopup();
     };
-    testRename.appendChild(closeBtn);
+    buttonsDiv.appendChild(closeBtn);
 
     if (auswahl === "anzeigen") {
         fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
@@ -413,7 +413,7 @@ var closeBtn = document.createElement("button");
     applyButton.onclick = function () {
       applyAddEmployeeTeam();
     };
-    testRename.appendChild(applyButton);
+    buttonsDiv.appendChild(applyButton);
         
     } else if (auswahl === "löschen") {
         var idInput = document.createElement("input");
@@ -428,7 +428,7 @@ var closeBtn = document.createElement("button");
     applyButton.onclick = function () {
       applyDeleteEmployeeTeam();
     };
-    testRename.appendChild(applyButton);
+    buttonsDiv.appendChild(applyButton);
     }
 } 
 
