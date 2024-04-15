@@ -122,6 +122,39 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Website-Redesign</td>
+                    <td>Marketing</td>
+                    <td>John Doe</td>
+                    <td>Hoch</td>
+                    <td>2.5</td>
+                    <td>2.0</td>
+                    <td>2024-05-01</td>
+                    <td>2024-09-30</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Mobile App-Entwicklung</td>
+                    <td>Entwicklung</td>
+                    <td>Jane Smith</td>
+                    <td>Mittel</td>
+                    <td>3.0</td>
+                    <td>2.5</td>
+                    <td>2024-06-15</td>
+                    <td>2025-01-15</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>SEO-Optimierung</td>
+                    <td>Marketing</td>
+                    <td>Emily Johnson</td>
+                    <td>Niedrig</td>
+                    <td>1.0</td>
+                    <td>0.8</td>
+                    <td>2024-07-10</td>
+                    <td>2024-08-31</td>
+                </tr>
                 <!-- Hier werden die Zeilen dynamisch hinzugefügt -->
             </tbody>
         </table>
@@ -174,81 +207,9 @@
         </div>
     </footer><!-- End: Footer Multi Column -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/script.min.js?h=c0a95793cc5a591cf7607ae2a6492c6a"></script>
-
- <script src="/assets/js/script.min.js?h=b91e3222b91e1d5c812614a4f089d4e9"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script>
-   $(document).ready(function() {
-    var priorityValues = {
-        'gering': 1,
-        'niedrig': 2,
-        'mittel': 3,
-        'hoch': 4
-    };
-
-    $('#projectTable').DataTable({
-        "paging": false,
-        "searching": false,
-        "info": false,
-        "columnDefs": [
-            {
-                "targets": [7, 8],
-                "render": function ( data, type, row ) {
-                    if (type === 'display') {
-                        return formatDate(data);
-                    }
-                    return data;
-                }
-            },
-            {
-                "targets": 3,
-                "render": function ( data, type, row ) {
-                    if (type === 'sort') {
-                        return priorityValues[data];
-                    }
-                    return data;
-                }
-            }
-        ]
-    });
-
-    fetch("https://cioban.de/api/project")
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            let table = $('#projectTable').DataTable();
-            data.project.forEach(element => {
-                let startdate = formatDate(element.start_date);
-                let enddate = formatDate(element.end_date);
-                table.row.add([
-                    element.project_id,
-                    element.project_name,
-                    element.department_name,
-                    element.supervisor,
-                    element.proj_priority,
-                    element.needed_fte,
-                    element.current_fte,
-                    startdate,
-                    enddate
-                ]).draw();
-            });
-        })
-        .catch(error => console.log(error));
-});
-
-// Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
-function formatDate(dateString) {
-    if (!dateString) return ""; // Check if the date is present
-    const parts = dateString.split('-');
-    const day = parts[2];
-    const month = parts[1];
-    const year = parts[0];
-    return `${day}.${month}.${year}`;
-}
-</script>
-    </body>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js" type="module"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" type="module"></script>
+    <script src="/assets/js/script.min.js?h=1bfddd4232654320b7c1f82eb5a26cbf"></script>
+</body>
 
 </html>
