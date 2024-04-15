@@ -122,39 +122,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Website-Redesign</td>
-                    <td>Marketing</td>
-                    <td>John Doe</td>
-                    <td>Hoch</td>
-                    <td>2.5</td>
-                    <td>2.0</td>
-                    <td>2024-05-01</td>
-                    <td>2024-09-30</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Mobile App-Entwicklung</td>
-                    <td>Entwicklung</td>
-                    <td>Jane Smith</td>
-                    <td>Mittel</td>
-                    <td>3.0</td>
-                    <td>2.5</td>
-                    <td>2024-06-15</td>
-                    <td>2025-01-15</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>SEO-Optimierung</td>
-                    <td>Marketing</td>
-                    <td>Emily Johnson</td>
-                    <td>Niedrig</td>
-                    <td>1.0</td>
-                    <td>0.8</td>
-                    <td>2024-07-10</td>
-                    <td>2024-08-31</td>
-                </tr>
+               
                 <!-- Hier werden die Zeilen dynamisch hinzugefügt -->
             </tbody>
         </table>
@@ -390,8 +358,9 @@ function updateProjectEditPersonalInputs() {
     var auswahl = document.getElementById("auswahl-projectEditPersonal").value;
     var eingabefelderDiv = document.getElementById("eingabefelder-projectEditPersonal");
     var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
-    buttonsDiv.innerHTML = "";
-    eingabefelderDiv.innerHTML = ""; 
+    eingabefelderDiv.innerHTML = "";     
+    // buttonsDiv.innerHTML = "";
+
 
 var closeBtn = document.createElement("button");
     closeBtn.textContent = "Zurück";
