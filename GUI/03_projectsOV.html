@@ -357,9 +357,9 @@ function closeEditPersonalPopup() {
 function updateProjectEditPersonalInputs() {
     var auswahl = document.getElementById("auswahl-projectEditPersonal").value;
     var eingabefelderDiv = document.getElementById("eingabefelder-projectEditPersonal");
-    var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
+    var testRename = document.getElementById("buttons-projectEditPersonal");
     eingabefelderDiv.innerHTML = "";     
-    // buttonsDiv.innerHTML = "";
+    // testRename.innerHTML = "";
 
 
 var closeBtn = document.createElement("button");
@@ -369,7 +369,7 @@ var closeBtn = document.createElement("button");
     closeBtn.onclick = function () {
       closeEditPersonalPopup();
     };
-    buttonsDiv.appendChild(closeBtn);
+    testRename.appendChild(closeBtn);
 
     if (auswahl === "anzeigen") {
         fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
@@ -413,7 +413,7 @@ var closeBtn = document.createElement("button");
     applyButton.onclick = function () {
       applyAddEmployeeTeam();
     };
-    buttonsDiv.appendChild(applyButton);
+    testRename.appendChild(applyButton);
         
     } else if (auswahl === "löschen") {
         var idInput = document.createElement("input");
@@ -428,7 +428,7 @@ var closeBtn = document.createElement("button");
     applyButton.onclick = function () {
       applyDeleteEmployeeTeam();
     };
-    buttonsDiv.appendChild(applyButton);
+    testRename.appendChild(applyButton);
     }
 } 
 
