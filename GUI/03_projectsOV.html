@@ -361,6 +361,16 @@ function updateProjectEditPersonalInputs() {
     var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
     buttonsDiv.innerHTML = "";
     eingabefelderDiv.innerHTML = ""; 
+
+var closeBtn = document.createElement("button");
+    closeBtn.textContent = "Zurück";
+    closeBtn.style.color = "black";
+    closeBtn.className = "btn text-truncate add-another-btn";
+    closeBtn.onclick = function () {
+      closeEditPersonalPopup();
+    };
+    buttonsDiv.appendChild(closeBtn);
+
     if (auswahl === "anzeigen") {
         fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
             .then(response => response.json())
