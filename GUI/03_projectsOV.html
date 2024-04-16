@@ -453,7 +453,7 @@
                 console.log(teamId, employeeId);
 
                 try {
-                    var response = await fetch(`"https://cioban.de//api/team/employee/`, {
+                    var response = await fetch(`https://cioban.de/api/team/employee/`, {
                         method: "POST",
                         body: JSON.stringify([{ team_id: teamId, employee_id: employeeId }]),
                         headers: {
