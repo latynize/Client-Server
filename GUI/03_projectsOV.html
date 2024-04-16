@@ -468,6 +468,7 @@
                     console.log("Erstellung erfolgreich!");
                     displaySuccessMessageEditProject("Hinzufügen erfolgreich!");
                 } catch (error) {
+                    console.error("Fehler beim Erstellen des Mitarbeiters:", error);
                     displayErrorMessageEditProject("Fehler beim hinzufügen.");
                 }
             } else {
