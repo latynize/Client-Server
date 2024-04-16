@@ -181,73 +181,6 @@
 
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
-        /*    $(document).ready(function() {
-            var priorityValues = {
-                'gering': 1,
-                'niedrig': 2,
-                'mittel': 3,
-                'hoch': 4
-            };
-        
-            $('#projectTable').DataTable({
-                "paging": false,
-                "searching": false,
-                "info": false,
-                "columnDefs": [
-                    {
-                        "targets": [7, 8],
-                        "render": function ( data, type, row ) {
-                            if (type === 'display') {
-                                return formatDate(data);
-                            }
-                            return data;
-                        }
-                    },
-                    {
-                        "targets": 3,
-                        "render": function ( data, type, row ) {
-                            if (type === 'sort') {
-                                return priorityValues[data];
-                            }
-                            return data;
-                        }
-                    }
-                ]
-            });
-        
-            fetch("https://cioban.de/api/project")
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    let table = $('#projectTable').DataTable();
-                    data.project.forEach(element => {
-                        let startdate = formatDate(element.start_date);
-                        let enddate = formatDate(element.end_date);
-                        table.row.add([
-                            element.project_id,
-                            element.project_name,
-                            element.department_name,
-                            element.supervisor,
-                            element.proj_priority,
-                            element.needed_fte,
-                            element.current_fte,
-                            startdate,
-                            enddate
-                        ]).draw();
-                    });
-                })
-                .catch(error => console.log(error));
-        });
-        
-        // Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
-        function formatDate(dateString) {
-            if (!dateString) return ""; // Check if the date is present
-            const parts = dateString.split('-');
-            const day = parts[2];
-            const month = parts[1];
-            const year = parts[0];
-            return `${day}.${month}.${year}`;
-        } */
 
 
         var selectedProjectId;
@@ -430,10 +363,29 @@
                 buttonsDiv.appendChild(applyButton);
 
             } else if (auswahl === "löschen") {
-                var idInput = document.createElement("input");
-                idInput.type = "text";
-                idInput.placeholder = "ID";
-                eingabefelderDiv.appendChild(idInput);
+                fetch(`https://cioban.de/api/project/team/${selectedProjectId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var teamDropdown = document.createElement("select");
+                        teamDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
+                        teamDropdown.placeholder = "Team auswählen";
+                        teamDropdown.id = "teamDropdownDelete";
+
+                        data.team.forEach(team => {
+                            var option = document.createElement("option");
+                            option.value = team.team_id;
+                            option.text = team.team_name;
+                            teamDropdown.appendChild(option);
+                        });
+
+                        eingabefelderDiv.insertBefore(teamDropdown, eingabefelderDiv.firstChild); // Dropdown vor dem Eingabefeld einfügen
+
+                        teamDropdown.addEventListener('change', function () {
+                            var selectedTeamId = teamDropdown.value;
+                            loadEmployeesDropdown(selectedTeamId);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching teams:', error));
 
                 var applyButton = document.createElement("button");
                 applyButton.textContent = "Löschen";
@@ -444,6 +396,28 @@
                 };
                 buttonsDiv.appendChild(applyButton);
             }
+
+            function loadEmployeesDropdown(teamId) {
+                fetch(`https://cioban.de/api/employee/team/${teamId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var employeeDropdown = document.createElement("select");
+                        employeeDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
+                        employeeDropdown.placeholder = "Mitarbeiter auswählen";
+                        employeeDropdown.id = "employeeDropdown";
+
+                        data.employees.forEach(employee => {
+                            var option = document.createElement("option");
+                            option.value = employee.employee_id;
+                            option.text = `${employee.first_name} ${employee.last_name}`; // Vor- und Nachname zusammenfügen
+                            employeeDropdown.appendChild(option);
+                        });
+
+                        eingabefelderDiv.appendChild(employeeDropdown); // Mitarbeiter-Dropdown hinzufügen
+                    })
+                    .catch(error => console.error('Error fetching employees:', error));
+            }
+
         }
 
         async function applyAddEmployeeTeam() {
@@ -480,6 +454,29 @@
         function applyDeleteEmployeeTeam() {
             if (validateProjectEditPersonal()) {
                 //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt gelöscht werden
+                var employeeId = document.getElementById("employeeDropdown").value;
+                var teamId = document.getElementById("teamDropdownDelete").value;
+
+                fetch(`https://cioban.de/api/team/employee/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify([{
+                        team_id: teamId,
+                        employee_id: employeeId
+                    }])
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Mitarbeiter erfolgreich gelöscht!");
+                            displaySuccessMessageEditProject("Löschen erfolgreich!");
+                        } else {
+                            console.error("Fehler beim Löschen des Mitarbeiters");
+                            displayErrorMessageEditProject("Fehler beim Löschen.");
+                        }
+                    })
+                    .catch(error => console.error("Fehler beim Löschen des Mitarbeiters:", error));
             } else {
                 document.getElementById("error-message-projectEditPersonal").style.display = "block";
                 document.getElementById("error-message-projectEditPersonal").innerHTML = "Bitte füllen Sie alle Felder aus!";
@@ -500,25 +497,25 @@
 
 
         function displayErrorMessageEditProject(message) {
-  var errorMessage = document.getElementById("error-message-projectEditPersonal");
-  errorMessage.textContent = message;
-  errorMessage.style.display = "block";
+            var errorMessage = document.getElementById("error-message-projectEditPersonal");
+            errorMessage.textContent = message;
+            errorMessage.style.display = "block";
 
-  setTimeout(function () {
-    errorMessage.style.display = "none";
-  }, 2000); // Nachricht wird nach 7 Sekunden ausgeblendet
-}
+            setTimeout(function () {
+                errorMessage.style.display = "none";
+            }, 2000); // Nachricht wird nach 7 Sekunden ausgeblendet
+        }
 
-function displaySuccessMessageEditProject(message) {
-  var successMessage = document.getElementById("success-message-projectEditPersonal");
-  successMessage.textContent = message;
-  successMessage.style.display = "block";
-  successMessage.style.color = "green";
+        function displaySuccessMessageEditProject(message) {
+            var successMessage = document.getElementById("success-message-projectEditPersonal");
+            successMessage.textContent = message;
+            successMessage.style.display = "block";
+            successMessage.style.color = "green";
 
-  setTimeout(function () {
-    successMessage.style.display = "none";
-  }, 2000); // Nachricht wird nach 7 Sekunden ausgeblendet
-}
+            setTimeout(function () {
+                successMessage.style.display = "none";
+            }, 2000); // Nachricht wird nach 7 Sekunden ausgeblendet
+        }
 
 
     </script>
