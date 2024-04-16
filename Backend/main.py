@@ -157,7 +157,7 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
 # search projects, read all employees in project
 
 @app.get("/api/project/employee/{project_id}/")
-async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
     Employee = m.Base.classes.employee
     Team = m.Base.classes.team
@@ -206,7 +206,7 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
 #search projects, read all teams in project
 
 @app.get("/api/project/team/{project_id}/")
-async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
     Team = m.Base.classes.team
 
@@ -232,12 +232,12 @@ async def search_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
 
 # assign employees to team
 
-@app.post("/api/project/employee/{team_id}/")
-async def assign_employee_to_team(team_id: int, team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
+@app.post("/api/team/employee/")
+async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
-        new_connection = ConnectionTeamEmployee(team_id=team_id, employee_id=data.employee_id)
+        new_connection = ConnectionTeamEmployee(employee_id=data.employee_id)
         db.add(new_connection)
     try:
         await db.commit()
@@ -249,13 +249,13 @@ async def assign_employee_to_team(team_id: int, team_data: List[t.ConnectionTeam
 
 # delete assignment emploees to team
 
-@app.delete("/api/project/employee/{team_id}/")
-async def delete_employee_from_team(team_id: int, employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+@app.delete("/api/team/employee/")
+async def delete_employee_from_team(team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
-    for data in employee_data:
+    for data in team_data:
         try:
-            deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, team_id=team_id, employee_id=data.employee_id)
+            deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, employee_id=data.employee_id)
             if deletion_successful:
                 return {"status": "success", "message": "Employee deleted from team successfully."}
             else:
@@ -583,44 +583,9 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db
     } for row in result.mappings().all()]
 
     return {"project": project}
-    Project = m.Base.classes.project
-    Department = m.Base.classes.department
-    Employee = m.Base.classes.employee
-
-    result = await db.execute(
-        select(
-            Project.project_id,
-            Project.proj_name,
-            Department.dep_name,
-            Employee.last_name,
-            Project.proj_priority,
-            Project.needed_fte,
-            Project.current_fte,
-            Project.start_date,
-            Project.end_date
-        )
-        .join(Department, Project.department_id == Department.department_id)
-        .join(Employee, Project.proj_manager == Employee.employee_id)
-        .where(Project.proj_name == project_name)
-    )
-    db.expire_all()
-
-    project = [{
-        'project_id': row.project_id,
-        'project_name': row.project_name,
-        'department_name': row.department_name,
-        'supervisor': row.supervisor_last_name,
-        'proj_priority': row.proj_priority,
-        'needed_fte': row.needed_fte,
-        'current_fte': row.current_fte,
-        'start_date': row.start_date.isoformat() if row.start_date else None,
-        'end_date': row.end_date.isoformat() if row.end_date else None
-    } for row in result.mappings().all()]
-
-    return {"project": project}
 
 
-@app.delete("/api/project/{project_id}/")
+@app.delete('/api/project/{project_id}/')
 async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
     try:
@@ -633,7 +598,7 @@ async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
         raise HTTPException(status_code=400, detail=f"Error deleting project: {e}")
 
 
-@app.post("/api/project/")
+@app.post('/api/project/')
 async def create_project(project_data: List[t.Project], db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
 
@@ -649,7 +614,7 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
         raise HTTPException(status_code=400, detail=f"Error creating project: {e}")
 
 
-@app.put("/api/project/{project_id}/")
+@app.put('/api/project/{project_id}/')
 async def update_project(project_id: int, update_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project  # Correct the Project class reference
 
@@ -728,7 +693,7 @@ async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting team: {e}")
 
-@app.post("/api/team/")
+@app.post('/api/team/')
 async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
 

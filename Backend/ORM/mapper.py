@@ -8,13 +8,13 @@ class Mapper:
 
     # Initialisiert PostgreSQL-Verbindung, Session, Metadaten und automatisches Mapping
     def __init__(self):
-        self.engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres", echo=True)
+        self.engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres")
         self.SessionLocal = sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
         self.metadata = MetaData()
         self.Base = automap_base()
 
     # Reflektiert die Tabellen der Datenbank als Metadaten
-    async def reflect_tables(self, schema="cioban"):
+    async def reflect_tables(self, schema="cioban") -> None:
         async with self.engine.begin() as conn:
             await conn.run_sync(self.metadata.reflect, schema=schema)
             await conn.run_sync(self.Base.prepare, reflect=True, schema=schema)
