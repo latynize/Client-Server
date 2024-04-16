@@ -448,9 +448,10 @@
         function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
             var employeeId = document.querySelector('input[type="text"]').value;
-            var teamId = document.getElementById("teamDropdown").value;
+            var teamId = document.getElementById("teamDropdown");
 
             console.log(teamId);
+            console.log(teamId.value);
 
 
                 //mitarbeiter id soll eingegeben werden und dann per fetch an das backend gesendet werden
