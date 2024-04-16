@@ -122,7 +122,7 @@
                 </tr>
             </thead>
             <tbody>
-               
+
                 <!-- Hier werden die Zeilen dynamisch hinzugefügt -->
             </tbody>
         </table>
@@ -180,290 +180,306 @@
 
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
-/*    $(document).ready(function() {
-    var priorityValues = {
-        'gering': 1,
-        'niedrig': 2,
-        'mittel': 3,
-        'hoch': 4
-    };
-
-    $('#projectTable').DataTable({
-        "paging": false,
-        "searching": false,
-        "info": false,
-        "columnDefs": [
-            {
-                "targets": [7, 8],
-                "render": function ( data, type, row ) {
-                    if (type === 'display') {
-                        return formatDate(data);
+        /*    $(document).ready(function() {
+            var priorityValues = {
+                'gering': 1,
+                'niedrig': 2,
+                'mittel': 3,
+                'hoch': 4
+            };
+        
+            $('#projectTable').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+                "columnDefs": [
+                    {
+                        "targets": [7, 8],
+                        "render": function ( data, type, row ) {
+                            if (type === 'display') {
+                                return formatDate(data);
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        "targets": 3,
+                        "render": function ( data, type, row ) {
+                            if (type === 'sort') {
+                                return priorityValues[data];
+                            }
+                            return data;
+                        }
                     }
-                    return data;
-                }
-            },
-            {
-                "targets": 3,
-                "render": function ( data, type, row ) {
-                    if (type === 'sort') {
-                        return priorityValues[data];
-                    }
-                    return data;
-                }
-            }
-        ]
-    });
-
-    fetch("https://cioban.de/api/project")
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            let table = $('#projectTable').DataTable();
-            data.project.forEach(element => {
-                let startdate = formatDate(element.start_date);
-                let enddate = formatDate(element.end_date);
-                table.row.add([
-                    element.project_id,
-                    element.project_name,
-                    element.department_name,
-                    element.supervisor,
-                    element.proj_priority,
-                    element.needed_fte,
-                    element.current_fte,
-                    startdate,
-                    enddate
-                ]).draw();
+                ]
             });
-        })
-        .catch(error => console.log(error));
-});
-
-// Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
-function formatDate(dateString) {
-    if (!dateString) return ""; // Check if the date is present
-    const parts = dateString.split('-');
-    const day = parts[2];
-    const month = parts[1];
-    const year = parts[0];
-    return `${day}.${month}.${year}`;
-} */
-
-
-var selectedProjectId;
-
-document.addEventListener('DOMContentLoaded', function() {
-    var priorityValues = {
-        'gering': 1,
-        'niedrig': 2,
-        'mittel': 3,
-        'hoch': 4
-    };
-
-    var table = $('#projectTable').DataTable({
-        "paging": false,
-        "searching": false,
-        "info": false,
-        "columnDefs": [
-            {
-                "targets": [7, 8],
-                "render": function ( data, type, row ) {
-                    if (type === 'display') {
-                        return formatDate(data);
-                    }
-                    return data;
-                }
-            },
-            {
-                "targets": 3,
-                "render": function ( data, type, row ) {
-                    if (type === 'sort') {
-                        return priorityValues[data];
-                    }
-                    return data;
-                }
-            }
-        ]
-    });
-
-    var popupContainer = document.getElementById('popupContainer-project');
-    var popupContent = document.getElementById('popupContent-project');
-    var rowDataDiv = document.getElementById('rowData-project');
-    var closeBtn = document.getElementById('closeBtn-project');
-
-    popupContent.style.padding = '40px';
-    popupContent.style.borderRadius = '20px';
-    popupContent.style.fontSize = '16px';
-    popupContent.style.border = '1px solid lightgrey';
-    popupContent.style.borderRadius = '5px';
-
-    $('#projectTable tbody').on('click', 'tr', function () {
-        selectedProjectId = $(this).find('td:first').text();
-        var rowData = '';
-        $(this).find('td').each(function(index) {
-            rowData += '<strong>' + table.columns(index).header().to$().text() + ':</strong> ' + $(this).text() + '<br>';
+        
+            fetch("https://cioban.de/api/project")
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    let table = $('#projectTable').DataTable();
+                    data.project.forEach(element => {
+                        let startdate = formatDate(element.start_date);
+                        let enddate = formatDate(element.end_date);
+                        table.row.add([
+                            element.project_id,
+                            element.project_name,
+                            element.department_name,
+                            element.supervisor,
+                            element.proj_priority,
+                            element.needed_fte,
+                            element.current_fte,
+                            startdate,
+                            enddate
+                        ]).draw();
+                    });
+                })
+                .catch(error => console.log(error));
         });
-        rowDataDiv.innerHTML = rowData;
-        popupContainer.style.display = 'block';
-    });
+        
+        // Funktion zur Formatierung des Datums (YYYY-MM-DD in DD.MM.YYYY)
+        function formatDate(dateString) {
+            if (!dateString) return ""; // Check if the date is present
+            const parts = dateString.split('-');
+            const day = parts[2];
+            const month = parts[1];
+            const year = parts[0];
+            return `${day}.${month}.${year}`;
+        } */
 
-    closeBtn.onclick = function() {
-        popupContainer.style.display = 'none';
-    };
 
-    fetch("https://cioban.de/api/project")
-        .then(response => response.json())
-        .then(data => {
-            let table = $('#projectTable').DataTable();
-            data.project.forEach(element => {
-                let startdate = formatDate(element.start_date);
-                let enddate = formatDate(element.end_date);
-                table.row.add([
-                    element.project_id,
-                    element.project_name,
-                    element.department_name,
-                    element.supervisor,
-                    element.proj_priority,
-                    element.needed_fte,
-                    element.current_fte,
-                    startdate,
-                    enddate
-                ]).draw();
+        var selectedProjectId;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var priorityValues = {
+                'gering': 1,
+                'niedrig': 2,
+                'mittel': 3,
+                'hoch': 4
+            };
+
+            var table = $('#projectTable').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+                "columnDefs": [
+                    {
+                        "targets": [7, 8],
+                        "render": function (data, type, row) {
+                            if (type === 'display') {
+                                return formatDate(data);
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        "targets": 3,
+                        "render": function (data, type, row) {
+                            if (type === 'sort') {
+                                return priorityValues[data];
+                            }
+                            return data;
+                        }
+                    }
+                ]
             });
-        })
-        .catch(error => console.log(error));
-});
 
-function formatDate(dateString) {
-    if (!dateString) return "";
-    const parts = dateString.split('-');
-    const day = parts[2];
-    const month = parts[1];
-    const year = parts[0];
-    return `${day}.${month}.${year}`;
-}
+            var popupContainer = document.getElementById('popupContainer-project');
+            var popupContent = document.getElementById('popupContent-project');
+            var rowDataDiv = document.getElementById('rowData-project');
+            var closeBtn = document.getElementById('closeBtn-project');
 
-function openProjectEditPersonalPopup() {
-    document.getElementById("popup-container-projectEditPersonal").style.display = "block";
-    document.getElementById("popupContent-project").style.display = "none";
-    updateProjectEditPersonalInputs();
-}
+            popupContent.style.padding = '40px';
+            popupContent.style.borderRadius = '20px';
+            popupContent.style.fontSize = '16px';
+            popupContent.style.border = '1px solid lightgrey';
+            popupContent.style.borderRadius = '5px';
 
-function closeEditPersonalPopup() {
-    document.getElementById("popup-container-projectEditPersonal").style.display = "none";
-    document.getElementById("popupContent-project").style.display = "block";
-    document.getElementById("error-message-project").style.display = "none";
-}
-
-function updateProjectEditPersonalInputs() {
-    var auswahl = document.getElementById("auswahl-projectEditPersonal").value;
-    var eingabefelderDiv = document.getElementById("eingabefelder-projectEditPersonal");
-    var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
-    eingabefelderDiv.innerHTML = "";     
-    buttonsDiv.innerHTML = "";
-
-
-var closeBtn = document.createElement("button");
-    closeBtn.textContent = "Zurück";
-    closeBtn.style.color = "black";
-    closeBtn.className = "btn text-truncate add-another-btn";
-    closeBtn.onclick = function () {
-      closeEditPersonalPopup();
-    };
-    buttonsDiv.appendChild(closeBtn);
-
-    if (auswahl === "anzeigen") {
-        fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
-            .then(response => response.json())
-            .then(data => {
-                var table = "<table style='overflow:auto'><tr><th>ID</th><th>Vorname</th><th>Name</th><th>Freie FTE</th><th>Mail</th><th>Tel. Nummer</th><th>Beschäftigungsstart</th><th>Erfahrungsgrad</th><th>Typ</th><th>Teams</th></tr>";
-                data.employee.forEach(person => {
-                    table += "<tr>";
-                    table += "<td>" + person.employee_id + "</td>";
-                    table += "<td>" + person.first_name + "</td>";
-                    table += "<td>" + person.last_name + "</td>";
-                    table += "<td>" + person.free_fte+ "</td>";
-                    table += "<td>" + person.e_mail + "</td>";
-                    table += "<td>" + person.phone_number + "</td>"; 
-                    table += "<td>" + person.entry_date + "</td>";
-                    table += "<td>" + person.exp_lvl_description + "</td>";
-                    table += "<td>" + person.type_name + "</td>";
-                    table += "<td>" + person.team_name + "</td>";
-                    table += "</tr>";
+            $('#projectTable tbody').on('click', 'tr', function () {
+                selectedProjectId = $(this).find('td:first').text();
+                var rowData = '';
+                $(this).find('td').each(function (index) {
+                    rowData += '<strong>' + table.columns(index).header().to$().text() + ':</strong> ' + $(this).text() + '<br>';
                 });
-                table += "</table>";
-                eingabefelderDiv.innerHTML = table;
-            })
-            .catch(error => console.log(error));
-    } else if (auswahl === "hinzufügen") {
-        var IdInput = document.createElement("input");
-        IdInput.type = "text";
-        IdInput.placeholder = "Projekt ID";
-        IdInput.value = selectedProjectId;
-        eingabefelderDiv.appendChild(IdInput);
-        
-        var employeeId = document.createElement("input");
-        employeeId.type = "text";
-        employeeId.placeholder = "Mitarbeiter ID";
-        eingabefelderDiv.appendChild(employeeId);
+                rowDataDiv.innerHTML = rowData;
+                popupContainer.style.display = 'block';
+            });
 
-        var applyButton = document.createElement("button");
-    applyButton.textContent = "Hinzufügen";
-    applyButton.style.color = "black";
-    applyButton.className = "btn text-truncate add-another-btn";
-    applyButton.onclick = function () {
-      applyAddEmployeeTeam();
-    };
-    buttonsDiv.appendChild(applyButton);
-        
-    } else if (auswahl === "löschen") {
-        var idInput = document.createElement("input");
-        idInput.type = "text";
-        idInput.placeholder = "ID";
-        eingabefelderDiv.appendChild(idInput);
+            closeBtn.onclick = function () {
+                popupContainer.style.display = 'none';
+            };
 
-        var applyButton = document.createElement("button");
-    applyButton.textContent = "Löschen";
-    applyButton.style.color = "black";
-    applyButton.className = "btn text-truncate add-another-btn";
-    applyButton.onclick = function () {
-      applyDeleteEmployeeTeam();
-    };
-    buttonsDiv.appendChild(applyButton);
-    }
-} 
+            fetch("https://cioban.de/api/project")
+                .then(response => response.json())
+                .then(data => {
+                    let table = $('#projectTable').DataTable();
+                    data.project.forEach(element => {
+                        let startdate = formatDate(element.start_date);
+                        let enddate = formatDate(element.end_date);
+                        table.row.add([
+                            element.project_id,
+                            element.project_name,
+                            element.department_name,
+                            element.supervisor,
+                            element.proj_priority,
+                            element.needed_fte,
+                            element.current_fte,
+                            startdate,
+                            enddate
+                        ]).draw();
+                    });
+                })
+                .catch(error => console.log(error));
+        });
 
-function applyAddEmployeeTeam (){
-    if (validateProjectEditPersonal()) {
-    //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt hinzugefügt werden
-    }else{
-        document.getElementById("error-message-projectEditPersonal").style.display = "block";
-        document.getElementById("error-message-projectEditPersonal").innerHTML = "Bitte füllen Sie alle Felder aus!";
-    }
-}
-function applyDeleteEmployeeTeam (){
-    if (validateProjectEditPersonal()) {
-    //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt gelöscht werden
-    }else{
-        document.getElementById("error-message-projectEditPersonal").style.display = "block";
-        document.getElementById("error-message-projectEditPersonal").innerHTML = "Bitte füllen Sie alle Felder aus!";
-    }
-}
+        function formatDate(dateString) {
+            if (!dateString) return "";
+            const parts = dateString.split('-');
+            const day = parts[2];
+            const month = parts[1];
+            const year = parts[0];
+            return `${day}.${month}.${year}`;
+        }
 
-function validateProjectEditPersonal() {
-  var inputs = document.querySelectorAll(
-    '#eingabefelder-projectEditPersonal input[type="text"]'
-  );
-  for (var i = 0; i < inputs.length; i++) {
-    if (inputs[i].value.trim() === "") {
-      return false;
-    }
-  }
-  return true;
-}
+        function openProjectEditPersonalPopup() {
+            document.getElementById("popup-container-projectEditPersonal").style.display = "block";
+            document.getElementById("popupContent-project").style.display = "none";
+            updateProjectEditPersonalInputs();
+        }
+
+        function closeEditPersonalPopup() {
+            document.getElementById("popup-container-projectEditPersonal").style.display = "none";
+            document.getElementById("popupContent-project").style.display = "block";
+            document.getElementById("error-message-project").style.display = "none";
+        }
+
+        function updateProjectEditPersonalInputs() {
+            var auswahl = document.getElementById("auswahl-projectEditPersonal").value;
+            var eingabefelderDiv = document.getElementById("eingabefelder-projectEditPersonal");
+            var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
+            eingabefelderDiv.innerHTML = "";
+            buttonsDiv.innerHTML = "";
 
 
+            var closeBtn = document.createElement("button");
+            closeBtn.textContent = "Zurück";
+            closeBtn.style.color = "black";
+            closeBtn.className = "btn text-truncate add-another-btn";
+            closeBtn.onclick = function () {
+                closeEditPersonalPopup();
+            };
+            buttonsDiv.appendChild(closeBtn);
 
-</script>
+            if (auswahl === "anzeigen") {
+                fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var table = "<table style='overflow:auto'><tr><th>ID</th><th>Vorname</th><th>Name</th><th>Freie FTE</th><th>Mail</th><th>Tel. Nummer</th><th>Beschäftigungsstart</th><th>Erfahrungsgrad</th><th>Typ</th><th>Teams</th></tr>";
+                        data.employee.forEach(person => {
+                            table += "<tr>";
+                            table += "<td>" + person.employee_id + "</td>";
+                            table += "<td>" + person.first_name + "</td>";
+                            table += "<td>" + person.last_name + "</td>";
+                            table += "<td>" + person.free_fte + "</td>";
+                            table += "<td>" + person.e_mail + "</td>";
+                            table += "<td>" + person.phone_number + "</td>";
+                            table += "<td>" + person.entry_date + "</td>";
+                            table += "<td>" + person.exp_lvl_description + "</td>";
+                            table += "<td>" + person.type_name + "</td>";
+                            table += "<td>" + person.team_name + "</td>";
+                            table += "</tr>";
+                        });
+                        table += "</table>";
+                        eingabefelderDiv.innerHTML = table;
+                    })
+                    .catch(error => console.log(error));
+            } else if (auswahl === "hinzufügen") {
+                fetch(`https://cioban.de/api/project/team/${selectedProjectId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var teamDropdown = document.createElement("select");
+                        teamDropdown.placeholder = "Team auswählen";
+
+                        data.team.forEach(team => {
+                            var option = document.createElement("option");
+                            option.value = team.team_id;
+                            option.text = team.team_name;
+                            teamDropdown.appendChild(option);
+                        });
+
+                        eingabefelderDiv.appendChild(teamDropdown);
+                    })
+                    .catch(error => console.error('Error fetching teams:', error));
+
+                var employeeId = document.createElement("input");
+                employeeId.type = "text";
+                employeeId.placeholder = "Mitarbeiter ID";
+                eingabefelderDiv.appendChild(employeeId);
+
+                var applyButton = document.createElement("button");
+                applyButton.textContent = "Hinzufügen";
+                applyButton.style.color = "black";
+                applyButton.className = "btn text-truncate add-another-btn";
+                applyButton.onclick = function () {
+                    applyAddEmployeeTeam();
+                };
+                buttonsDiv.appendChild(applyButton);
+            } else if (auswahl === "löschen") {
+                var idInput = document.createElement("input");
+                idInput.type = "text";
+                idInput.placeholder = "ID";
+                eingabefelderDiv.appendChild(idInput);
+
+                var applyButton = document.createElement("button");
+                applyButton.textContent = "Löschen";
+                applyButton.style.color = "black";
+                applyButton.className = "btn text-truncate add-another-btn";
+                applyButton.onclick = function () {
+                    applyDeleteEmployeeTeam();
+                };
+                buttonsDiv.appendChild(applyButton);
+            }
+        }
+
+        function applyAddEmployeeTeam() {
+            if (validateProjectEditPersonal()) {
+
+                //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt hinzugefügt werden
+                //team des projektes sollen per fetch abgerufen werden
+                //fetch("https://cioban.de/api/project/team/{project_id}/")
+                //sollen als dopdown in das eingabefeld eingefügt werden
+                //mitarbeiter id soll eingegeben werden und dann per fetch an das backend gesendet werden
+                //fetch("https://cioban.de//api/team/employee/")
+            } else {
+                document.getElementById("error-message-projectEditPersonal").style.display = "block";
+                document.getElementById("error-message-projectEditPersonal").innerHTML = "Bitte füllen Sie alle Felder aus!";
+            }
+        }
+        function applyDeleteEmployeeTeam() {
+            if (validateProjectEditPersonal()) {
+                //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt gelöscht werden
+            } else {
+                document.getElementById("error-message-projectEditPersonal").style.display = "block";
+                document.getElementById("error-message-projectEditPersonal").innerHTML = "Bitte füllen Sie alle Felder aus!";
+            }
+        }
+
+        function validateProjectEditPersonal() {
+            var inputs = document.querySelectorAll(
+                '#eingabefelder-projectEditPersonal input[type="text"]'
+            );
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value.trim() === "") {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
+
+    </script>
 </body>
 
 </html>
