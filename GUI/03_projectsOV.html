@@ -445,16 +445,31 @@
             }
         }
 
-        function applyAddEmployeeTeam() {
+        async function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
-            var employeeId = document.querySelector('input[type="text"]').value;
-            var teamId = document.getElementById("teamDropdown").value;
+                var employeeId = document.querySelector('input[type="text"]').value;
+                var teamId = document.getElementById("teamDropdown").value;
 
-            console.log(teamId);
+                console.log(teamId, employeeId);
 
+                try {
+                    var response = await fetch(`"https://cioban.de//api/team/employee/`, {
+                        method: "POST",
+                        body: JSON.stringify([{ team_id: teamId, employee_id: employeeId }]),
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
 
-                //mitarbeiter id soll eingegeben werden und dann per fetch an das backend gesendet werden
-                //fetch("https://cioban.de//api/team/employee/")
+                    if (!response.ok) {
+                        throw new Error("Fehler beim Erstellen des Mitarbeiters");
+                    }
+
+                    console.log("Erstellung erfolgreich!");
+                    displaySuccessMessage("Hinzufügen erfolgreich!");
+                } catch (error) {
+                    displayErrorMessage("Fehler beim hinzufügen.");
+                }
             } else {
                 document.getElementById("error-message-projectEditPersonal").style.display = "block";
                 document.getElementById("error-message-projectEditPersonal").innerHTML = "Bitte füllen Sie alle Felder aus!";
