@@ -399,6 +399,7 @@
                     .then(response => response.json())
                     .then(data => {
                         var teamDropdown = document.createElement("select");
+                        teamDropdown.id = "teamDropdown";
                         teamDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
                         teamDropdown.placeholder = "Team auswählen";
 
@@ -446,12 +447,12 @@
 
         function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
-                var teamId = document.querySelector('select').value;
+                var teamId = document.getElementById(teamDropdown).value;
             var employeeId = document.querySelector('input[type="text"]').value;
 
             console.log(teamId, employeeId);
 
-            
+
                 //mitarbeiter id soll eingegeben werden und dann per fetch an das backend gesendet werden
                 //fetch("https://cioban.de//api/team/employee/")
             } else {
