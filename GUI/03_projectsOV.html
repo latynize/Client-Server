@@ -446,11 +446,12 @@
 
         function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
+                var teamId = document.querySelector('select').value;
+            var employeeId = document.querySelector('input[type="text"]').value;
 
-                //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt hinzugefügt werden
-                //team des projektes sollen per fetch abgerufen werden
-                //fetch("https://cioban.de/api/project/team/{project_id}/")
-                //sollen als dopdown in das eingabefeld eingefügt werden
+            console.log(teamId, employeeId);
+
+            
                 //mitarbeiter id soll eingegeben werden und dann per fetch an das backend gesendet werden
                 //fetch("https://cioban.de//api/team/employee/")
             } else {
