@@ -399,6 +399,7 @@
                     .then(response => response.json())
                     .then(data => {
                         var teamDropdown = document.createElement("select");
+                        teamDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
                         teamDropdown.placeholder = "Team auswählen";
 
                         data.team.forEach(team => {
@@ -408,7 +409,7 @@
                             teamDropdown.appendChild(option);
                         });
 
-                        eingabefelderDiv.appendChild(teamDropdown);
+                        eingabefelderDiv.insertBefore(teamDropdown, eingabefelderDiv.firstChild); // Dropdown vor dem Eingabefeld einfügen
                     })
                     .catch(error => console.error('Error fetching teams:', error));
 
@@ -425,6 +426,7 @@
                     applyAddEmployeeTeam();
                 };
                 buttonsDiv.appendChild(applyButton);
+
             } else if (auswahl === "löschen") {
                 var idInput = document.createElement("input");
                 idInput.type = "text";
