@@ -497,6 +497,27 @@
         }
 
 
+        function displayErrorMessageEditProject(message) {
+  var errorMessage = document.getElementById("error-message-projectEditPersonal");
+  errorMessage.textContent = message;
+  errorMessage.style.display = "block";
+
+  setTimeout(function () {
+    errorMessage.style.display = "none";
+  }, 2000); // Nachricht wird nach 7 Sekunden ausgeblendet
+}
+
+function displaySuccessMessageEditProject(message) {
+  var successMessage = document.getElementById("success-message-projectEditPersonal");
+  successMessage.textContent = message;
+  successMessage.style.display = "block";
+  successMessage.style.color = "green";
+
+  setTimeout(function () {
+    successMessage.style.display = "none";
+  }, 2000); // Nachricht wird nach 7 Sekunden ausgeblendet
+}
+
 
     </script>
 </body>
