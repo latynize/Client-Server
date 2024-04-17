@@ -230,6 +230,50 @@ async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_
     return {"team": teams}
 
 
+# search teams, read all employees in team
+@app.get("/api/team/employee/{team_id}/")
+async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Team = m.Base.classes.team
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+
+    result = await db.execute(
+        select(
+            Employee.employee_id,
+            Employee.first_name,
+            Employee.last_name,
+            Employee.free_fte,
+            Employee.e_mail,
+            Employee.phone_number,
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description,
+            Type.type_name
+        )
+        .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)
+        .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .filter(Team.team_id == team_id)
+    )
+    db.expire_all()
+
+    employees = [{
+        'employee_id': row.employee_id,
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name
+    } for row in result.mappings().all()]
+
+    return {"employee": employees}
+
+
 # assign employees to team
 
 @app.post("/api/team/employee/")
