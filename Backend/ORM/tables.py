@@ -3,6 +3,9 @@ from datetime import date
 from typing import Optional
 
 
+# This file contains the Pydantic models for the ORM tables. These models are used to validate the data that is sent
+# to the API.
+
 class JobBase(BaseModel):
     job_id: int
     job_name: str

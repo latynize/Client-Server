@@ -1,27 +1,24 @@
 import datetime
 import os
 import jwt
-from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ORM.mapper import Mapper as m
 
+
+# This module provides the Helper class, which contains static methods that are needed in multiple modules of the
+# main module.
 
 class Helper:
+    # The secret key for the JWT encoding.
     SECRET_KEY = os.getenv("SECRET_KEY")
 
     @staticmethod
     async def universal_delete(model_instance, db, **conditions) -> bool:
         """
-        Asynchrone Methode zum Löschen von Einträgen aus einer Datenbank basierend auf gegebenen Bedingungen.
-
-        Args:
-            model_instance: Das zu löschende Datenbankmodell.
-            db (AsyncSession, optional): Die Datenbanksitzung. Standardmäßig Depends(m.get_db_session).
-            **conditions: Bedingungen zur Bestimmung, welche Einträge zu löschen sind.
-
-        Returns:
-            bool: True, wenn das Löschen erfolgreich war, sonst False.
+        Deletes the instances of the given model that match the given conditions.
+        :param model_instance: The model instance to delete.
+        :param db: The database session.
+        :param conditions: The conditions to match.
+        :return: bool: True if the instances were deleted, False otherwise.
         """
         query = select(model_instance)
         for attr, value in conditions.items():
@@ -41,7 +38,14 @@ class Helper:
 
     @staticmethod
     async def universal_update(model_instance, db, entity_id, update_data) -> bool:
-
+        """
+        Updates the instance of the given model by the given ID based on the given data.
+        :param model_instance: The model instance to update.
+        :param db: The database session.
+        :param entity_id: The ID of the entity to update.
+        :param update_data: The data to update.
+        :return: bool: True if the instance was successfully updated, False otherwise.
+        """
         try:
             entity = await db.get(model_instance, entity_id)
             if not entity:
@@ -58,9 +62,15 @@ class Helper:
             raise e
 
     @staticmethod
-    def create_jwt(username):
+    def create_jwt(username) -> str:
+        """
+        Creates a JWT token for the given username.
+        :param username: The username to create the token for.
+        :return: str: The JWT token.
+        """
         payload = {
             "username": username,
             "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }
+
         return jwt.encode(payload, Helper.SECRET_KEY, algorithm="HS256")

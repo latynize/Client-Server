@@ -19,10 +19,10 @@ class Mapper:
         self.metadata = MetaData()
         self.Base = automap_base()
 
-    async def reflect_tables(self, schema: str = "cioban") -> None:
+    async def reflect_tables(self, schema="cioban") -> None:
         """
         Reflects the tables of the given schema and prepares the ORM.
-        :param String schema: The schema to reflect.
+        :param schema: The schema to reflect.
         """
         async with self.engine.begin() as conn:
             await conn.run_sync(self.metadata.reflect, schema=schema)
@@ -31,7 +31,7 @@ class Mapper:
     async def get_db_session(self) -> AsyncSession:
         """
         Generates a session to the database schema "cioban".
-        :return: AsyncSession session: The database session.
+        :return: session: The database session.
         """
         async with self.SessionLocal() as session:
             await session.execute(text("SET search_path TO cioban"))
@@ -40,7 +40,7 @@ class Mapper:
     async def get_db_session_login(self) -> AsyncSession:
         """
         Generates a session to the database schema "login".
-        :return: AsyncSession session: The database session.
+        :return: session: The database session.
         """
         async with self.SessionLocal() as session:
             await session.execute(text("SET search_path TO login"))
