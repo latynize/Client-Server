@@ -4,3 +4,7 @@
 *.pyc
 .venv
 startUvicorn.bat
+/.idea
+.idea/copilot/chatSessions/00000000000.xd
+.idea/copilot/chatSessions/blobs/version
+.idea/copilot/chatSessions/xd.lck

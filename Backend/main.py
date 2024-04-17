@@ -10,10 +10,10 @@ from typing import List, Optional
 from ORM.mapper import Mapper
 from helper import Helper as h
 
-
 m = Mapper()
 m_login = Mapper()
 app = FastAPI()
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -275,7 +275,8 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
 
 # assign employees to team
 @app.post("/api/team/employee/")
-async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
+async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],
+                                  db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
@@ -295,11 +296,12 @@ async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: Asy
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     try:
-        deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db ,team_id=team_data.team_id ,employee_id=team_data.employee_id)
+        deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, team_id=team_data.team_id,
+                                                       employee_id=team_data.employee_id)
         if deletion_successful:
-                return {"status": "success", "message": "Employee deleted from team successfully."}
+            return {"status": "success", "message": "Employee deleted from team successfully."}
         else:
-                raise HTTPException(status_code=404, detail="Employee not found in team")
+            raise HTTPException(status_code=404, detail="Employee not found in team")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
 
@@ -656,7 +658,7 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
 
 @app.put('/api/project/{project_id}/')
 async def update_project(project_id: int, update_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
-    Project = m.Base.classes.project 
+    Project = m.Base.classes.project
 
     try:
         update_successful = await h.universal_update(Project, db, project_id, update_data)
@@ -694,6 +696,7 @@ async def get_team(db: AsyncSession = Depends(m.get_db_session)):
 
     return {"team": teams}
 
+
 @app.get('/api/team/{team_id}/')
 async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -720,6 +723,7 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
 
     return {"team": team}
 
+
 @app.delete("/api/team/{team_id}/")
 async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -734,6 +738,7 @@ async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting team: {e}")
 
+
 @app.post('/api/team/')
 async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -747,6 +752,7 @@ async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error creating team: {e}")
+
 
 @app.put("/api/team/{team_id}/")
 async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depends(m.get_db_session)):
@@ -854,6 +860,7 @@ async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_se
         return {"status": "success", "message": "Login successful", "token": token}
     else:
         raise HTTPException(status_code=401, detail="Login failed")
+
 
 @app.post('/api/verifyToken')
 async def verify_token(token: t.Token):
