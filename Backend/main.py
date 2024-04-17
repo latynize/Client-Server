@@ -155,54 +155,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     return {"employee": employees}
 
 
-# search projects, read all employees in project
-@app.get("/api/project/employee/{project_id}/")
-async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
-    Project = m.Base.classes.project
-    Employee = m.Base.classes.employee
-    Team = m.Base.classes.team
-    Exp_Level = m.Base.classes.experience_level
-    Type = m.Base.classes.type
-    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
-
-    result = await db.execute(
-        select(
-            Employee.employee_id,
-            Employee.first_name,
-            Employee.last_name,
-            Employee.free_fte,
-            Employee.e_mail,
-            Employee.phone_number,
-            Employee.entry_date,
-            Exp_Level.exp_lvl_description,
-            Type.type_name,
-            Team.team_name
-        )
-        .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)
-        .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)
-        .join(Project, Team.project_id == Project.project_id)
-        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
-        .join(Type, Employee.type_id == Type.type_id)
-        .filter(Project.project_id == project_id)
-    )
-    db.expire_all()
-
-    employees = [{
-        'employee_id': row.employee_id,
-        'first_name': row.first_name,
-        'last_name': row.last_name,
-        'free_fte': row.free_fte,
-        'e_mail': row.e_mail,
-        'phone_number': row.phone_number,
-        'entry_date': row.entry_date,
-        'exp_lvl_description': row.exp_lvl_description,
-        'type_name': row.type_name,
-        'team_name': row.team_name
-    } for row in result.mappings().all()]
-
-    return {"employee": employees}
-
-
 #search projects, read all teams in project
 @app.get("/api/project/team/{project_id}/")
 async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
@@ -669,7 +621,54 @@ async def update_project(project_id: int, update_data: t.Project, db: AsyncSessi
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
 
 
-# CRUD operations for team
+@app.get("/api/project/employee/{project_id}/")
+async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Employee = m.Base.classes.employee
+    Team = m.Base.classes.team
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+
+    result = await db.execute(
+        select(
+            Employee.employee_id,
+            Employee.first_name,
+            Employee.last_name,
+            Employee.free_fte,
+            Employee.e_mail,
+            Employee.phone_number,
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description,
+            Type.type_name,
+            Team.team_name
+        )
+        .join(ConnectionTeamEmployee, Employee.employee_id == ConnectionTeamEmployee.employee_id)
+        .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)
+        .join(Project, Team.project_id == Project.project_id)
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .filter(Project.project_id == project_id)
+    )
+    db.expire_all()
+
+    employees = [{
+        'employee_id': row.employee_id,
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name,
+        'team_name': row.team_name
+    } for row in result.mappings().all()]
+
+    return {"employee": employees}
+
+
+# CRUD operations for team table
 @app.get('/api/team/')
 async def get_team(db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -767,7 +766,7 @@ async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depe
         raise HTTPException(status_code=400, detail=f"Error updating team: {e}")
 
 
-# Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
+# Read definition tables (Team, Address, Type, Education Degree, Job, Skill, Experience Level)
 @app.get('/api/department/')
 async def get_department(db: AsyncSession = Depends(m.get_db_session)):
     Department = m.Base.classes.department
