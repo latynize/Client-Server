@@ -309,25 +309,29 @@
                 fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
                     .then(response => response.json())
                     .then(data => {
-                        var table = "<table style='overflow:auto'><tr><th>ID</th><th>Vorname</th><th>Name</th><th>Freie FTE</th><th>Mail</th><th>Tel. Nummer</th><th>Beschäftigungsstart</th><th>Erfahrungsgrad</th><th>Typ</th><th>Teams</th></tr>";
-                        data.employee.forEach(person => {
-                            table += "<tr>";
-                            table += "<td>" + person.employee_id + "</td>";
-                            table += "<td>" + person.first_name + "</td>";
-                            table += "<td>" + person.last_name + "</td>";
-                            table += "<td>" + person.free_fte + "</td>";
-                            table += "<td>" + person.e_mail + "</td>";
-                            table += "<td>" + person.phone_number + "</td>";
-                            table += "<td>" + person.entry_date + "</td>";
-                            table += "<td>" + person.exp_lvl_description + "</td>";
-                            table += "<td>" + person.type_name + "</td>";
-                            table += "<td>" + person.team_name + "</td>";
-                            table += "</tr>";
-                        });
-                        table += "</table>";
-                        eingabefelderDiv.innerHTML = table;
+                        if (data.employee && data.employee.length > 0) {
+                            var table = "<table style='overflow:auto'><tr><th>ID</th><th>Vorname</th><th>Name</th><th>Freie FTE</th><th>Mail</th><th>Tel. Nummer</th><th>Beschäftigungsstart</th><th>Erfahrungsgrad</th><th>Typ</th><th>Teams</th></tr>";
+                            data.employee.forEach(person => {
+                                table += "<tr>";
+                                table += "<td>" + person.employee_id + "</td>";
+                                table += "<td>" + person.first_name + "</td>";
+                                table += "<td>" + person.last_name + "</td>";
+                                table += "<td>" + person.free_fte + "</td>";
+                                table += "<td>" + person.e_mail + "</td>";
+                                table += "<td>" + person.phone_number + "</td>";
+                                table += "<td>" + person.entry_date + "</td>";
+                                table += "<td>" + person.exp_lvl_description + "</td>";
+                                table += "<td>" + person.type_name + "</td>";
+                                table += "<td>" + person.team_name + "</td>";
+                                table += "</tr>";
+                            });
+                            table += "</table>";
+                            eingabefelderDiv.innerHTML = table;
+                        } else {
+                            eingabefelderDiv.innerHTML = "Keine Daten vorhanden.";
+                        }
                     })
-                    .catch(error => console.log(error));
+                    .catch(error => console.error(error));
             } else if (auswahl === "hinzufügen") {
                 fetch(`https://cioban.de/api/project/team/${selectedProjectId}/`)
                     .then(response => response.json())
