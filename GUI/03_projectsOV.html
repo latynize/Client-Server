@@ -387,17 +387,18 @@
                     })
                     .catch(error => console.error('Error fetching teams:', error));
 
-                var applyButton = document.createElement("button");
-                applyButton.textContent = "Löschen";
-                applyButton.style.color = "black";
-                applyButton.className = "btn text-truncate add-another-btn";
-                applyButton.onclick = function () {
-                    applyDeleteEmployeeTeam();
-                };
-                buttonsDiv.appendChild(applyButton);
+                /*                var applyButton = document.createElement("button");
+                               applyButton.textContent = "Löschen";
+                               applyButton.style.color = "black";
+                               applyButton.className = "btn text-truncate add-another-btn";
+                               applyButton.onclick = function () {
+                                   applyDeleteEmployeeTeam();
+                               };
+                               buttonsDiv.appendChild(applyButton); */
             }
 
             function loadEmployeesDropdown(teamId) {
+                var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
                 console.log("in loadEmployeesDropdown");
                 fetch(`https://cioban.de/api/team/employee/${teamId}`)
                     .then(response => response.json())
@@ -417,6 +418,15 @@
                         eingabefelderDiv.appendChild(employeeDropdown); // Mitarbeiter-Dropdown hinzufügen
                     })
                     .catch(error => console.error('Error fetching employees:', error));
+
+                var applyButton = document.createElement("button");
+                applyButton.textContent = "Löschen";
+                applyButton.style.color = "black";
+                applyButton.className = "btn text-truncate add-another-btn";
+                applyButton.onclick = function () {
+                    applyDeleteEmployeeTeam();
+                };
+                buttonsDiv.appendChild(applyButton);
             }
 
         }
