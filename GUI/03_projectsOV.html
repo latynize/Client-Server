@@ -398,7 +398,8 @@
             }
 
             function loadEmployeesDropdown(teamId) {
-                fetch(`https://cioban.de/api/employee/team/${teamId}`)
+                console.log("in loadEmployeesDropdown");
+                fetch(`https://cioban.de/api/team/employee/${teamId}`)
                     .then(response => response.json())
                     .then(data => {
                         var employeeDropdown = document.createElement("select");
