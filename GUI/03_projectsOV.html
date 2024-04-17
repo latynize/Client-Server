@@ -402,10 +402,21 @@
                 fetch(`https://cioban.de/api/team/employee/${teamId}`)
                     .then(response => response.json())
                     .then(data => {
-                        var employeeDropdown = document.createElement("select");
-                        employeeDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
-                        employeeDropdown.placeholder = "Mitarbeiter auswählen";
-                        employeeDropdown.id = "employeeDropdown";
+                        var employeeDropdown = document.getElementById("employeeDropdown");
+
+                        if (employeeDropdown) {
+                            // Wenn ein Dropdown bereits existiert, lösche alle vorhandenen Optionen
+                            while (employeeDropdown.firstChild) {
+                                employeeDropdown.removeChild(employeeDropdown.firstChild);
+                            }
+                        } else {
+                            // Wenn kein Dropdown vorhanden ist, erstelle ein neues
+                            employeeDropdown = document.createElement("select");
+                            employeeDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
+                            employeeDropdown.placeholder = "Mitarbeiter auswählen";
+                            employeeDropdown.id = "employeeDropdown";
+                            eingabefelderDiv.appendChild(employeeDropdown); // Mitarbeiter-Dropdown hinzufügen
+                        }
 
                         data.employee.forEach(employee => {
                             var option = document.createElement("option");
