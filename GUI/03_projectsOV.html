@@ -399,7 +399,6 @@
 
             function loadEmployeesDropdown(teamId) {
                 var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
-                console.log("in loadEmployeesDropdown");
                 fetch(`https://cioban.de/api/team/employee/${teamId}`)
                     .then(response => response.json())
                     .then(data => {
@@ -408,7 +407,7 @@
                         employeeDropdown.placeholder = "Mitarbeiter auswählen";
                         employeeDropdown.id = "employeeDropdown";
 
-                        data.employees.forEach(employee => {
+                        data.employee.forEach(employee => {
                             var option = document.createElement("option");
                             option.value = employee.employee_id;
                             option.text = `${employee.first_name} ${employee.last_name}`; // Vor- und Nachname zusammenfügen
