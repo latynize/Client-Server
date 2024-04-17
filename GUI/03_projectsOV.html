@@ -309,25 +309,29 @@
                 fetch(`https://cioban.de/api/project/employee/${selectedProjectId}`)
                     .then(response => response.json())
                     .then(data => {
-                        var table = "<table style='overflow:auto'><tr><th>ID</th><th>Vorname</th><th>Name</th><th>Freie FTE</th><th>Mail</th><th>Tel. Nummer</th><th>Beschäftigungsstart</th><th>Erfahrungsgrad</th><th>Typ</th><th>Teams</th></tr>";
-                        data.employee.forEach(person => {
-                            table += "<tr>";
-                            table += "<td>" + person.employee_id + "</td>";
-                            table += "<td>" + person.first_name + "</td>";
-                            table += "<td>" + person.last_name + "</td>";
-                            table += "<td>" + person.free_fte + "</td>";
-                            table += "<td>" + person.e_mail + "</td>";
-                            table += "<td>" + person.phone_number + "</td>";
-                            table += "<td>" + person.entry_date + "</td>";
-                            table += "<td>" + person.exp_lvl_description + "</td>";
-                            table += "<td>" + person.type_name + "</td>";
-                            table += "<td>" + person.team_name + "</td>";
-                            table += "</tr>";
-                        });
-                        table += "</table>";
-                        eingabefelderDiv.innerHTML = table;
+                        if (data.employee && data.employee.length > 0) {
+                            var table = "<table style='overflow:auto'><tr><th>ID</th><th>Vorname</th><th>Name</th><th>Freie FTE</th><th>Mail</th><th>Tel. Nummer</th><th>Beschäftigungsstart</th><th>Erfahrungsgrad</th><th>Typ</th><th>Teams</th></tr>";
+                            data.employee.forEach(person => {
+                                table += "<tr>";
+                                table += "<td>" + person.employee_id + "</td>";
+                                table += "<td>" + person.first_name + "</td>";
+                                table += "<td>" + person.last_name + "</td>";
+                                table += "<td>" + person.free_fte + "</td>";
+                                table += "<td>" + person.e_mail + "</td>";
+                                table += "<td>" + person.phone_number + "</td>";
+                                table += "<td>" + person.entry_date + "</td>";
+                                table += "<td>" + person.exp_lvl_description + "</td>";
+                                table += "<td>" + person.type_name + "</td>";
+                                table += "<td>" + person.team_name + "</td>";
+                                table += "</tr>";
+                            });
+                            table += "</table>";
+                            eingabefelderDiv.innerHTML = table;
+                        } else {
+                            eingabefelderDiv.innerHTML = "Keine Daten vorhanden.";
+                        }
                     })
-                    .catch(error => console.log(error));
+                    .catch(error => console.error(error));
             } else if (auswahl === "hinzufügen") {
                 fetch(`https://cioban.de/api/project/team/${selectedProjectId}/`)
                     .then(response => response.json())
@@ -386,27 +390,30 @@
                         });
                     })
                     .catch(error => console.error('Error fetching teams:', error));
-
-                var applyButton = document.createElement("button");
-                applyButton.textContent = "Löschen";
-                applyButton.style.color = "black";
-                applyButton.className = "btn text-truncate add-another-btn";
-                applyButton.onclick = function () {
-                    applyDeleteEmployeeTeam();
-                };
-                buttonsDiv.appendChild(applyButton);
             }
 
             function loadEmployeesDropdown(teamId) {
-                fetch(`https://cioban.de/api/employee/team/${teamId}`)
+                var buttonsDiv = document.getElementById("buttons-projectEditPersonal");
+                fetch(`https://cioban.de/api/team/employee/${teamId}`)
                     .then(response => response.json())
                     .then(data => {
-                        var employeeDropdown = document.createElement("select");
-                        employeeDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
-                        employeeDropdown.placeholder = "Mitarbeiter auswählen";
-                        employeeDropdown.id = "employeeDropdown";
+                        var employeeDropdown = document.getElementById("employeeDropdown");
 
-                        data.employees.forEach(employee => {
+                        if (employeeDropdown) {
+                            // Wenn ein Dropdown bereits existiert, lösche alle vorhandenen Optionen
+                            while (employeeDropdown.firstChild) {
+                                employeeDropdown.removeChild(employeeDropdown.firstChild);
+                            }
+                        } else {
+                            // Wenn kein Dropdown vorhanden ist, erstelle ein neues
+                            employeeDropdown = document.createElement("select");
+                            employeeDropdown.style.width = "100%"; // Dropdown so breit wie das Eingabefeld
+                            employeeDropdown.placeholder = "Mitarbeiter auswählen";
+                            employeeDropdown.id = "employeeDropdown";
+                            eingabefelderDiv.appendChild(employeeDropdown); // Mitarbeiter-Dropdown hinzufügen
+                        }
+
+                        data.employee.forEach(employee => {
                             var option = document.createElement("option");
                             option.value = employee.employee_id;
                             option.text = `${employee.first_name} ${employee.last_name}`; // Vor- und Nachname zusammenfügen
@@ -416,6 +423,20 @@
                         eingabefelderDiv.appendChild(employeeDropdown); // Mitarbeiter-Dropdown hinzufügen
                     })
                     .catch(error => console.error('Error fetching employees:', error));
+                var applyButton = document.getElementById("applyDeleteButton");
+
+                if (!applyButton) {
+                    // Wenn der Button noch nicht existiert, erstelle ihn
+                    applyButton = document.createElement("button");
+                    applyButton.textContent = "Löschen";
+                    applyButton.style.color = "black";
+                    applyButton.className = "btn text-truncate add-another-btn";
+                    applyButton.id = "applyDeleteButton";
+                    applyButton.onclick = function () {
+                        applyDeleteEmployeeTeam();
+                    };
+                    buttonsDiv.appendChild(applyButton);
+                }
             }
 
         }
@@ -424,6 +445,8 @@
             if (validateProjectEditPersonal()) {
                 var employeeId = document.querySelector('input[type="text"]').value;
                 var teamId = document.getElementById("teamDropdown").value;
+
+
 
                 console.log(teamId, employeeId);
 
@@ -457,15 +480,17 @@
                 var employeeId = document.getElementById("employeeDropdown").value;
                 var teamId = document.getElementById("teamDropdownDelete").value;
 
+                console.log(teamId, employeeId);
+
                 fetch(`https://cioban.de/api/team/employee/`, {
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify([{
+                    body: JSON.stringify({
                         team_id: teamId,
                         employee_id: employeeId
-                    }])
+                    })
                 })
                     .then(response => {
                         if (response.ok) {
