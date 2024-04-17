@@ -287,20 +287,19 @@ async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee], db:
         raise HTTPException(status_code=400, detail=f"Error assigning employees to team: {e}")
 
 
-# delete assignment emploees to team
+# delete assignment employees to team
 @app.delete("/api/team/employee/")
 async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
-    for data in team_data:
-        try:
-            deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, employee_id=ConnectionTeamEmployee.employee_id)
-            if deletion_successful:
+    try:
+        deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db ,team_id=team_data.team_id ,employee_id=team_data.employee_id)
+        if deletion_successful:
                 return {"status": "success", "message": "Employee deleted from team successfully."}
-            else:
+        else:
                 raise HTTPException(status_code=404, detail="Employee not found in team")
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
 
 
 # CRUD operations for the Employee table
@@ -676,7 +675,7 @@ async def get_team(db: AsyncSession = Depends(m.get_db_session)):
             Team.team_id,
             Team.team_name,
             Team.team_purpose,
-            Project.proj_name.label('project_name')
+            Project.proj_name
         )
         .join(Project, Team.project_id == Project.project_id)
     )
@@ -686,7 +685,7 @@ async def get_team(db: AsyncSession = Depends(m.get_db_session)):
         'team_id': row.team_id,
         'team_name': row.team_name,
         'team_purpose': row.team_purpose,
-        'project_name': row.project_name
+        'project_name': row.proj_name
     } for row in result.mappings().all()]
 
     return {"team": teams}
@@ -701,7 +700,7 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
             Team.team_id,
             Team.team_name,
             Team.team_purpose,
-            Project.proj_name.label('project_name')
+            Project.proj_name
         )
         .join(Project, Team.project_id == Project.project_id)
         .where(Team.team_id == team_id)
@@ -712,7 +711,7 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
         'team_id': row.team_id,
         'team_name': row.team_name,
         'team_purpose': row.team_purpose,
-        'project_name': row.project_name
+        'project_name': row.proj_name
     } for row in result.mappings().all()]
 
     return {"team": team}
@@ -755,6 +754,7 @@ async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depe
             raise HTTPException(status_code=404, detail="Team not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating team: {e}")
+
 
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
 @app.get('/api/department/')
