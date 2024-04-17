@@ -201,8 +201,12 @@
                     {
                         "targets": [7, 8],
                         "render": function (data, type, row) {
-                            if (type === 'display') {
-                                return formatDate(data);
+                            if (type === 'display' && data) {
+                                var date = new Date(data);
+                                var day = date.getDate().toString().padStart(2, '0');
+                                var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                                var year = date.getFullYear();
+                                return day + '.' + month + '.' + year;
                             }
                             return data;
                         }
@@ -249,8 +253,8 @@
                 .then(data => {
                     let table = $('#projectTable').DataTable();
                     data.project.forEach(element => {
-                        let startdate = formatDate(element.start_date);
-                        let enddate = formatDate(element.end_date);
+                        // let startdate = formatDate(element.start_date);
+                        // let enddate = formatDate(element.end_date);
                         table.row.add([
                             element.project_id,
                             element.project_name,
@@ -259,8 +263,8 @@
                             element.proj_priority,
                             element.needed_fte,
                             element.current_fte,
-                            startdate,
-                            enddate
+                            element.start_date,
+                            element.end_date
                         ]).draw();
                     });
                 })
