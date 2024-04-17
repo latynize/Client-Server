@@ -1,6 +1,5 @@
 .DS_Store
 
-/.idea
 *.pyc
 .venv
 startUvicorn.bat
