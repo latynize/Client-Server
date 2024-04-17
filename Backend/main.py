@@ -29,8 +29,7 @@ async def shutdown_event():
 
 # API endpoints
 
-# Search endpoint
-
+# Search for employees based on given criteria
 @app.post("/api/search/")
 async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
@@ -155,7 +154,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
 
 
 # search projects, read all employees in project
-
 @app.get("/api/project/employee/{project_id}/")
 async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
@@ -204,7 +202,6 @@ async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.
 
 
 #search projects, read all teams in project
-
 @app.get("/api/project/team/{project_id}/")
 async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
@@ -275,13 +272,12 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
 
 
 # assign employees to team
-
 @app.post("/api/team/employee/")
 async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
-        new_connection = ConnectionTeamEmployee(employee_id=data.employee_id)
+        new_connection = ConnectionTeamEmployee(**data.dict())
         db.add(new_connection)
     try:
         await db.commit()
@@ -292,14 +288,13 @@ async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee], db:
 
 
 # delete assignment emploees to team
-
 @app.delete("/api/team/employee/")
-async def delete_employee_from_team(team_data: List[t.ConnectionTeamEmployee], db: AsyncSession = Depends(m.get_db_session)):
+async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
         try:
-            deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, employee_id=data.employee_id)
+            deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, employee_id=ConnectionTeamEmployee.employee_id)
             if deletion_successful:
                 return {"status": "success", "message": "Employee deleted from team successfully."}
             else:
@@ -307,8 +302,8 @@ async def delete_employee_from_team(team_data: List[t.ConnectionTeamEmployee], d
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
 
-# CRUD operations for the Employee table
 
+# CRUD operations for the Employee table
 @app.get('/api/employee/')
 async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
@@ -431,7 +426,6 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_
 
 
 # Read Internal, External, Stat employees
-
 @app.get('/api/internal/')
 async def get_internal(db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
@@ -550,7 +544,6 @@ async def get_stat(db: AsyncSession = Depends(m.get_db_session)):
 
 
 # CRUD operations for the Project table
-
 @app.get('/api/project/')
 async def get_project(db: AsyncSession = Depends(m.get_db_session)):
     Project = m.Base.classes.project
@@ -660,7 +653,7 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
 
 @app.put('/api/project/{project_id}/')
 async def update_project(project_id: int, update_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
-    Project = m.Base.classes.project  # Correct the Project class reference
+    Project = m.Base.classes.project 
 
     try:
         update_successful = await h.universal_update(Project, db, project_id, update_data)
@@ -673,7 +666,6 @@ async def update_project(project_id: int, update_data: t.Project, db: AsyncSessi
 
 
 # CRUD operations for team
-
 @app.get('/api/team/')
 async def get_team(db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -765,7 +757,6 @@ async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depe
         raise HTTPException(status_code=400, detail=f"Error updating team: {e}")
 
 # Read Team, Address, Type, Education Degree, Job, Skill, Experience Level
-
 @app.get('/api/department/')
 async def get_department(db: AsyncSession = Depends(m.get_db_session)):
     Department = m.Base.classes.department

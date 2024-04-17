@@ -40,13 +40,10 @@ class Helper:
         return True
 
     @staticmethod
-    async def universal_update(entity_class, db, entity_id, update_data) -> bool:
-        """
-        Klasse hat Entities
-        Modell hat Instances
-        """
+    async def universal_update(model_instance, db, entity_id, update_data) -> bool:
+
         try:
-            entity = await db.get(entity_class, entity_id)
+            entity = await db.get(model_instance, entity_id)
             if not entity:
                 return False
 
