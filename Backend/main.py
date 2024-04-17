@@ -645,6 +645,20 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
     return {"team": team}
 
 
+@app.delete("/api/team/employee/")
+async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)):
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+
+    try:
+        deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, team_id=team_data.team_id, employee_id=team_data.employee_id)
+        if deletion_successful:
+            return {"status": "success", "message": "Employee deleted from team successfully."}
+        else:
+            raise HTTPException(status_code=404, detail="Employee not found in team")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
+
+
 @app.delete("/api/team/{team_id}/")
 async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
@@ -745,21 +759,6 @@ async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: 
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Error assigning employees to team: {e}")
-
-
-@app.delete("/api/team/employee/")
-async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)):
-    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
-
-    try:
-        deletion_successful = await h.universal_delete(ConnectionTeamEmployee, db, team_id=team_data.team_id,
-                                                       employee_id=team_data.employee_id)
-        if deletion_successful:
-            return {"status": "success", "message": "Employee deleted from team successfully."}
-        else:
-            raise HTTPException(status_code=404, detail="Employee not found in team")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error deleting employee from team: {e}")
 
 
 # Read definition tables (Team, Address, Type, Education Degree, Job, Skill, Experience Level)
