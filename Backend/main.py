@@ -155,32 +155,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     return {"employee": employees}
 
 
-#search projects, read all teams in project
-@app.get("/api/project/team/{project_id}/")
-async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
-    Project = m.Base.classes.project
-    Team = m.Base.classes.team
-
-    result = await db.execute(
-        select(
-            Team.team_id,
-            Team.team_name,
-            Team.team_purpose
-        )
-        .join(Project, Team.project_id == Project.project_id)
-        .filter(Project.project_id == project_id)
-    )
-    db.expire_all()
-
-    teams = [{
-        'team_id': row.team_id,
-        'team_name': row.team_name,
-        'team_purpose': row.team_purpose
-    } for row in result.mappings().all()]
-
-    return {"team": teams}
-
-
 # search teams, read all employees in team
 @app.get("/api/team/employee/{team_id}/")
 async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
@@ -666,6 +640,31 @@ async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.
     } for row in result.mappings().all()]
 
     return {"employee": employees}
+
+
+@app.get("/api/project/team/{project_id}/")
+async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Project = m.Base.classes.project
+    Team = m.Base.classes.team
+
+    result = await db.execute(
+        select(
+            Team.team_id,
+            Team.team_name,
+            Team.team_purpose
+        )
+        .join(Project, Team.project_id == Project.project_id)
+        .filter(Project.project_id == project_id)
+    )
+    db.expire_all()
+
+    teams = [{
+        'team_id': row.team_id,
+        'team_name': row.team_name,
+        'team_purpose': row.team_purpose
+    } for row in result.mappings().all()]
+
+    return {"team": teams}
 
 
 # CRUD operations for team table
