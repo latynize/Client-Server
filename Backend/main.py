@@ -138,6 +138,8 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
 
     result = await db.execute(query)
 
+    db.expire_all()
+
     employees = [{
         'employee_id': row.employee_id,
         'first_name': row.first_name,
@@ -344,9 +346,11 @@ async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
 @app.delete("/api/employee/{employee_id}/")
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
     try:
+        deletion_casc_connection = await h.universal_delete(ConnectionTeamEmployee, db, employee_id=employee_id)
         deletion_successful = await h.universal_delete(Employee, db, employee_id=employee_id)
-        if deletion_successful:
+        if deletion_successful and deletion_casc_connection:
             return {"status": "success", "message": "Employee deleted successfully."}
         else:
             raise HTTPException(status_code=404, detail="Employee not found")
@@ -719,9 +723,11 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
 @app.delete("/api/team/{team_id}/")
 async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Team = m.Base.classes.team
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
     try:
         deletion_successful = await h.universal_delete(Team, db, team_id=team_id)
-        if deletion_successful:
+        deletion_casc_connection = await h.universal_delete(ConnectionTeamEmployee, db, team_id=team_id)
+        if deletion_successful and deletion_casc_connection:
             return {"status": "success", "message": "Team deleted successfully."}
         else:
             raise HTTPException(status_code=404, detail="Team not found")
