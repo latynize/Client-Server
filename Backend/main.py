@@ -275,8 +275,7 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
 
 # assign employees to team
 @app.post("/api/team/employee/")
-async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],
-                                  db: AsyncSession = Depends(m.get_db_session)):
+async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: AsyncSession = Depends(m.get_db_session)):
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
@@ -345,6 +344,47 @@ async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
     return {"employee": employees}
 
 
+@app.get('/api/employee/{employee_id}/')
+async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    Employee = m.Base.classes.employee
+    Exp_Level = m.Base.classes.experience_level
+    Type = m.Base.classes.type
+
+    result = await db.execute(
+        select(
+            Employee.employee_id,
+            Employee.first_name,
+            Employee.last_name,
+            Employee.free_fte,
+            Employee.e_mail,
+            Employee.phone_number,
+            Employee.entry_date,
+            Exp_Level.exp_lvl_description,
+            Type.type_name,
+            Employee.address_id
+        )
+        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
+        .join(Type, Employee.type_id == Type.type_id)
+        .where(Employee.employee_id == employee_id)
+    )
+    db.expire_all()
+
+    employee = [{
+        'employee_id': row.employee_id,
+        'first_name': row.first_name,
+        'last_name': row.last_name,
+        'free_fte': row.free_fte,
+        'e_mail': row.e_mail,
+        'phone_number': row.phone_number,
+        'entry_date': row.entry_date,
+        'exp_lvl_description': row.exp_lvl_description,
+        'type_name': row.type_name,
+        'address_id': row.address_id
+    } for row in result.mappings().all()]
+
+    return {"employee": employee}
+
+
 @app.delete("/api/employee/{employee_id}/")
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
     Employee = m.Base.classes.employee
@@ -387,47 +427,6 @@ async def update_employee(employee_id: int, update_data: t.Employee, db: AsyncSe
             raise HTTPException(status_code=404, detail="Employee not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")
-
-
-@app.get('/api/employee/{employee_id}/')
-async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
-    Employee = m.Base.classes.employee
-    Exp_Level = m.Base.classes.experience_level
-    Type = m.Base.classes.type
-
-    result = await db.execute(
-        select(
-            Employee.employee_id,
-            Employee.first_name,
-            Employee.last_name,
-            Employee.free_fte,
-            Employee.e_mail,
-            Employee.phone_number,
-            Employee.entry_date,
-            Exp_Level.exp_lvl_description,
-            Type.type_name,
-            Employee.address_id
-        )
-        .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
-        .join(Type, Employee.type_id == Type.type_id)
-        .where(Employee.employee_id == employee_id)
-    )
-    db.expire_all()
-
-    employee = [{
-        'employee_id': row.employee_id,
-        'first_name': row.first_name,
-        'last_name': row.last_name,
-        'free_fte': row.free_fte,
-        'e_mail': row.e_mail,
-        'phone_number': row.phone_number,
-        'entry_date': row.entry_date,
-        'exp_lvl_description': row.exp_lvl_description,
-        'type_name': row.type_name,
-        'address_id': row.address_id
-    } for row in result.mappings().all()]
-
-    return {"employee": employee}
 
 
 # Read Internal, External, Stat employees
@@ -846,6 +845,7 @@ async def get_experience_level(db: AsyncSession = Depends(m.get_db_session)):
     return {"experience_level": exp_levels}
 
 
+# Login API
 @app.post('/api/login/')
 async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_session_login)):
     Login = m_login.Base.classes.user_login
