@@ -29,9 +29,15 @@ async def shutdown_event():
 
 # API endpoints
 
-# Search for employees based on given criteria
+# Search
 @app.post("/api/search/")
 async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: AsyncSession = Depends(m.get_db_session)):
+    """	
+    Searches for employees based on the given criteria.
+    :param data: List of SearchCriteria objects.
+    :param db: The database session.
+    :return: List of employees that match the criteria.
+    """
     Employee = m.Base.classes.employee
     ExperienceLevel = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -155,9 +161,14 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     return {"employee": employees}
 
 
-# CRUD operations for the Employee table
+# CRUD operations for the employee table
 @app.get('/api/employee/')
 async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all employees.
+    :param db: The database session.
+    :return: List of all employees.
+    """
     Employee = m.Base.classes.employee
     Exp_Level = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -196,6 +207,12 @@ async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/employee/{employee_id}/')
 async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns an employee by given ID.
+    :param employee_id: The ID of the employee to return.
+    :param db: The database session.
+    :return: The employee with the given ID.
+    """
     Employee = m.Base.classes.employee
     Exp_Level = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -237,6 +254,12 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_
 
 @app.delete("/api/employee/{employee_id}/")
 async def delete_employee(employee_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Deletes an employee by given ID.
+    :param employee_id: The ID of the employee to delete.
+    :param db: The database session.
+    :return: Success message if the employee was successfully deleted, error message otherwise.
+    """
     Employee = m.Base.classes.employee
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
     try:
@@ -252,6 +275,12 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(m.get_db_
 
 @app.post("/api/employee/")
 async def create_employees(employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Creates a new employees.
+    :param employee_data: List of Employee attributes.
+    :param db: The database session.
+    :return: Success message if the employee was successfully created, error message otherwise.
+    """
     Employee = m.Base.classes.employee
 
     for data in employee_data:
@@ -267,6 +296,13 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
 
 @app.put("/api/employee/{employee_id}/")
 async def update_employee(employee_id: int, update_data: t.Employee, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Updates an employee by given ID.
+    :param employee_id: The ID of the employee to update.
+    :param update_data: The data to update.
+    :param db: The database session.
+    :return: Success message if the employee was successfully updated, error message otherwise.
+    """
     Employee = m.Base.classes.employee
 
     try:
@@ -279,9 +315,14 @@ async def update_employee(employee_id: int, update_data: t.Employee, db: AsyncSe
         raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")
 
 
-# Read Internal, External, Stat employees
+# Read internal and external employees and stats table
 @app.get('/api/internal/')
 async def get_internal(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all internal employees.
+    :param db: The database session.
+    :return: List of all internal employees.
+    """
     Employee = m.Base.classes.employee
     Exp_Level = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -321,6 +362,11 @@ async def get_internal(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/external/')
 async def get_external(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all external employees.
+    :param db: The database session.
+    :return: List of all external employees.
+    """
     Employee = m.Base.classes.employee
     Exp_Level = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -360,6 +406,11 @@ async def get_external(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/stat/')
 async def get_stat(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all stats.
+    :param db: The database session.
+    :return: List of all stats.
+    """
     Employee = m.Base.classes.employee
     Exp_Level = m.Base.classes.experience_level
     Type = m.Base.classes.type
@@ -397,9 +448,14 @@ async def get_stat(db: AsyncSession = Depends(m.get_db_session)):
     return {"stat": stats}
 
 
-# CRUD operations for the Project table
+# CRUD operations for the project table
 @app.get('/api/project/')
 async def get_project(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all projects.
+    :param db: The database session.
+    :return: List of all projects.
+    """
     Project = m.Base.classes.project
     Department = m.Base.classes.department
     Employee = m.Base.classes.employee
@@ -438,6 +494,12 @@ async def get_project(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/project/{project_id}/')
 async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns a project by given ID.
+    :param project_id: The ID of the project to return.
+    :param db: The database session.
+    :return: The project with the given ID.
+    """
     Project = m.Base.classes.project
     Department = m.Base.classes.department
     Employee = m.Base.classes.employee
@@ -478,6 +540,12 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db
 
 @app.delete('/api/project/{project_id}/')
 async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Deletes a project by given ID.
+    :param project_id: The ID of the project to delete.
+    :param db: The database session.
+    :return: Success message if the project was successfully deleted, error message otherwise.
+    """
     Project = m.Base.classes.project
     try:
         deletion_successful = await h.universal_delete(Project, db, project_id=project_id)
@@ -491,6 +559,12 @@ async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
 
 @app.post('/api/project/')
 async def create_project(project_data: List[t.Project], db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Creates a new project.
+    :param project_data: List of Project attributes.
+    :param db: The database session.
+    :return: Success message if the project was successfully created, error message otherwise.
+    """
     Project = m.Base.classes.project
 
     for data in project_data:
@@ -507,6 +581,13 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
 
 @app.put('/api/project/{project_id}/')
 async def update_project(project_id: int, update_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Updates a project by given ID.
+    :param project_id: The ID of the project to update.
+    :param update_data: The data to update.
+    :param db: The database session.
+    :return: Success message if the project was successfully updated, error message otherwise.
+    """
     Project = m.Base.classes.project
 
     try:
@@ -521,6 +602,12 @@ async def update_project(project_id: int, update_data: t.Project, db: AsyncSessi
 
 @app.get("/api/project/employee/{project_id}/")
 async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Searches for employees that are assigned to a given project.
+    :param project_id: The ID of the project to search for.
+    :param db: The database session.
+    :return: List of employees that are assigned to the given project.
+    """
     Project = m.Base.classes.project
     Employee = m.Base.classes.employee
     Team = m.Base.classes.team
@@ -568,6 +655,12 @@ async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.
 
 @app.get("/api/project/team/{project_id}/")
 async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Searches for teams that are assigned to a given project.
+    :param project_id: The ID of the project to search for.
+    :param db: The database session.
+    :return: List of teams that are assigned to the given project.
+    """
     Project = m.Base.classes.project
     Team = m.Base.classes.team
 
@@ -594,6 +687,11 @@ async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_
 # CRUD operations for team table
 @app.get('/api/team/')
 async def get_team(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all teams.
+    :param db: The database session.
+    :return: List of all teams.
+    """
     Team = m.Base.classes.team
     Project = m.Base.classes.project
 
@@ -620,6 +718,12 @@ async def get_team(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/team/{team_id}/')
 async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns a team by given ID.
+    :param team_id: The ID of the team to return.
+    :param db: The database session.
+    :return: The team with the given ID.
+    """
     Team = m.Base.classes.team
     Project = m.Base.classes.project
 
@@ -647,6 +751,12 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
 
 @app.delete("/api/team/employee/")
 async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Deletes an employee from a team.
+    :param team_data: List of the team and employee ID.
+    :param db: The database session.
+    :return: Success message if the employee was successfully deleted from the team, error message otherwise.
+    """
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     try:
@@ -661,6 +771,12 @@ async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: Asy
 
 @app.delete("/api/team/{team_id}/")
 async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Deletes a team by given ID.
+    :param team_id: The ID of the team to delete.
+    :param db: The database session.
+    :return: Success message if the team was successfully deleted, error message otherwise.
+    """
     Team = m.Base.classes.team
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
     try:
@@ -676,6 +792,12 @@ async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)
 
 @app.post('/api/team/')
 async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Creates a new team.
+    :param team_data: List of Team attributes.
+    :param db: The database session.
+    :return: Success message if the team was successfully created, error message otherwise.
+    """
     Team = m.Base.classes.team
 
     for data in team_data:
@@ -691,6 +813,13 @@ async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_
 
 @app.put("/api/team/{team_id}/")
 async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Updates a team by given ID.
+    :param team_id: The ID of the team to update.
+    :param update_data: The data to update.
+    :param db: The database session.
+    :return: Success message if the team was successfully updated, error message otherwise.
+    """
     Team = m.Base.classes.team
 
     try:
@@ -705,6 +834,12 @@ async def update_team(team_id: int, update_data: t.Team, db: AsyncSession = Depe
 
 @app.get("/api/team/employee/{team_id}/")
 async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Searches for employees that are assigned to a given team.
+    :param team_id: The ID of the team to search for.
+    :param db: The database session.
+    :return: List of employees that are assigned to the given team.
+    """
     Team = m.Base.classes.team
     Employee = m.Base.classes.employee
     Exp_Level = m.Base.classes.experience_level
@@ -748,6 +883,12 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
 
 @app.post("/api/team/employee/")
 async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Assigns an employee to a team.
+    :param team_data: List of the team and employee ID.
+    :param db: The database session.
+    :return: Success message if the employee was successfully assigned to the team, error message otherwise.
+    """
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
@@ -764,6 +905,11 @@ async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: 
 # Read definition tables (Team, Address, Type, Education Degree, Job, Skill, Experience Level)
 @app.get('/api/department/')
 async def get_department(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all departments.
+    :param db: The database session.
+    :return: List of all departments.
+    """
     Department = m.Base.classes.department
     result = await db.execute(
         select(Department)
@@ -775,6 +921,11 @@ async def get_department(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/address/')
 async def get_address(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all addresses.
+    :param db: The database session.
+    :return: List of all addresses.
+    """
     Address = m.Base.classes.address
     result = await db.execute(
         select(Address)
@@ -786,6 +937,11 @@ async def get_address(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/type/')
 async def get_type(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all types.
+    :param db: The database session.
+    :return: List of all types.
+    """
     Type = m.Base.classes.type
     result = await db.execute(
         select(Type)
@@ -797,6 +953,11 @@ async def get_type(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/education_degree/')
 async def get_education_degree(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all education degrees.
+    :param db: The database session.
+    :return: List of all education degrees.
+    """
     Education_degree = m.Base.classes.education_degree
     result = await db.execute(
         select(Education_degree)
@@ -808,6 +969,11 @@ async def get_education_degree(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/job/')
 async def get_job(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all jobs.
+    :param db: The database session.
+    :return: List of all jobs.
+    """
     Job = m.Base.classes.job
     result = await db.execute(
         select(Job)
@@ -819,6 +985,11 @@ async def get_job(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/skill/')
 async def get_skill(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all skills.
+    :param db: The database session.
+    :return: List of all skills.
+    """
     Skill = m.Base.classes.skill
     result = await db.execute(
         select(Skill)
@@ -830,6 +1001,11 @@ async def get_skill(db: AsyncSession = Depends(m.get_db_session)):
 
 @app.get('/api/experience_level/')
 async def get_experience_level(db: AsyncSession = Depends(m.get_db_session)):
+    """
+    Returns all experience levels.
+    :param db: The database session.
+    :return: List of all experience levels.
+    """
     Experience_level = m.Base.classes.experience_level
     result = await db.execute(
         select(Experience_level)
@@ -842,6 +1018,12 @@ async def get_experience_level(db: AsyncSession = Depends(m.get_db_session)):
 # Login API
 @app.post('/api/login/')
 async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_session_login)):
+    """
+    Logs in a user.
+    :param data: List of the username and password.
+    :param db: The database session.
+    :return: Success message if the login was successful, error message otherwise. Additionally provides a JWT token if successful.
+    """
     Login = m_login.Base.classes.user_login
     result = await db.execute(
         select(Login)
@@ -858,6 +1040,11 @@ async def login(data: t.User_Login, db: AsyncSession = Depends(m_login.get_db_se
 
 @app.post('/api/verifyToken')
 async def verify_token(token: t.Token):
+    """
+    Verifies a JWT token.
+    :param token: The token to verify.
+    :return: Success message if the token is valid, error message otherwise.
+    """
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
