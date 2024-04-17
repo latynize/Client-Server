@@ -442,6 +442,8 @@
                 var employeeId = document.querySelector('input[type="text"]').value;
                 var teamId = document.getElementById("teamDropdown").value;
 
+
+
                 console.log(teamId, employeeId);
 
                 try {
@@ -473,6 +475,8 @@
                 //hier soll ein ein Mitarbeiter einem Team und somit einem Projekt gelöscht werden
                 var employeeId = document.getElementById("employeeDropdown").value;
                 var teamId = document.getElementById("teamDropdownDelete").value;
+
+                console.log(teamId, employeeId);
 
                 fetch(`https://cioban.de/api/team/employee/`, {
                     method: "DELETE",
