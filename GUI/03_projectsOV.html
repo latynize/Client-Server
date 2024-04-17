@@ -253,8 +253,6 @@
                 .then(data => {
                     let table = $('#projectTable').DataTable();
                     data.project.forEach(element => {
-                        // let startdate = formatDate(element.start_date);
-                        // let enddate = formatDate(element.end_date);
                         table.row.add([
                             element.project_id,
                             element.project_name,
