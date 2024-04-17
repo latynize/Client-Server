@@ -155,22 +155,6 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
     return {"employee": employees}
 
 
-# assign employees to team
-@app.post("/api/team/employee/")
-async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: AsyncSession = Depends(m.get_db_session)):
-    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
-
-    for data in team_data:
-        new_connection = ConnectionTeamEmployee(**data.dict())
-        db.add(new_connection)
-    try:
-        await db.commit()
-        return {"message": "Employees assigned to team successfully"}
-    except Exception as e:
-        await db.rollback()
-        raise HTTPException(status_code=400, detail=f"Error assigning employees to team: {e}")
-
-
 # delete assignment employees to team
 @app.delete("/api/team/employee/")
 async def delete_employee_from_team(team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)):
@@ -621,6 +605,21 @@ async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_
     } for row in result.mappings().all()]
 
     return {"team": teams}
+
+
+@app.post("/api/team/employee/")
+async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: AsyncSession = Depends(m.get_db_session)):
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+
+    for data in team_data:
+        new_connection = ConnectionTeamEmployee(**data.dict())
+        db.add(new_connection)
+    try:
+        await db.commit()
+        return {"message": "Employees assigned to team successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error assigning employees to team: {e}")
 
 
 # CRUD operations for team table
