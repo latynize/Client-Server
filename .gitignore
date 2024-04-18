@@ -3,3 +3,4 @@
 *.pyc
 .venv
 startUvicorn.bat
+/.idea
