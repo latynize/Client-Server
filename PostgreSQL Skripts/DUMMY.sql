@@ -270,5 +270,6 @@ VALUES
 	(35,9, 4, 848),
     (36,9, 4, 848);
     
-    
-	
+SET search_path TO login;
+
+INSERT INTO user_login (username, hashed_password) VALUES ('WI22', 'ecb79c5358a9d8596b62ba238e38822e8ec03d2a8177e0b99921eec4ff219304');

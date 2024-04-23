@@ -1,3 +1,7 @@
+-- Drop Schema
+DROP SCHEMA IF EXISTS cioban CASCADE;
+DROP SCHEMA IF EXISTS login CASCADE;
+
 -- Create the schema
 CREATE SCHEMA cioban;
 

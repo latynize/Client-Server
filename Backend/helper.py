@@ -1,14 +1,25 @@
-from fastapi import Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+import datetime
+import os
+import jwt
 from sqlalchemy.future import select
-from ORM.mapper import Mapper as mapper
 
+
+# This module provides the Helper class, which contains static methods that are needed in multiple modules of the
+# main module.
 
 class Helper:
+    # The secret key for the JWT encoding.
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
     @staticmethod
-    async def universal_delete(model_instance, db: AsyncSession = Depends(mapper.get_db_session), **conditions) -> bool:
-
+    async def universal_delete(model_instance, db, **conditions) -> bool:
+        """
+        Deletes the instances of the given model that match the given conditions.
+        :param model_instance: The model instance to delete.
+        :param db: The database session.
+        :param conditions: The conditions to match.
+        :return: bool: True if the instances were deleted, False otherwise.
+        """
         query = select(model_instance)
         for attr, value in conditions.items():
             query = query.filter(getattr(model_instance, attr) == value)
@@ -25,29 +36,41 @@ class Helper:
         await db.commit()
         return True
 
-    async def universal_insert(model_instance, data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
-        new_entry = model_instance(**data)
-        db.add(new_entry)
+    @staticmethod
+    async def universal_update(model_instance, db, entity_id, update_data) -> bool:
+        """
+        Updates the instance of the given model by the given ID based on the given data.
+        :param model_instance: The model instance to update.
+        :param db: The database session.
+        :param entity_id: The ID of the entity to update.
+        :param update_data: The data to update.
+        :return: bool: True if the instance was successfully updated, False otherwise.
+        """
         try:
-            await db.commit()
-            await db.refresh(new_entry)
-            return new_entry
-        except Exception as e:
-            await db.rollback()
-            raise HTTPException(status_code=400, detail=f"Error creating entry: {e}")
-        
-    async def universal_update(entity_class, entity_id: int, update_data: dict, db: AsyncSession = Depends(mapper.get_db_session)):
-        try:
-            entity = await db.get(entity_class, entity_id)
+            entity = await db.get(model_instance, entity_id)
             if not entity:
-                return False 
+                return False
 
-            for key, value in update_data.items():
+            for key, value in update_data:
                 if hasattr(entity, key):
                     setattr(entity, key, value)
-            
+
             await db.commit()
-            return True  
+            return True
         except Exception as e:
             await db.rollback()
             raise e
+
+    @staticmethod
+    def create_jwt(username) -> str:
+        """
+        Creates a JWT token for the given username.
+        :param username: The username to create the token for.
+        :return: str: The JWT token.
+        """
+        payload = {
+            "username": username,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }
+
+        return jwt.encode(payload, Helper.SECRET_KEY, algorithm="HS256")
