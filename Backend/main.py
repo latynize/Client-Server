@@ -144,6 +144,8 @@ async def search_function(data: Optional[List[t.SearchCriteria]] = None, db: Asy
 
     result = await db.execute(query)
 
+    db.expire_all()
+
     employees = [{
         'employee_id': row.employee_id,
         'first_name': row.first_name,
@@ -186,6 +188,7 @@ async def get_employee(db: AsyncSession = Depends(m.get_db_session)):
         .join(Exp_Level, Employee.experience_level_id == Exp_Level.experience_level_id)
         .join(Type, Employee.type_id == Type.type_id)
     )
+    db.expire_all()
 
     employees = [{
         'employee_id': row.employee_id,
@@ -231,6 +234,7 @@ async def get_employee_by_id(employee_id: int, db: AsyncSession = Depends(m.get_
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.employee_id == employee_id)
     )
+    db.expire_all()
 
     employee = [{
         'employee_id': row.employee_id,
@@ -339,6 +343,7 @@ async def get_internal(db: AsyncSession = Depends(m.get_db_session)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 1)
     )
+    db.expire_all()
 
     internals = [{
         'employee_id': row.employee_id,
@@ -382,6 +387,7 @@ async def get_external(db: AsyncSession = Depends(m.get_db_session)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 2)
     )
+    db.expire_all()
 
     externals = [{
         'employee_id': row.employee_id,
@@ -425,6 +431,7 @@ async def get_stat(db: AsyncSession = Depends(m.get_db_session)):
         .join(Type, Employee.type_id == Type.type_id)
         .where(Employee.type_id == 3)
     )
+    db.expire_all()
 
     stats = [{
         'employee_id': row.employee_id,
@@ -468,6 +475,7 @@ async def get_project(db: AsyncSession = Depends(m.get_db_session)):
         .join(Department, Project.department_id == Department.department_id)
         .join(Employee, Project.proj_manager == Employee.employee_id)
     )
+    db.expire_all()
 
     projects = [{
         'project_id': row.project_id,
@@ -513,6 +521,7 @@ async def get_project_by_id(project_id: int, db: AsyncSession = Depends(m.get_db
         .join(Employee, Project.proj_manager == Employee.employee_id)
         .where(Project.project_id == project_id)
     )
+    db.expire_all()
 
     project = [{
         'project_id': row.project_id,
@@ -626,6 +635,7 @@ async def search_project_employee(project_id: int, db: AsyncSession = Depends(m.
         .join(Type, Employee.type_id == Type.type_id)
         .filter(Project.project_id == project_id)
     )
+    db.expire_all()
 
     employees = [{
         'employee_id': row.employee_id,
@@ -663,6 +673,7 @@ async def search_project_team(project_id: int, db: AsyncSession = Depends(m.get_
         .join(Project, Team.project_id == Project.project_id)
         .filter(Project.project_id == project_id)
     )
+    db.expire_all()
 
     teams = [{
         'team_id': row.team_id,
@@ -693,6 +704,7 @@ async def get_team(db: AsyncSession = Depends(m.get_db_session)):
         )
         .join(Project, Team.project_id == Project.project_id)
     )
+    db.expire_all()
 
     teams = [{
         'team_id': row.team_id,
@@ -725,6 +737,7 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
         .join(Project, Team.project_id == Project.project_id)
         .where(Team.team_id == team_id)
     )
+    db.expire_all()
 
     team = [{
         'team_id': row.team_id,
@@ -851,6 +864,7 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
         .join(Type, Employee.type_id == Type.type_id)
         .filter(Team.team_id == team_id)
     )
+    db.expire_all()
 
     employees = [{
         'employee_id': row.employee_id,
