@@ -31,7 +31,8 @@ CREATE TABLE employee (
     employee_id SERIAL PRIMARY KEY,
     first_name VARCHAR(200), 
     last_name VARCHAR(200),
-    free_fte DOUBLE PRECISION,
+    free_fte REAL,
+    base_fte REAL,
     e_mail VARCHAR(200),
     phone_number VARCHAR(25), 
     entry_date DATE,
@@ -99,8 +100,8 @@ CREATE TABLE project (
     proj_name VARCHAR(35),
     proj_priority VARCHAR(15),
     proj_manager INT,
-    needed_fte DOUBLE PRECISION,
-    current_fte DOUBLE PRECISION,
+    needed_fte REAL,
+    current_fte REAL,
     start_date DATE,
     end_date DATE
     -- Foreign key constraints will be added after table creation
@@ -125,7 +126,8 @@ CREATE TABLE connection_team_employee (
     team_id INT,
     employee_id INT,
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
-    FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
+    FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE,
+    base_fte INT ON DELETE CASCADE,
 );
 
 CREATE TABLE connection_education_skill (
