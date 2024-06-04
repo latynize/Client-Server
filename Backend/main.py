@@ -289,7 +289,7 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
             db.add(new_employee)
         else:
             await db.rollback()
-            raise HTTPException(status_code=400, detail=f"Error false FTE: {e}")
+            raise HTTPException(status_code=400, detail=f"Error false FTE")
     try:
         await db.commit()
         return {"message": "Employees created successfully"}
