@@ -127,7 +127,7 @@ CREATE TABLE connection_team_employee (
     employee_id INT,
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE,
-    base_fte INT ON DELETE CASCADE,
+    base_fte INT
 );
 
 CREATE TABLE connection_education_skill (
@@ -140,16 +140,16 @@ CREATE TABLE connection_education_skill (
 
 -- Add foreign key constraints to previously created tables
 ALTER TABLE employee
-ADD CONSTRAINT fk_experience_level FOREIGN KEY (experience_level_id) REFERENCES experience_level(experience_level_id) ON DELETE CASCADE,
-ADD CONSTRAINT fk_type FOREIGN KEY (type_id) REFERENCES type(type_id) ON DELETE CASCADE, 
-ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES address(address_id) ON DELETE CASCADE;
+ADD CONSTRAINT experience_level FOREIGN KEY (experience_level_id) REFERENCES experience_level(experience_level_id) ON DELETE CASCADE,
+ADD CONSTRAINT type FOREIGN KEY (type_id) REFERENCES type(type_id) ON DELETE CASCADE, 
+ADD CONSTRAINT address FOREIGN KEY (address_id) REFERENCES address(address_id) ON DELETE CASCADE;
 
 ALTER TABLE project
-ADD CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department(department_id) ON DELETE CASCADE,
-ADD CONSTRAINT fk_proj_manager FOREIGN KEY (proj_manager) REFERENCES employee(employee_id) ON DELETE CASCADE;
+ADD CONSTRAINT department FOREIGN KEY (department_id) REFERENCES department(department_id) ON DELETE CASCADE,
+ADD CONSTRAINT proj_manager FOREIGN KEY (proj_manager) REFERENCES employee(employee_id) ON DELETE CASCADE;
 
 ALTER TABLE team
-ADD CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE;
+ADD CONSTRAINT project FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE;
 
 -- Insert initial data
 INSERT INTO type (type_name, type_description) VALUES
