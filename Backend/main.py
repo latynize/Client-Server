@@ -284,8 +284,12 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
     Employee = m.Base.classes.employee
 
     for data in employee_data:
-        new_employee = Employee(**data.dict())
-        db.add(new_employee)
+        if 0 < data.free_fte <= 1:
+            new_employee = Employee(**data.dict())
+            db.add(new_employee)
+        else:
+            await db.rollback()
+            raise HTTPException(status_code=400, detail=f"Error false FTE")
     try:
         await db.commit()
         return {"message": "Employees created successfully"}
@@ -885,7 +889,7 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
 async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: AsyncSession = Depends(m.get_db_session)):
     """
     Assigns an employee to a team.
-    :param team_data: List of the team and employee ID.
+    :param team_data: List of the team, employee ID and the FTE amount.
     :param db: The database session.
     :return: Success message if the employee was successfully assigned to the team, error message otherwise.
     """

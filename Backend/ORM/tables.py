@@ -27,6 +27,7 @@ class EducationDegreeBase(BaseModel):
 class EmployeeBase(BaseModel):
     first_name: str
     last_name: str
+    base_fte: float
     free_fte: float
     e_mail: str
     phone_number: str
@@ -111,6 +112,7 @@ class SearchCriteriaBase(BaseModel):
 class ConnectionTeamEmployeeBase(BaseModel):
     team_id: int
     employee_id: int
+    assigned_fte: float
 
 
 class User_LoginBase(BaseModel):
