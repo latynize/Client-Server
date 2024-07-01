@@ -897,6 +897,18 @@ async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: 
 
     for data in team_data:
         new_connection = ConnectionTeamEmployee(**data.dict())
+
+        result = await db.execute(
+        select(ConnectionTeamEmployee.employee_id)
+        .filter(ConnectionTeamEmployee.team_id == new_connection.team_id)
+        .filter(ConnectionTeamEmployee.employee_id == new_connection.employee_id)
+        )
+
+        for row in result.mappings().all():
+            if row is not None:
+                await db.rollback()
+                raise HTTPException(status_code=400, detail=f"Error assigning employee to team: Employee already assigned to team")
+            
         db.add(new_connection)
     try:
         await db.commit()

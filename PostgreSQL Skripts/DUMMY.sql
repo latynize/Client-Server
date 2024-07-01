@@ -127,7 +127,7 @@ VALUES
 
 
 
-INSERT INTO connection_team_employee (team_ID, employee_ID, base_fte)
+INSERT INTO connection_team_employee (team_ID, employee_ID, assigned_fte)
 VALUES 
 (1, 1, 0.9),
 (1, 2, 0.8),

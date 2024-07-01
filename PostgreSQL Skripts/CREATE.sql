@@ -31,8 +31,8 @@ CREATE TABLE employee (
     employee_id SERIAL PRIMARY KEY,
     first_name VARCHAR(200), 
     last_name VARCHAR(200),
-    free_fte REAL,
     base_fte REAL,
+    free_fte REAL,
     e_mail VARCHAR(200),
     phone_number VARCHAR(25), 
     entry_date DATE,
@@ -127,7 +127,7 @@ CREATE TABLE connection_team_employee (
     employee_id INT,
     FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE,
-    base_fte INT
+    assigned_fte REAL
 );
 
 CREATE TABLE connection_education_skill (
