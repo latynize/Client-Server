@@ -451,11 +451,11 @@
         async function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
                 var employeeId = document.querySelector('input[type="text"]').value;
-                var assignedFte = document.querySelectorAll('input[type="text"]').value;
+                var assignedFte = document.getElementById("assignedFte").value;
                 var teamId = document.getElementById("teamDropdown").value;
 
 
-
+                console.log(assignedFte);
                 console.log([{ team_id: teamId, employee_id: employeeId, assigned_fte: assignedFte }]);
 
                 try {
