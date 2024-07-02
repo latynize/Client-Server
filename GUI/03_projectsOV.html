@@ -456,7 +456,7 @@
 
 
 
-                console.log(teamId, employeeId);
+                console.log([{ team_id: teamId, employee_id: employeeId, assigned_fte: assignedFte }]);
 
                 try {
                     var response = await fetch(`https://cioban.de/api/team/employee/`, {
