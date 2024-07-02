@@ -451,12 +451,12 @@
         async function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
                 var employeeId = document.querySelector('input[type="text"]').value;
-                var assignedFte = document.getElementById("assignedFte").value;
+                var assignedFte = document.getElementById("assignedFte");
                 var teamId = document.getElementById("teamDropdown").value;
 
 
                 console.log(assignedFte);
-                console.log([{ team_id: teamId, employee_id: employeeId, assigned_fte: assignedFte }]);
+                console.log([{ team_id: teamId, employee_id: employeeId, assigned_fte: assignedFte.value }]);
 
                 try {
                     var response = await fetch(`https://cioban.de/api/team/employee/`, {
