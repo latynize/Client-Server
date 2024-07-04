@@ -1,9 +1,8 @@
 .DS_Store
-
-
 *.pyc
 .venv
 startUvicorn.bat
-APIvenv
+venv
 /.idea
+.DS_Store
 .DS_Store
