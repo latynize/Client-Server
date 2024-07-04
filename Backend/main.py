@@ -9,23 +9,23 @@ from sqlalchemy import or_
 from typing import List, Optional
 from ORM.mapper import Mapper
 from helper import Helper as h
+from contextlib import asynccontextmanager
 
 m = Mapper()
 m_login = Mapper()
-app = FastAPI()
 
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await m.reflect_tables()
     await m_login.reflect_tables(schema="login")
+    try:
+        yield
+    finally:
+        await m.engine.dispose()
+        await m_login.engine.dispose()
 
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await m.engine.dispose()
-    await m_login.engine.dispose()
-
+app = FastAPI(lifespan=lifespan)
 
 # API endpoints
 
@@ -285,7 +285,7 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
 
     for data in employee_data:
         if 0 < data.free_fte <= 1:
-            new_employee = Employee(**data.dict())
+            new_employee = Employee(**data.model_dump())
             db.add(new_employee)
         else:
             await db.rollback()
@@ -572,7 +572,7 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
     Project = m.Base.classes.project
 
     for data in project_data:
-        new_project = Project(**data.dict())
+        new_project = Project(**data.model_dump())
         db.add(new_project)
     try:
         await db.commit()
@@ -805,7 +805,7 @@ async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_
     Team = m.Base.classes.team
 
     for data in team_data:
-        new_team = Team(**data.dict())
+        new_team = Team(**data.model_dump())
         db.add(new_team)
     try:
         await db.commit()
@@ -896,7 +896,7 @@ async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: 
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
     for data in team_data:
-        new_connection = ConnectionTeamEmployee(**data.dict())
+        new_connection = ConnectionTeamEmployee(**data.model_dump())
 
         result = await db.execute(
         select(ConnectionTeamEmployee.employee_id)

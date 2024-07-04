@@ -28,7 +28,7 @@ class Mapper:
             await conn.run_sync(self.metadata.reflect, schema=schema)
             await conn.run_sync(self.Base.prepare, reflect=True, schema=schema)
 
-    async def get_db_session(self) -> AsyncSession:
+    async def get_db_session(self):
         """
         Generates a session to the database schema "cioban".
         :return: session: The database session.
@@ -37,7 +37,7 @@ class Mapper:
             await session.execute(text("SET search_path TO cioban"))
             yield session
 
-    async def get_db_session_login(self) -> AsyncSession:
+    async def get_db_session_login(self):
         """
         Generates a session to the database schema "login".
         :return: session: The database session.
