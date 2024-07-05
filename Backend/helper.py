@@ -62,6 +62,18 @@ class Helper:
             raise e
 
     @staticmethod
+    async def calculate_fte(employee_data, project_data, fte, db) -> bool:
+        return bool
+        
+    @staticmethod 
+    async def check_fte_employee() -> bool:
+        return bool
+    
+    @staticmethod
+    async def check_fte_project() -> bool:
+        return bool
+
+    @staticmethod
     def create_jwt(username) -> str:
         """
         Creates a JWT token for the given username.
