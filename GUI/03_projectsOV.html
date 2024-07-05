@@ -359,6 +359,12 @@
                 employeeId.placeholder = "Mitarbeiter ID";
                 eingabefelderDiv.appendChild(employeeId);
 
+                var assignedFte = document.createElement("input");
+                assignedFte.type = "text";
+                assignedFte.placeholder = "FTE";
+                assignedFte.id="assignedFte"
+                eingabefelderDiv.appendChild(assignedFte);
+
                 var applyButton = document.createElement("button");
                 applyButton.textContent = "Hinzufügen";
                 applyButton.style.color = "black";
@@ -446,16 +452,13 @@
         async function applyAddEmployeeTeam() {
             if (validateProjectEditPersonal()) {
                 var employeeId = document.querySelector('input[type="text"]').value;
+                var assignedFte = document.getElementById("assignedFte");
                 var teamId = document.getElementById("teamDropdown").value;
-
-
-
-                console.log(teamId, employeeId);
 
                 try {
                     var response = await fetch(`https://cioban.de/api/team/employee/`, {
                         method: "POST",
-                        body: JSON.stringify([{ team_id: teamId, employee_id: employeeId }]),
+                        body: JSON.stringify({ team_id: teamId, employee_id: employeeId, assigned_fte: assignedFte.value }),
                         headers: {
                             "Content-Type": "application/json",
                         },
@@ -491,7 +494,8 @@
                     },
                     body: JSON.stringify({
                         team_id: teamId,
-                        employee_id: employeeId
+                        employee_id: employeeId,
+                        assigned_fte: 0
                     })
                 })
                     .then(response => {

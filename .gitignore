@@ -1,8 +1,7 @@
-.DS_Store
-
-
+DS_Store
 *.pyc
 .venv
 startUvicorn.bat
-
+venv
 /.idea
+__pycache__

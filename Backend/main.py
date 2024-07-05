@@ -9,23 +9,23 @@ from sqlalchemy import or_
 from typing import List, Optional
 from ORM.mapper import Mapper
 from helper import Helper as h
+from contextlib import asynccontextmanager
 
 m = Mapper()
 m_login = Mapper()
-app = FastAPI()
 
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await m.reflect_tables()
     await m_login.reflect_tables(schema="login")
+    try:
+        yield
+    finally:
+        await m.engine.dispose()
+        await m_login.engine.dispose()
 
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await m.engine.dispose()
-    await m_login.engine.dispose()
-
+app = FastAPI(lifespan=lifespan)
 
 # API endpoints
 
@@ -274,7 +274,7 @@ async def delete_employee(employee_id: int, db: AsyncSession = Depends(m.get_db_
 
 
 @app.post("/api/employee/")
-async def create_employees(employee_data: List[t.Employee], db: AsyncSession = Depends(m.get_db_session)):
+async def create_employees(employee_data: t.Employee, db: AsyncSession = Depends(m.get_db_session)):
     """
     Creates a new employees.
     :param employee_data: List of Employee attributes.
@@ -283,9 +283,13 @@ async def create_employees(employee_data: List[t.Employee], db: AsyncSession = D
     """
     Employee = m.Base.classes.employee
 
-    for data in employee_data:
-        new_employee = Employee(**data.dict())
+
+    if 0 < employee_data.free_fte <= 1:
+        new_employee = Employee(**employee_data.model_dump())
         db.add(new_employee)
+    else:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error false FTE")
     try:
         await db.commit()
         return {"message": "Employees created successfully"}
@@ -558,7 +562,7 @@ async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
 
 
 @app.post('/api/project/')
-async def create_project(project_data: List[t.Project], db: AsyncSession = Depends(m.get_db_session)):
+async def create_project(project_data: t.Project, db: AsyncSession = Depends(m.get_db_session)):
     """
     Creates a new project.
     :param project_data: List of Project attributes.
@@ -567,9 +571,11 @@ async def create_project(project_data: List[t.Project], db: AsyncSession = Depen
     """
     Project = m.Base.classes.project
 
-    for data in project_data:
-        new_project = Project(**data.dict())
-        db.add(new_project)
+    new_project = Project(**project_data.model_dump())
+    if not (0.0 <= new_project.needed_fte):
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Error assigning needed FTE to project: False FTE")
+    db.add(new_project)
     try:
         await db.commit()
         new_project_id = new_project.project_id
@@ -791,7 +797,7 @@ async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)
 
 
 @app.post('/api/team/')
-async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_db_session)):
+async def create_team(team_data: t.Team, db: AsyncSession = Depends(m.get_db_session)):
     """
     Creates a new team.
     :param team_data: List of Team attributes.
@@ -800,9 +806,8 @@ async def create_team(team_data: List[t.Team], db: AsyncSession = Depends(m.get_
     """
     Team = m.Base.classes.team
 
-    for data in team_data:
-        new_team = Team(**data.dict())
-        db.add(new_team)
+    new_team = Team(**team_data.model_dump())
+    db.add(new_team)
     try:
         await db.commit()
         return {"message": "Team created successfully"}
@@ -882,18 +887,33 @@ async def search_team_employee(team_id: int, db: AsyncSession = Depends(m.get_db
 
 
 @app.post("/api/team/employee/")
-async def assign_employee_to_team(team_data: List[t.ConnectionTeamEmployee],db: AsyncSession = Depends(m.get_db_session)):
+async def assign_employee_to_team(team_data: t.ConnectionTeamEmployee,db: AsyncSession = Depends(m.get_db_session)):
     """
     Assigns an employee to a team.
-    :param team_data: List of the team and employee ID.
+    :param team_data: List of the team, employee ID and the FTE amount.
     :param db: The database session.
     :return: Success message if the employee was successfully assigned to the team, error message otherwise.
     """
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
 
-    for data in team_data:
-        new_connection = ConnectionTeamEmployee(**data.dict())
-        db.add(new_connection)
+    new_connection = ConnectionTeamEmployee(**team_data.model_dump())
+
+    if not (0.0 < new_connection.assigned_fte <= 1.0):
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Error assigning employee to team: False FTE")
+
+    result = await db.execute(
+    select(ConnectionTeamEmployee.employee_id)
+    .filter(ConnectionTeamEmployee.team_id == new_connection.team_id)
+    .filter(ConnectionTeamEmployee.employee_id == new_connection.employee_id)
+    )
+    
+    for row in result.mappings().all():
+        if row is not None:
+            await db.rollback()
+            raise HTTPException(status_code=400, detail="Error assigning employee to team: Employee already assigned to team")
+    db.add(new_connection)
+
     try:
         await db.commit()
         return {"message": "Employees assigned to team successfully"}
