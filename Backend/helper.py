@@ -66,11 +66,11 @@ class Helper:
         return bool
         
     @staticmethod 
-    async def check_fte_employee() -> bool:
+    async def check_fte_employee(employee_data, new_fte) -> bool:
         return bool
     
     @staticmethod
-    async def check_fte_project() -> bool:
+    async def check_fte_project(project_data, new_fte) -> bool:
         return bool
 
     @staticmethod
