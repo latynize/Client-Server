@@ -97,9 +97,9 @@ CREATE TABLE team (
 CREATE TABLE project (
     project_id SERIAL PRIMARY KEY,
     department_id INT,
+    proj_manager INT,
     proj_name VARCHAR(35),
     proj_priority VARCHAR(15),
-    proj_manager INT,
     needed_fte DOUBLE PRECISION,
     current_fte DOUBLE PRECISION,
     start_date DATE,

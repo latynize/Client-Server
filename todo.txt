@@ -13,3 +13,5 @@ In param change List to Dictionary
 ##	In delete ConnectionTeamEmployee -> assigned_fte always 0
 
 
+CREATE.SQL -> proj_man zu proj_man_id ändern
+              cjs zu cjs_id ändern
