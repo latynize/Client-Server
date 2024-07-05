@@ -284,7 +284,7 @@ async def create_employees(employee_data: t.Employee, db: AsyncSession = Depends
     Employee = m.Base.classes.employee
 
 
-    if 0 <= employee_data.free_fte <= 1:
+    if 0 < employee_data.base_fte <= 1:
         new_employee = Employee(**employee_data.model_dump())
         db.add(new_employee)
     else:
