@@ -62,8 +62,37 @@ class Helper:
             raise e
 
     @staticmethod
-    async def calculate_fte(employee_data, project_data, fte, db) -> bool:
-        return bool
+    async def calculate_fte(employee_id, team_id, assigned_fte, db, m) -> bool:
+        
+        Employee = m.Base.classes.employee
+        Project = m.Base.classes.project
+
+        free_ftes = await db.execute(
+        select(Employee.free_fte)
+        .filter(Employee.employee_id == employee_id)
+        )
+
+        for free_fte in free_ftes.mappings().all():
+            new_free_fte = free_fte - assigned_fte
+            if not new_free_fte >= 0:
+                return False
+
+        current_ftes = await db.execute(
+        select(Project.needed_fte)
+        # inner join mit Project um über team id die PRojekt id zu finden
+        )
+
+        try:
+            employee = await db.get(Employee, employee_id)
+            setattr(employee, "free_fte", new_free_fte)
+
+
+
+            db.commit()
+                
+        except Exception as e:
+            await db.rollback()
+            raise e
         
     @staticmethod 
     async def check_fte_employee(employee_data, new_fte) -> bool:
