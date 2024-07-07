@@ -309,6 +309,12 @@ async def update_employee(employee_id: int, update_data: t.Employee, db: AsyncSe
     """
     Employee = m.Base.classes.employee
 
+    new_base_fte = update_data.base_fte
+
+    if not (0.0 < new_base_fte <= 1):
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Error assigning employee to team: False FTE")
+
     try:
         update_successful = await h.universal_update(Employee, db, employee_id, update_data)
         if update_successful:

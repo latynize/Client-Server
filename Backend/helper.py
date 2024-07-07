@@ -62,41 +62,77 @@ class Helper:
             raise e
 
     @staticmethod
-    async def calculate_fte(employee_id, team_id, assigned_fte, db, m) -> bool:
+    async def calculate_fte(employee_id, team_id, assigned_fte, operation ,db, m) -> bool:
         
         Employee = m.Base.classes.employee
+        Team = m.Base.classes.team
         Project = m.Base.classes.project
 
-        free_ftes = await db.execute(
+        free_fte = await db.execute(
         select(Employee.free_fte)
         .filter(Employee.employee_id == employee_id)
         )
 
-        for free_fte in free_ftes.mappings().all():
-            new_free_fte = free_fte - assigned_fte
-            if not new_free_fte >= 0:
-                return False
+        for freeFteRow in free_fte.mappings().all():
+            if operation == "+":
+                new_free_fte = freeFteRow.free_fte - assigned_fte
+                if not new_free_fte >= 0:
+                    return False
+            elif operation == "-":
+                new_free_fte = freeFteRow.free_fte + assigned_fte
+                if not new_free_fte <= 1:
+                    return False
 
-        current_ftes = await db.execute(
+        current_fte = await db.execute(
         select(Project.needed_fte)
-        # inner join mit Project um über team id die PRojekt id zu finden
+        .join(Team, Project.Project_id == Team.project_id)
+        .filter(Team.team_id == team_id)
         )
+
+        for currentFteRow in current_fte.mappings().all():
+            if operation == "+":
+                new_needed_fte = currentFteRow.current_fte + assigned_fte
+            elif operation == "-":
+                new_needed_fte = currentFteRow.current_fte - assigned_fte
+                if not new_needed_fte >= 0:
+                    return False
+                
+        id_result = await db.execute(
+        select(Team.project_id)
+        .filter(Team.team_id == team_id)
+        )
+
+        for projectIdRow in id_result.mappings().all():
+            project_id = projectIdRow.project_id
 
         try:
             employee = await db.get(Employee, employee_id)
             setattr(employee, "free_fte", new_free_fte)
 
-
+            Project = await db.get(Project, project_id)
+            setattr(Project, "needed_fte", new_needed_fte)
 
             db.commit()
+            
+            return True
                 
         except Exception as e:
             await db.rollback()
             raise e
         
     @staticmethod 
-    async def check_fte_employee(employee_data, new_fte) -> bool:
-        return bool
+    async def check_fte_employee(employee_data, new_base_fte) -> bool:
+
+        assigned_fte = employee_data.base_fte - employee_data.free_fte
+
+        if not new_base_fte >= assigned_fte:
+            return False
+        
+        else:
+            return True
+        
+        # Funktion ist so eigentlich quatsch, könnte man auch in der main machen.
+        # Wichtig wäre eine Funktion, die die Free FTE berechnet, wenn man die Base FTE ändert!!!
     
     @staticmethod
     async def check_fte_project(project_data, new_fte) -> bool:
