@@ -9,13 +9,16 @@ from sqlalchemy import MetaData, text
 
 
 class Mapper:
-
     def __init__(self):
         """
         Initializes the PostgreSQL engine, session, metadata, and automatic mapping.
         """
-        self.engine = create_async_engine("postgresql+asyncpg://postgres:post@localhost/postgres")
-        self.SessionLocal = sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
+        self.engine = create_async_engine(
+            "postgresql+asyncpg://postgres:post@localhost/postgres"
+        )
+        self.SessionLocal = sessionmaker(
+            self.engine, class_=AsyncSession, expire_on_commit=False
+        )
         self.metadata = MetaData()
         self.Base = automap_base()
 

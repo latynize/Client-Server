@@ -3,6 +3,15 @@ In param change List to Dictionary
 CREATE.SQL -> proj_man zu proj_man_id ändern
               cjs zu cjs_id ändern
 
+moe
+Test-Klassen (Automatisiert)
+main - test - dev
+
+robin
+update_employee, update_project, delete_project, (unassign)
+
 ConnectionTeamEmployee vergleichen mit current_fte in Projects
 
 GANTT ersten Monat anschauen, Termin endet im März Grafik im Februar
+
+Assign FTE Frontend Kacke..... (Jacob?? Pls...)
