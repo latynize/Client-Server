@@ -27,46 +27,10 @@ CREATE TABLE education_degree (
     education_name VARCHAR(50)
 );
 
-CREATE TABLE employee (
-    employee_id SERIAL PRIMARY KEY,
-    first_name VARCHAR(200), 
-    last_name VARCHAR(200),
-    base_fte DOUBLE PRECISION,
-    free_fte DOUBLE PRECISION,
-    e_mail VARCHAR(200),
-    phone_number VARCHAR(25), 
-    entry_date DATE,
-    experience_level_id INT,
-    type_id INT,
-    address_id INT
-);
-
 CREATE TABLE type (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(25),
     type_description VARCHAR(200)
-);
-
-CREATE TABLE internal (
-    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
-    job_id INT REFERENCES job(job_id) ON DELETE CASCADE,
-    floor INT,
-    room INT,
-    PRIMARY KEY (employee_id)
-);
-
-CREATE TABLE external (
-    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
-    job_id INT REFERENCES job(job_id) ON DELETE CASCADE,
-    supervisor_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
-    PRIMARY KEY (employee_id)
-);
-
-CREATE TABLE stat (
-    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
-    education_id INT REFERENCES education_degree(education_id) ON DELETE CASCADE,
-    supervisor_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
-    PRIMARY KEY (employee_id)
 );
 
 CREATE TABLE address (
@@ -91,6 +55,45 @@ CREATE TABLE department (
     dep_description VARCHAR(300)
 );
 
+CREATE TABLE employee (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(200), 
+    last_name VARCHAR(200),
+    base_fte DOUBLE PRECISION,
+    free_fte DOUBLE PRECISION,
+    e_mail VARCHAR(200),
+    phone_number VARCHAR(25), 
+    entry_date DATE,
+    experience_level_id INT,
+    type_id INT,
+    address_id INT,
+    FOREIGN KEY (experience_level_id) REFERENCES experience_level(experience_level_id) ON DELETE CASCADE,
+    FOREIGN KEY (type_id) REFERENCES type(type_id) ON DELETE CASCADE, 
+    FOREIGN KEY (address_id) REFERENCES address(address_id) ON DELETE CASCADE
+);
+
+CREATE TABLE internal (
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    job_id INT REFERENCES job(job_id) ON DELETE CASCADE,
+    floor INT,
+    room INT,
+    PRIMARY KEY (employee_id)
+);
+
+CREATE TABLE external (
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    job_id INT REFERENCES job(job_id) ON DELETE CASCADE,
+    supervisor_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    PRIMARY KEY (employee_id)
+);
+
+CREATE TABLE stat (
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    education_id INT REFERENCES education_degree(education_id) ON DELETE CASCADE,
+    supervisor_id INT REFERENCES employee(employee_id) ON DELETE CASCADE,
+    PRIMARY KEY (employee_id)
+);
+
 CREATE TABLE project (
     project_id SERIAL PRIMARY KEY,
     department_id INT,
@@ -100,7 +103,9 @@ CREATE TABLE project (
     needed_fte DOUBLE PRECISION,
     current_fte DOUBLE PRECISION,
     start_date DATE,
-    end_date DATE
+    end_date DATE,
+    FOREIGN KEY (department_id) REFERENCES department(department_id) ON DELETE CASCADE,
+    FOREIGN KEY (proj_manager) REFERENCES employee(employee_id) ON DELETE CASCADE
 );
 
 CREATE TABLE team (
@@ -136,11 +141,6 @@ CREATE TABLE connection_education_skill (
     FOREIGN KEY (skill_id) REFERENCES skill(skill_id) ON DELETE CASCADE
 );
 
--- Add foreign key constraints to previously created tables
-ALTER TABLE employee
-ADD CONSTRAINT experience_level FOREIGN KEY (experience_level_id) REFERENCES experience_level(experience_level_id) ON DELETE CASCADE,
-ADD CONSTRAINT type FOREIGN KEY (type_id) REFERENCES type(type_id) ON DELETE CASCADE, 
-ADD CONSTRAINT address FOREIGN KEY (address_id) REFERENCES address(address_id) ON DELETE CASCADE;
 
 -- Insert initial data
 INSERT INTO type (type_name, type_description) VALUES
