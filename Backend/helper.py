@@ -62,63 +62,46 @@ class Helper:
             raise e
 
     @staticmethod
-    async def calculate_fte(employee_id, team_id, assigned_fte, operation ,db, m) -> bool:
-        
-        Employee = m.Base.classes.employee
-        Team = m.Base.classes.team
-        Project = m.Base.classes.project
+    async def calculate_employee_fte(Employee, employee_id, assigned_fte, operation ,db) -> float:
 
-        free_fte = await db.execute(
-        select(Employee.free_fte)
+        employee_fte = await db.execute(select(
+            Employee.free_fte,
+            Employee.base_fte)
         .filter(Employee.employee_id == employee_id)
         )
 
-        for freeFteRow in free_fte.mappings().all():
-            if operation == "+":
-                new_free_fte = freeFteRow.free_fte - assigned_fte
+        for employee_fte_row in employee_fte.mappings().all():
+            if operation == "add":
+                new_free_fte = employee_fte_row.free_fte - assigned_fte
                 if not new_free_fte >= 0:
-                    return False
-            elif operation == "-":
-                new_free_fte = freeFteRow.free_fte + assigned_fte
-                if not new_free_fte <= 1:
-                    return False
+                    raise Exception ("Free FTE is below zero")
+            elif operation == "delete":
+                new_free_fte = employee_fte_row.free_fte + assigned_fte
+                if not new_free_fte <= employee_fte_row.base_fte:
+                    raise Exception ("Free FTE is over one")
+                
+            return new_free_fte
+        
+    @staticmethod
+    async def calculate_project_fte(Project, project_id, assigned_fte, operation, db) -> float:
 
-        current_fte = await db.execute(
-        select(Project.needed_fte)
-        .join(Team, Project.Project_id == Team.project_id)
-        .filter(Team.team_id == team_id)
+        project_fte = await db.execute(select(
+            Project.needed_fte,
+            Project.current_fte)
+        .filter(Project.project_id == project_id)
         )
 
-        for currentFteRow in current_fte.mappings().all():
-            if operation == "+":
-                new_needed_fte = currentFteRow.current_fte + assigned_fte
-            elif operation == "-":
-                new_needed_fte = currentFteRow.current_fte - assigned_fte
-                if not new_needed_fte >= 0:
-                    return False
+        for project_fte_row in project_fte.mappings().all():
+            if operation == "add":
+                new_current_fte = project_fte_row.current_fte + assigned_fte
+                if new_current_fte > project_fte_row.needed_fte:
+                    raise Exception ("Current Project FTE is larger then FTE's needed")
+            elif operation == "delete":
+                new_current_fte = project_fte_row.current_fte - assigned_fte
+                if not new_current_fte >= 0:
+                    raise Exception ("Current Project FTE is below zero")
                 
-        id_result = await db.execute(
-        select(Team.project_id)
-        .filter(Team.team_id == team_id)
-        )
-
-        for projectIdRow in id_result.mappings().all():
-            project_id = projectIdRow.project_id
-
-        try:
-            employee = await db.get(Employee, employee_id)
-            setattr(employee, "free_fte", new_free_fte)
-
-            Project = await db.get(Project, project_id)
-            setattr(Project, "needed_fte", new_needed_fte)
-
-            db.commit()
-            
-            return True
-                
-        except Exception as e:
-            await db.rollback()
-            raise e
+        return new_current_fte
         
     @staticmethod 
     async def check_fte_employee(employee_data, new_base_fte) -> bool:
@@ -130,9 +113,6 @@ class Helper:
         
         else:
             return True
-        
-        # Funktion ist so eigentlich quatsch, könnte man auch in der main machen.
-        # Wichtig wäre eine Funktion, die die Free FTE berechnet, wenn man die Base FTE ändert!!!
     
     @staticmethod
     async def check_fte_project(project_data, new_fte) -> bool:
@@ -147,7 +127,7 @@ class Helper:
         """
         payload = {
             "username": username,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+            "exp": datetime.datetime.now() + datetime.timedelta(minutes=30)
         }
 
         return jwt.encode(payload, Helper.SECRET_KEY, algorithm="HS256")

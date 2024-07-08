@@ -900,27 +900,49 @@ async def assign_employee_to_team(team_data: t.ConnectionTeamEmployee,db: AsyncS
     :param db: The database session.
     :return: Success message if the employee was successfully assigned to the team, error message otherwise.
     """
+    Employee = m.Base.classes.employee
+    Team = m.Base.classes.team
+    Project = m.Base.classes.project
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+    operation = 'add'
 
     new_connection = ConnectionTeamEmployee(**team_data.model_dump())
 
     if not (0.0 < new_connection.assigned_fte <= 1.0):
-        await db.rollback()
         raise HTTPException(status_code=400, detail="Error assigning employee to team: False FTE")
 
-    result = await db.execute(
-    select(ConnectionTeamEmployee.employee_id)
-    .filter(ConnectionTeamEmployee.team_id == new_connection.team_id)
-    .filter(ConnectionTeamEmployee.employee_id == new_connection.employee_id)
+    result = await db.execute(select(
+        ConnectionTeamEmployee.employee_id)
+        .filter(ConnectionTeamEmployee.team_id == new_connection.team_id)
+        .filter(ConnectionTeamEmployee.employee_id == new_connection.employee_id)
     )
-    
-    for row in result.mappings().all():
-        if row is not None:
-            await db.rollback()
-            raise HTTPException(status_code=400, detail="Error assigning employee to team: Employee already assigned to team")
-    db.add(new_connection)
+
+    result_project_id = await db.execute(
+        select(Team.project_id)
+        .filter(Team.team_id == new_connection.team_id)
+    )
+
+    for result_project_id_row in result_project_id:
+        project_id = result_project_id_row.project_id
 
     try:
+        new_employee_fte = await h.calculate_employee_fte(Employee, new_connection.employee_id, new_connection.assigned_fte, operation ,db)
+        new_project_fte = await h.calculate_project_fte(Project, project_id, new_connection.assigned_fte, operation, db)
+        entity_employee = await db.get(Employee, new_connection.employee_id)
+        if not entity_employee:
+            raise HTTPException(status_code=400, detail="Employee Enitity missing") 
+        entity_project = await db.get(Project, project_id)
+        if not entity_employee:
+            return False
+
+        for row in result.mappings().all():
+            if row is not None:
+                raise HTTPException(status_code=400, detail="Error assigning employee to team: Employee already assigned to team")
+        db.add(new_connection)
+            
+        if hasattr (entity_employee, "free_fte") and hasattr(entity_project, "current_fte"):
+            setattr(entity_employee, "free_fte", new_employee_fte)
+            setattr(entity_project, "current_fte", new_project_fte)
         await db.commit()
         return {"message": "Employees assigned to team successfully"}
     except Exception as e:

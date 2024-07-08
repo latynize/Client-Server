@@ -97,7 +97,7 @@ VALUES
   ('Datenanalyse', 'Analysiert und interpretiert Daten zur Unterstützung von Geschäftsentscheidungen');
 
 
-INSERT INTO project (department_ID, proj_name, proj_priority, proj_manager, needed_fte, current_fte, start_date, end_date)
+INSERT INTO project (department_ID, proj_name, proj_priority, proj_manager, current_fte, needed_fte, start_date, end_date)
 VALUES 
 (4, 'SAP 4/HANA', 'hoch', 7, 8, 8, '2022-01-01', '2025-06-30'),
 (5, 'Microsoft 360', 'mittel', 2, 2, 6, '2022-02-01', '2024-08-31'),
