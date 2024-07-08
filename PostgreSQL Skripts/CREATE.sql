@@ -107,8 +107,8 @@ CREATE TABLE team (
     team_id SERIAL PRIMARY KEY,
     project_id INT,
     team_name VARCHAR(250),
-    team_purpose VARCHAR(200)
-	FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE;
+    team_purpose VARCHAR(200),
+    FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE
 );
 
 CREATE TABLE connection_job_skill (
@@ -120,11 +120,11 @@ CREATE TABLE connection_job_skill (
 );
 
 CREATE TABLE connection_team_employee (
-	cte_id SERIAL PRIMARY KEY,
+    cte_id SERIAL PRIMARY KEY,
     team_id INT,
     employee_id INT,
     assigned_fte DOUBLE PRECISION,
-	FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
 );
 
