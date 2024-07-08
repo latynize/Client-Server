@@ -394,7 +394,7 @@ async def create_employees(
         db.add(new_employee)
     else:
         await db.rollback()
-        raise HTTPException(status_code=400, detail=f"Error false FTE")
+        raise Exception("Error false FTE")
     try:
         await db.commit()
         return {"message": "Employees created successfully"}
@@ -639,7 +639,6 @@ async def get_project_by_id(
     Project = m.Base.classes.project
     Department = m.Base.classes.department
     Employee = m.Base.classes.employee
-    Team = m.Base.classes.team
 
     result = await db.execute(
         select(
@@ -918,22 +917,67 @@ async def delete_employee_from_team(
     :param db: The database session.
     :return: Success message if the employee was successfully deleted from the team, error message otherwise.
     """
+    Employee = m.Base.classes.employee
     ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+    Team = m.Base.classes.team
+    Project = m.Base.classes.project
+
+    operation = "delete"
+
+    result_project_id = await db.execute(
+        select(Team.project_id).filter(Team.team_id == team_data.team_id)
+    )
+
+    for result_project_id_row in result_project_id:
+        project_id = result_project_id_row.project_id
+
+    result_assigned_fte = await db.execute(
+        select(ConnectionTeamEmployee.assigned_fte)
+        .filter(ConnectionTeamEmployee.employee_id == team_data.employee_id)
+        .filter(ConnectionTeamEmployee.team_id == team_data.team_id)
+    )
+
+    for result_assigned_ftes in result_assigned_fte:
+        assigned_fte = result_assigned_ftes.assigned_fte
 
     try:
+        new_employee_fte = await h.calculate_employee_fte(
+            Employee,
+            team_data.employee_id,
+            assigned_fte,
+            operation,
+            db,
+        )
+        new_project_fte = await h.calculate_project_fte(
+            Project, project_id, assigned_fte, operation, db
+        )
+        entity_employee = await db.get(Employee, team_data.employee_id)
+        if not entity_employee:
+            raise HTTPException(status_code=400, detail="Employee Enitity missing")
+        entity_project = await db.get(Project, project_id)
+        if not entity_project:
+            raise HTTPException(status_code=400, detail="Project Enitity missing")
         deletion_successful = await h.universal_delete(
             ConnectionTeamEmployee,
             db,
             team_id=team_data.team_id,
             employee_id=team_data.employee_id,
         )
-        if deletion_successful:
+
+        if not deletion_successful:
+            raise HTTPException(status_code=404, detail="Employee not found in team")
+        else:
+            if hasattr(entity_employee, "free_fte") and hasattr(
+                entity_project, "current_fte"
+            ):
+                setattr(entity_employee, "free_fte", new_employee_fte)
+                setattr(entity_project, "current_fte", new_project_fte)
+            await db.commit()
             return {
                 "status": "success",
                 "message": "Employee deleted from team successfully.",
             }
-        else:
-            raise HTTPException(status_code=404, detail="Employee not found in team")
+
     except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Error deleting employee from team: {e}"

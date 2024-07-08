@@ -8,7 +8,8 @@ Test-Klassen (Automatisiert)
 main - test - dev
 
 robin
-update_employee, update_project, delete_project, (unassign)
+update_employee, update_project, delete_project
+
 
 ConnectionTeamEmployee vergleichen mit current_fte in Projects
 
