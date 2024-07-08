@@ -6,9 +6,10 @@ CREATE.SQL -> proj_man zu proj_man_id ändern
 moe
 Test-Klassen (Automatisiert)
 main - test - dev
+CREATE SQL ON DELETE CASCADE
 
 robin
-update_employee, update_project, delete_project
+update_employee, update_project, delete_team
 
 
 ConnectionTeamEmployee vergleichen mit current_fte in Projects

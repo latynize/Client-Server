@@ -360,7 +360,7 @@ async def delete_employee(
         for projects in team_fte.mappings().all():
             entity_project = await db.get(Project, projects.project_id)
             if not entity_project:
-                raise HTTPException(status_code=400, detail="Project Enitity missing")
+                raise Exception("Could not find project")
 
             if hasattr(entity_project, "current_fte"):
                 new_fte = await h.calculate_project_fte(
@@ -368,9 +368,13 @@ async def delete_employee(
                 )
                 setattr(entity_project, "current_fte", new_fte)
 
-        await db.commit()
-        await h.universal_delete(Employee, db, employee_id=employee_id)
-        return {"status": "success", "message": "Employee deleted successfully."}
+        deletion_successful = await h.universal_delete(Employee, db, employee_id=employee_id)
+
+        if deletion_successful:
+            await db.commit()
+            return {"status": "success", "message": "Employee deleted successfully."}
+        else:
+            raise Exception("Employee not found")
 
     except Exception as e:
         await db.rollback()
@@ -684,12 +688,36 @@ async def delete_project(project_id: int, db: AsyncSession = Depends(m.get_db_se
     :param db: The database session.
     :return: Success message if the project was successfully deleted, error message otherwise.
     """
+    Employee = m.Base.classes.employee
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
     Project = m.Base.classes.project
+    Team = m.Base.classes.team
+    operation = "delete"
+
+    employee_fte = await db.execute(
+        select(ConnectionTeamEmployee.assigned_fte, ConnectionTeamEmployee.employee_id)
+        .join(Team, ConnectionTeamEmployee.team_id == Team.team_id)
+        .filter(Team.project_id == project_id)
+    )
+
     try:
+        for employees in employee_fte.mappings().all():
+            entity_employee = await db.get(Employee, employees.employee_id)
+            if not entity_employee:
+                raise Exception("Could not find employee")
+            
+            if hasattr(entity_employee, "free_fte"):
+                new_fte = await h.calculate_employee_fte(
+                    Employee, employees.employee_id, employees.assigned_fte, operation, db
+                )
+                setattr(entity_employee, "free_fte", new_fte)
+
         deletion_successful = await h.universal_delete(
             Project, db, project_id=project_id
         )
+
         if deletion_successful:
+            await db.commit()
             return {"status": "success", "message": "Project deleted successfully."}
         else:
             raise HTTPException(status_code=404, detail="Project not found")
@@ -953,10 +981,10 @@ async def delete_employee_from_team(
         )
         entity_employee = await db.get(Employee, team_data.employee_id)
         if not entity_employee:
-            raise HTTPException(status_code=400, detail="Employee Enitity missing")
+            raise Exception("Employee Enitity missing")
         entity_project = await db.get(Project, project_id)
         if not entity_project:
-            raise HTTPException(status_code=400, detail="Project Enitity missing")
+            raise Exception("Project Enitity missing")
         deletion_successful = await h.universal_delete(
             ConnectionTeamEmployee,
             db,

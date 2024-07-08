@@ -68,13 +68,16 @@ class Helper:
             if operation == "add":
                 new_free_fte = employee_fte_row.free_fte - assigned_fte
                 if not new_free_fte >= 0:
-                    raise Exception("Free FTE is below zero")
+                    raise Exception("Free FTE would be below zero")
             elif operation == "delete":
                 new_free_fte = employee_fte_row.free_fte + assigned_fte
                 if not new_free_fte <= employee_fte_row.base_fte:
-                    raise Exception("Free FTE is over one")
+                    raise Exception("Free FTE would be above base FTE")
+                
+        if new_free_fte is None:
+            raise Exception("Failed to calculate new FTE")
 
-            return new_free_fte
+        return new_free_fte
 
     @staticmethod
     async def calculate_project_fte(
@@ -90,11 +93,11 @@ class Helper:
             if operation == "add":
                 new_current_fte = project_fte_row.current_fte + assigned_fte
                 if new_current_fte > project_fte_row.needed_fte:
-                    raise Exception("Current Project FTE is larger then FTE's needed")
+                    raise Exception("Current FTE would be above needed FTE")
             elif operation == "delete":
                 new_current_fte = project_fte_row.current_fte - assigned_fte
                 if not new_current_fte >= 0:
-                    raise Exception("Current Project FTE is below zero")
+                    raise Exception("Current FTE would be below zero")
 
         if new_current_fte is None:
             raise Exception("Failed to calculate new FTE")
