@@ -441,7 +441,7 @@ async def update_employee(
         raise HTTPException(status_code=400, detail=f"Error updating employee: {e}")
 
 
-# Read internal and external employees and stats table
+# Read operation for internal, external and stat table
 @app.get("/api/internal/")
 async def get_internal(db: AsyncSession = Depends(m.get_db_session)):
     """
@@ -935,86 +935,10 @@ async def get_team_by_id(team_id: int, db: AsyncSession = Depends(m.get_db_sessi
     return {"team": team}
 
 
-@app.delete("/api/team/employee/")
-async def delete_employee_from_team(
-    team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)
-):
-    """
-    Deletes an employee from a team.
-    :param team_data: List of the team and employee ID.
-    :param db: The database session.
-    :return: Success message if the employee was successfully deleted from the team, error message otherwise.
-    """
-    Employee = m.Base.classes.employee
-    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
-    Team = m.Base.classes.team
-    Project = m.Base.classes.project
-
-    operation = "delete"
-
-    result_project_id = await db.execute(
-        select(Team.project_id).filter(Team.team_id == team_data.team_id)
-    )
-
-    for result_project_id_row in result_project_id:
-        project_id = result_project_id_row.project_id
-
-    result_assigned_fte = await db.execute(
-        select(ConnectionTeamEmployee.assigned_fte)
-        .filter(ConnectionTeamEmployee.employee_id == team_data.employee_id)
-        .filter(ConnectionTeamEmployee.team_id == team_data.team_id)
-    )
-
-    for result_assigned_ftes in result_assigned_fte:
-        assigned_fte = result_assigned_ftes.assigned_fte
-
-    try:
-        new_employee_fte = await h.calculate_employee_fte(
-            Employee,
-            team_data.employee_id,
-            assigned_fte,
-            operation,
-            db,
-        )
-        new_project_fte = await h.calculate_project_fte(
-            Project, project_id, assigned_fte, operation, db
-        )
-        entity_employee = await db.get(Employee, team_data.employee_id)
-        if not entity_employee:
-            raise Exception("Employee Enitity missing")
-        entity_project = await db.get(Project, project_id)
-        if not entity_project:
-            raise Exception("Project Enitity missing")
-        deletion_successful = await h.universal_delete(
-            ConnectionTeamEmployee,
-            db,
-            team_id=team_data.team_id,
-            employee_id=team_data.employee_id,
-        )
-
-        if not deletion_successful:
-            raise HTTPException(status_code=404, detail="Employee not found in team")
-        else:
-            if hasattr(entity_employee, "free_fte") and hasattr(
-                entity_project, "current_fte"
-            ):
-                setattr(entity_employee, "free_fte", new_employee_fte)
-                setattr(entity_project, "current_fte", new_project_fte)
-            await db.commit()
-            return {
-                "status": "success",
-                "message": "Employee deleted from team successfully.",
-            }
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Error deleting employee from team: {e}"
-        )
-
-
 @app.delete("/api/team/{team_id}/")
 async def delete_team(team_id: int, db: AsyncSession = Depends(m.get_db_session)):
     """
+    NOTE: Not used by GUI at this moment!
     Deletes a team by given ID.
     :param team_id: The ID of the team to delete.
     :param db: The database session.
@@ -1061,6 +985,7 @@ async def update_team(
 ):
     """
     Updates a team by given ID.
+    NOTE: Not used by GUI at this moment!
     :param team_id: The ID of the team to update.
     :param update_data: The data to update.
     :param db: The database session.
@@ -1134,7 +1059,7 @@ async def search_team_employee(
 
     return {"employee": employees}
 
-
+# Operations for assigning employees to teams and removing employees from teams
 @app.post("/api/team/employee/")
 async def assign_employee_to_team(
     team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)
@@ -1210,6 +1135,82 @@ async def assign_employee_to_team(
             status_code=400, detail=f"Error assigning employees to team: {e}"
         )
 
+        
+@app.delete("/api/team/employee/")
+async def delete_employee_from_team(
+    team_data: t.ConnectionTeamEmployee, db: AsyncSession = Depends(m.get_db_session)
+):
+    """
+    Deletes an employee from a team.
+    :param team_data: List of the team and employee ID.
+    :param db: The database session.
+    :return: Success message if the employee was successfully deleted from the team, error message otherwise.
+    """
+    Employee = m.Base.classes.employee
+    ConnectionTeamEmployee = m.Base.classes.connection_team_employee
+    Team = m.Base.classes.team
+    Project = m.Base.classes.project
+
+    operation = "delete"
+
+    result_project_id = await db.execute(
+        select(Team.project_id).filter(Team.team_id == team_data.team_id)
+    )
+
+    for result_project_id_row in result_project_id:
+        project_id = result_project_id_row.project_id
+
+    result_assigned_fte = await db.execute(
+        select(ConnectionTeamEmployee.assigned_fte)
+        .filter(ConnectionTeamEmployee.employee_id == team_data.employee_id)
+        .filter(ConnectionTeamEmployee.team_id == team_data.team_id)
+    )
+
+    for result_assigned_ftes in result_assigned_fte:
+        assigned_fte = result_assigned_ftes.assigned_fte
+
+    try:
+        new_employee_fte = await h.calculate_employee_fte(
+            Employee,
+            team_data.employee_id,
+            assigned_fte,
+            operation,
+            db,
+        )
+        new_project_fte = await h.calculate_project_fte(
+            Project, project_id, assigned_fte, operation, db
+        )
+        entity_employee = await db.get(Employee, team_data.employee_id)
+        if not entity_employee:
+            raise Exception("Employee Enitity missing")
+        entity_project = await db.get(Project, project_id)
+        if not entity_project:
+            raise Exception("Project Enitity missing")
+        deletion_successful = await h.universal_delete(
+            ConnectionTeamEmployee,
+            db,
+            team_id=team_data.team_id,
+            employee_id=team_data.employee_id,
+        )
+
+        if not deletion_successful:
+            raise HTTPException(status_code=404, detail="Employee not found in team")
+        else:
+            if hasattr(entity_employee, "free_fte") and hasattr(
+                entity_project, "current_fte"
+            ):
+                setattr(entity_employee, "free_fte", new_employee_fte)
+                setattr(entity_project, "current_fte", new_project_fte)
+            await db.commit()
+            return {
+                "status": "success",
+                "message": "Employee deleted from team successfully.",
+            }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=400, detail=f"Error deleting employee from team: {e}"
+        )
 
 # Read definition tables (Team, Address, Type, Education Degree, Job, Skill, Experience Level)
 @app.get("/api/department/")
