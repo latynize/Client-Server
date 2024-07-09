@@ -17,3 +17,5 @@ ConnectionTeamEmployee vergleichen mit current_fte in Projects
 GANTT ersten Monat anschauen, Termin endet im März Grafik im Februar
 
 Assign FTE Frontend Kacke..... (Jacob?? Pls...)
+
+Team create, update und delete is missing in the GUI
