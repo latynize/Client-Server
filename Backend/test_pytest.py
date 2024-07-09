@@ -1,227 +1,255 @@
 import pytest
 from httpx import AsyncClient
-from main import app
-from ORM.tables import Employee, Project, Team, ConnectionTeamEmployee, Department, Type, ExperienceLevel, Skill, Address, EducationDegree, Job, Internal, External, Stat
-from ORM.mapper import Mapper
-from helper import Helper
-from dotenv import load_dotenv
-import os
+from fastapi import status
+import ORM.tables as t
 
-pytest_plugins = 'pytest_asyncio'
+BASE_URL = "http://127.0.0.1:8000"
 
-# Set up fixtures for test data
-@pytest.fixture(scope="module")
-async def async_client():
-    load_dotenv()
-    test_url = os.getenv("TEST_DB")
-    async with AsyncClient(app=app, base_url=test_url) as ac:
-        yield ac
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_get_employee():
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.get("/api/employee/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "employee" in response_data
 
-@pytest.fixture(scope="module")
-async def setup_db():
-    # Add any setup code to create test data here
-    mapper = Mapper()
-    await mapper.reflect_tables()
-    async with mapper.get_db_session() as db:
-        # Example: add test employee
-        new_employee = Employee(
-            first_name="Test",
-            last_name="User",
-            base_fte=1.0,
-            free_fte=1.0,
-            e_mail="test.user@example.com",
-            phone_number="1234567890",
-            entry_date="2024-01-01",
-            experience_level_id=1,
-            type_id=1,
-            address_id=1
-        )
-        db.add(new_employee)
-        await db.commit()
-    yield
-    async with mapper.get_db_session() as db:
-        await db.execute("DELETE FROM employee WHERE e_mail='test.user@example.com'")
-        await db.commit()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_get_employee_by_id():
+    employee_id = 1
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.get(f"/api/employee/{employee_id}/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "employee" in response_data
 
-@pytest.mark.asyncio
-async def test_create_employee(async_client, setup_db):
-    data = {
-        "first_name": "John",
-        "last_name": "Doe",
-        "base_fte": 1.0,
-        "free_fte": 1.0,
-        "e_mail": "john.doe@example.com",
-        "phone_number": "9876543210",
-        "entry_date": "2024-01-01",
-        "experience_level_id": 1,
-        "type_id": 1,
-        "address_id": 1
-    }
-    response = await async_client.post("/api/employee/", json=data)
-    assert response.status_code == 200
-    assert response.json()["message"] == "Employees created successfully"
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_create_employee():
+    new_employee = t.Employee(
+            first_name = "Andreas",
+            last_name = "Schmietendorf",
+            base_fte = 1.0,
+            free_fte = 1.0,
+            e_mail = "andreas.schmietendorf@test.de",
+            phone_number = "1234567890",
+            entry_date = "2024-01-01",
+            experience_level_id = 1,
+            type_id = 1,
+            address_id = 1
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/employee/", json=new_employee.model_dump())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Employees created successfully"
 
-@pytest.mark.asyncio
-async def test_get_employee(async_client, setup_db):
-    response = await async_client.get("/api/employee/")
-    assert response.status_code == 200
-    assert "employee" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_update_employee():
+    employee_id = 1
+    update_data = t.Employee(
+        first_name="Jane",
+        last_name="Doe",
+        base_fte = 1.0,
+        free_fte=0.8,
+        e_mail="jane.doe@example.com",
+        phone_number="0987654321",
+        entry_date="2024-01-01",
+        experience_level_id=1,
+        type_id=1,
+        address_id = 1
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.put(f"/api/employee/{employee_id}/", json=update_data.dict())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Employee updated successfully."
 
-@pytest.mark.asyncio
-async def test_get_employee_by_id(async_client, setup_db):
-    response = await async_client.get("/api/employee/1/")
-    assert response.status_code == 200
-    assert "employee" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_delete_employee():
+    employee_id = 1
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.delete(f"/api/employee/{employee_id}/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Employee deleted successfully."
 
-@pytest.mark.asyncio
-async def test_update_employee(async_client, setup_db):
-    data = {
-        "first_name": "Jane",
-        "last_name": "Doe",
-        "base_fte": 0.8,
-        "free_fte": 0.8,
-        "e_mail": "jane.doe@example.com",
-        "phone_number": "1231231230",
-        "entry_date": "2024-02-01",
-        "experience_level_id": 2,
-        "type_id": 2,
-        "address_id": 2
-    }
-    response = await async_client.put("/api/employee/1/", json=data)
-    assert response.status_code == 200
-    assert response.json()["message"] == "Employee updated successfully."
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_search_employee():
+    search_criteria = [
+        {
+            "department": "IT",
+            "job": "Developer",
+            "experienceLevel": "Senior",
+            "project": "ProjectX",
+            "type": "Full-Time",
+            "skill": "Python",
+            "fte": 1.0,
+        }
+    ]
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/search/", json=search_criteria)
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "employee" in response_data
 
-@pytest.mark.asyncio
-async def test_delete_employee(async_client, setup_db):
-    response = await async_client.delete("/api/employee/1/")
-    assert response.status_code == 200
-    assert response.json()["message"] == "Employee deleted successfully."
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_get_project():
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.get("/api/project/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "project" in response_data
 
-@pytest.mark.asyncio
-async def test_create_project(async_client, setup_db):
-    data = {
-        "department_id": 1,
-        "proj_name": "New Project",
-        "proj_priority": "High",
-        "proj_manager": 1,
-        "needed_fte": 5.0,
-        "current_fte": 2.0,
-        "start_date": "2024-01-01",
-        "end_date": "2024-12-31"
-    }
-    response = await async_client.post("/api/project/", json=data)
-    assert response.status_code == 200
-    assert response.json()["message"] == "Project created successfully"
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_get_project_by_id():
+    project_id = 1
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.get(f"/api/project/{project_id}/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "project" in response_data
 
-@pytest.mark.asyncio
-async def test_get_project(async_client, setup_db):
-    response = await async_client.get("/api/project/")
-    assert response.status_code == 200
-    assert "project" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_create_project():
+    new_project = t.Project(
+        proj_name="New Project",
+        department_id=1,
+        proj_manager=1,
+        proj_priority=1,
+        needed_fte=5.0,
+        current_fte=0.0,
+        start_date="2024-01-01",
+        end_date="2024-12-31",
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/project/", json=new_project.model_dump_json())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Project created successfully"
 
-@pytest.mark.asyncio
-async def test_get_project_by_id(async_client, setup_db):
-    response = await async_client.get("/api/project/1/")
-    assert response.status_code == 200
-    assert "project" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_update_project():
+    project_id = 1
+    update_data = t.Project(
+        proj_name="Updated Project",
+        department_id=1,
+        proj_manager=1,
+        proj_priority=1,
+        needed_fte=5.0,
+        current_fte=0.0,
+        start_date="2024-01-01",
+        end_date="2024-12-31",
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.put(f"/api/project/{project_id}/", json=update_data.model_dump_json())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Project updated successfully."
 
-@pytest.mark.asyncio
-async def test_update_project(async_client, setup_db):
-    data = {
-        "department_id": 1,
-        "proj_name": "Updated Project",
-        "proj_priority": "Low",
-        "proj_manager": 1,
-        "needed_fte": 3.0,
-        "current_fte": 1.0,
-        "start_date": "2024-02-01",
-        "end_date": "2024-11-30"
-    }
-    response = await async_client.put("/api/project/1/", json=data)
-    assert response.status_code == 200
-    assert response.json()["message"] == "Project updated successfully."
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_delete_project():
+    project_id = 1
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.delete(f"/api/project/{project_id}/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Project deleted successfully."
 
-@pytest.mark.asyncio
-async def test_delete_project(async_client, setup_db):
-    response = await async_client.delete("/api/project/1/")
-    assert response.status_code == 200
-    assert response.json()["message"] == "Project deleted successfully."
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_get_team():
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.get("/api/team/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "team" in response_data
 
-@pytest.mark.asyncio
-async def test_get_internal(async_client, setup_db):
-    response = await async_client.get("/api/internal/")
-    assert response.status_code == 200
-    assert "internal" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_get_team_by_id():
+    team_id = 1
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.get(f"/api/team/{team_id}/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert "team" in response_data
 
-@pytest.mark.asyncio
-async def test_get_external(async_client, setup_db):
-    response = await async_client.get("/api/external/")
-    assert response.status_code == 200
-    assert "external" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_create_team():
+    new_team = t.Team(
+        team_name="New Team",
+        team_purpose="Development",
+        project_id=1,
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/team/", json=new_team.model_dump_json())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Team created successfully"
 
-@pytest.mark.asyncio
-async def test_get_stat(async_client, setup_db):
-    response = await async_client.get("/api/stat/")
-    assert response.status_code == 200
-    assert "stat" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_update_team():
+    team_id = 1
+    update_data = t.Team(
+        team_name="Updated Team",
+        team_purpose="Development",
+        project_id=1,
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.put(f"/api/team/{team_id}/", json=update_data.model_dump_json())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Team updated successfully."
 
-@pytest.mark.asyncio
-async def test_get_department(async_client, setup_db):
-    response = await async_client.get("/api/department/")
-    assert response.status_code == 200
-    assert "department" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_delete_team():
+    team_id = 1
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.delete(f"/api/team/{team_id}/")
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Team deleted successfully."
 
-@pytest.mark.asyncio
-async def test_get_address(async_client, setup_db):
-    response = await async_client.get("/api/address/")
-    assert response.status_code == 200
-    assert "address" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_assign_employee_to_team():
+    team_data = t.ConnectionTeamEmployee(
+        team_id=1,
+        employee_id=1,
+        assigned_fte=0.5,
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/team/employee/", json=team_data.model_dump_json())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Employees assigned to team successfully"
 
-@pytest.mark.asyncio
-async def test_get_type(async_client, setup_db):
-    response = await async_client.get("/api/type/")
-    assert response.status_code == 200
-    assert "type" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_delete_employee_from_team():
+    team_data = t.ConnectionTeamEmployee(
+        team_id=1,
+        employee_id=1,
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.delete("/api/team/employee/", json=team_data.model_dump())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Employee deleted from team successfully."
 
-@pytest.mark.asyncio
-async def test_get_education_degree(async_client, setup_db):
-    response = await async_client.get("/api/education_degree/")
-    assert response.status_code == 200
-    assert "education_degree" in response.json()
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_login():
+    login_data = t.User_Login(
+        username="testuser",
+        password="testpassword",
+    )
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/login/", json=login_data.model_dump_json())
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Login successful"
+    assert "token" in response_data
 
-@pytest.mark.asyncio
-async def test_get_job(async_client, setup_db):
-    response = await async_client.get("/api/job/")
-    assert response.status_code == 200
-    assert "job" in response.json()
-
-@pytest.mark.asyncio
-async def test_get_skill(async_client, setup_db):
-    response = await async_client.get("/api/skill/")
-    assert response.status_code == 200
-    assert "skill" in response.json()
-
-@pytest.mark.asyncio
-async def test_get_experience_level(async_client, setup_db):
-    response = await async_client.get("/api/experience_level/")
-    assert response.status_code == 200
-    assert "experience_level" in response.json()
-
-@pytest.mark.asyncio
-async def test_login(async_client, setup_db):
-    data = {
-        "username": "testuser",
-        "password": "testpassword"
-    }
-    response = await async_client.post("/api/login/", json=data)
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
-
-@pytest.mark.asyncio
-async def test_verify_token(async_client, setup_db):
-    token_data = {
-        "access_token": "your_jwt_token_here"
-    }
-    response = await async_client.post("/api/verifyToken", json=token_data)
-    assert response.status_code == 200
-    assert response.json()["status"] == "success"
+@pytest.mark.anyio(asynclib_name="asyncio")
+async def test_verify_token():
+    token = {"access_token": "your_valid_jwt_token_here"}
+    async with AsyncClient(base_url=BASE_URL) as ac:
+        response = await ac.post("/api/verifyToken", json=token)
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data["message"] == "Token is valid"

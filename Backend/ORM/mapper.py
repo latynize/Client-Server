@@ -1,14 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import MetaData, text
 from dotenv import load_dotenv
 import os
-
-
-# This module provides the Mapper class, which is responsible for the ORM setup. It uses the SQLAlchemy library to
-# reflect the tables of the database schemas and to generate sessions to these schemas.
-
 
 class Mapper:
     def __init__(self):
@@ -17,10 +12,13 @@ class Mapper:
         """
         load_dotenv()
         postgresql_url = os.getenv("POSTGRESQL_DB")
+        if not postgresql_url:
+            raise ValueError("POSTGRESQL_DB environment variable not set.")
+        
         self.engine = create_async_engine(
             postgresql_url
         )
-        self.SessionLocal = sessionmaker(
+        self.SessionLocal = async_sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False
         )
         self.metadata = MetaData()
@@ -29,6 +27,7 @@ class Mapper:
     async def reflect_tables(self, schema="cioban") -> None:
         """
         Reflects the tables of the given schema and prepares the ORM.
+        
         :param schema: The schema to reflect.
         """
         async with self.engine.begin() as conn:
@@ -38,17 +37,31 @@ class Mapper:
     async def get_db_session(self):
         """
         Generates a session to the database schema "cioban".
-        :return: session: The database session.
+        
+        :return: An asynchronous generator yielding the database session.
         """
         async with self.SessionLocal() as session:
-            await session.execute(text("SET search_path TO cioban"))
-            yield session
+            try:
+                await session.execute(text("SET search_path TO cioban"))
+                yield session
+            except Exception as e:
+                print(f"Error during session execution: {e}")
+                raise
+            finally:
+                await session.close()
 
     async def get_db_session_login(self):
         """
         Generates a session to the database schema "login".
-        :return: session: The database session.
+        
+        :return: An asynchronous generator yielding the database session.
         """
         async with self.SessionLocal() as session:
-            await session.execute(text("SET search_path TO login"))
-            yield session
+            try:
+                await session.execute(text("SET search_path TO login"))
+                yield session
+            except Exception as e:
+                print(f"Error during session execution: {e}")
+                raise
+            finally:
+                await session.close()
