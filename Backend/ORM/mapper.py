@@ -2,6 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import MetaData, text
+from dotenv import load_dotenv
+import os
 
 
 # This module provides the Mapper class, which is responsible for the ORM setup. It uses the SQLAlchemy library to
@@ -13,8 +15,10 @@ class Mapper:
         """
         Initializes the PostgreSQL engine, session, metadata, and automatic mapping.
         """
+        load_dotenv()
+        postgresql_url = os.getenv("POSTGRESQL_DB")
         self.engine = create_async_engine(
-            "postgresql+asyncpg://postgres:post@localhost/postgres"
+            postgresql_url
         )
         self.SessionLocal = sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False
