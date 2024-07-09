@@ -104,19 +104,6 @@ class Helper:
 
         return new_current_fte
 
-    @staticmethod
-    async def check_fte_employee(employee_data, new_base_fte) -> bool:
-        assigned_fte = employee_data.base_fte - employee_data.free_fte
-
-        if not new_base_fte >= assigned_fte:
-            return False
-
-        else:
-            return True
-
-    @staticmethod
-    async def check_fte_project(project_data, new_fte) -> bool:
-        return bool
 
     @staticmethod
     def create_jwt(username) -> str:

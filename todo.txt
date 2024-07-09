@@ -9,7 +9,6 @@ main - test - dev
 CREATE SQL ON DELETE CASCADE
 
 robin
-update_employee, update_project, delete_team
 
 
 ConnectionTeamEmployee vergleichen mit current_fte in Projects

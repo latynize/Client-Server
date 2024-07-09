@@ -422,12 +422,33 @@ async def update_employee(
     """
     Employee = m.Base.classes.employee
 
+    fte_result = await db.execute(
+        select(
+            Employee.base_fte,
+            Employee.free_fte
+        )
+        .filter(Employee.employee_id == employee_id)
+    )
+
+    for fte_row in fte_result.mappings().all():
+        free_fte = fte_row.free_fte
+        base_fte = fte_row.base_fte
+
     new_base_fte = update_data.base_fte
+    assigned_fte = base_fte - free_fte
 
     if not (0.0 < new_base_fte <= 1):
         raise HTTPException(
-            status_code=400, detail="Error assigning employee to team: False FTE"
+            status_code=400, detail="Error updating employee: False FTE"
         )
+
+    elif not new_base_fte >= assigned_fte:
+        raise HTTPException(
+            status_code=400, detail="Error updating employee: Base FTE too low"
+        )
+
+    new_free_fte = new_base_fte - assigned_fte
+    update_data.free_fte = new_free_fte
 
     try:
         update_successful = await h.universal_update(
@@ -768,6 +789,28 @@ async def update_project(
     """
     Project = m.Base.classes.project
 
+    new_needed_fte = update_data.needed_fte
+
+    fte_result = await db.execute(
+        select(
+            Project.current_fte
+        )
+        .filter(Project.project_id == project_id)
+    )
+
+    for fte_row in fte_result.mappings().all():
+        current_fte = fte_row.current_fte
+
+    if not (0.0 < new_needed_fte):
+        raise HTTPException(
+            status_code=400, detail="Error updating project: False FTE"
+        )
+
+    elif not new_needed_fte >= current_fte:
+        raise HTTPException(
+            status_code=400, detail="Error updating project: Needed FTE too low"
+        )    
+    
     try:
         update_successful = await h.universal_update(
             Project, db, project_id, update_data
@@ -775,7 +818,7 @@ async def update_project(
         if update_successful:
             return {"status": "success", "message": "Project updated successfully."}
         else:
-            raise HTTPException(status_code=404, detail="Project not found")
+            raise Exception("Project not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error updating project: {e}")
 
