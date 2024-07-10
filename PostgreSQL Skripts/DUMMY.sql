@@ -103,7 +103,7 @@ VALUES
 (5, 'Microsoft 360', 'mittel', 2, 2, 6, '2022-02-01', '2024-08-31'),
 (5, 'Microsoft Exchange', 'gering', 10, 3, 2, '2022-03-01', '2029-09-30'),
 (4, 'Active Directory', 'hoch', 4, 3, 8, '2022-04-01', '2027-10-31'),
-(3, 'IT-Service-Portal', 'niedrig', 8, 5, 10, '2022-05-01', '2035-11-30');
+(3, 'IT-Service-Portal', 'gering', 8, 5, 10, '2022-05-01', '2035-11-30');
 
 
 INSERT INTO team (project_ID, team_name, team_purpose)
