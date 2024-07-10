@@ -275,4 +275,5 @@ SET search_path TO login;
 INSERT INTO user_login (username, hashed_password) 
 VALUES 
 	('WI22', 'ecb79c5358a9d8596b62ba238e38822e8ec03d2a8177e0b99921eec4ff219304'),
-	('Schmietendorf', 'bdd2da1e54dfda96dc0d3231eab93f7abc18c0c1e11805882830f3ec444f9654');
+	('Schmietendorf', 'bdd2da1e54dfda96dc0d3231eab93f7abc18c0c1e11805882830f3ec444f9654'),
+	('testuser', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08');

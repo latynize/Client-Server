@@ -6,4 +6,5 @@ venv
 /.idea
 __pycache__
 .env
-.testing
+.pytest_cache
+test_pytest.py
